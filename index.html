@@ -3,78 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NorixCraft - Minecraft Server</title>
+  <title>NorixCraft - Official Server</title>
   <link rel="stylesheet" href="style.css"/>
   <script defer src="script.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto&display=swap" rel="stylesheet">
 </head>
 <body>
   <nav class="navbar">
     <div class="logo">NorixCraft</div>
     <ul class="nav-links">
-      <li><a href="#">Home</a></li>
-      <li><a href="#">Store</a></li>
-      <li><a href="#">Vote</a></li>
-      <li><a href="#">Rules</a></li>
-      <li><a href="#">Discord</a></li>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#store">Store</a></li>
+      <li><a href="#vote">Vote</a></li>
+      <li><a href="#discord">Discord</a></li>
     </ul>
   </nav>
 
-  <header class="hero">
+  <header class="hero" id="home">
     <div class="overlay"></div>
     <div class="hero-content">
       <h1>Welcome to NorixCraft</h1>
-      <p>Survival | PvP | Economy | Custom Plugins</p>
+      <p class="subtitle">Custom Survival Minecraft Server</p>
       <div class="ip-box">
-        <input type="text" id="server-ip" value="play.norixcraft.net" readonly>
-        <button onclick="copyIP()">Copy IP</button>
+        <span id="status">Checking server status...</span>
+        <div>
+          <input type="text" value="play.norixcraft.net" id="server-ip" readonly>
+          <button onclick="copyIP()">Copy IP</button>
+        </div>
       </div>
-      <div id="status" class="status">Checking server status...</div>
     </div>
   </header>
 
-  <section class="section cards-section">
-    <h2>Why Join Us?</h2>
+  <section class="section" id="features">
+    <h2>🔥 Server Features</h2>
     <div class="cards">
-      <div class="card">
-        <h3>Lag-Free Experience</h3>
-        <p>Hosted on dedicated machines to ensure smooth performance.</p>
+      <div class="card glow">
+        <h3>Economy & Quests</h3>
+        <p>Trade, earn, and complete custom quests.</p>
       </div>
-      <div class="card">
-        <h3>Custom Plugins</h3>
-        <p>Unique gameplay mechanics to make things more exciting!</p>
+      <div class="card glow">
+        <h3>Events & PvP</h3>
+        <p>Weekly events and arena-based PvP system.</p>
       </div>
-      <div class="card">
-        <h3>Active Staff</h3>
-        <p>Helpful admins and moderators to keep the server fun and safe.</p>
+      <div class="card glow">
+        <h3>Ranks & Crates</h3>
+        <p>Unlock powerful perks and cosmetic gear.</p>
       </div>
     </div>
   </section>
 
-  <section class="section store-preview">
-    <h2>Featured Items</h2>
-    <div class="store-cards">
-      <div class="store-card">
-        <h3>VIP Rank</h3>
-        <p>Access exclusive kits, fly, and more!</p>
-        <span>$5.00</span>
+  <section class="section" id="store">
+    <h2>🛒 Store Preview</h2>
+    <div class="store-items">
+      <div class="item-card">
+        <h4>VIP Rank</h4>
+        <p>$5.00</p>
+        <a href="#">Purchase</a>
       </div>
-      <div class="store-card">
-        <h3>Crate Keys</h3>
-        <p>Unlock random powerful rewards!</p>
-        <span>$2.00</span>
+      <div class="item-card">
+        <h4>Legend Rank</h4>
+        <p>$12.00</p>
+        <a href="#">Purchase</a>
       </div>
-      <div class="store-card">
-        <h3>Spawners</h3>
-        <p>Buy spawners for your mob farms!</p>
-        <span>$7.50</span>
+      <div class="item-card">
+        <h4>Crate Bundle</h4>
+        <p>$8.50</p>
+        <a href="#">Purchase</a>
       </div>
     </div>
+    <p class="note">* Payments secured via Tebex</p>
+  </section>
+
+  <section class="section discord-section" id="discord">
+    <h2>💬 Join Our Discord</h2>
+    <iframe src="https://discord.com/widget?id=YOUR_SERVER_ID&theme=dark" width="350" height="400" allowtransparency="true" frameborder="0"></iframe>
+    <p><a href="https://discord.gg/YOURINVITE" target="_blank">discord.gg/YOURINVITE</a></p>
   </section>
 
   <footer>
-    <p>&copy; 2025 NorixCraft. Not affiliated with Mojang.</p>
+    <p>&copy; 2025 NorixCraft • Not affiliated with Mojang • Made with ❤️ in Minecraft</p>
   </footer>
 </body>
-  </html>
+    </html>
