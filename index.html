@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -11,29 +10,51 @@
   <header>
     <div class="nav">
       <div class="logo">NORIXCRAFT</div>
-      <ul>
+      <div class="menu-toggle" id="mobile-menu">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </div>
+      <ul class="nav-links">
         <li><a href="#">Support</a></li>
         <li><a href="#">Rules</a></li>
         <li><a href="#">Vote</a></li>
         <li><a href="#">News</a></li>
         <li><a href="#">Store</a></li>
       </ul>
+    </div><div class="hero">
+  <div class="hero-text">
+    <h1>NORIXCRAFT</h1>
+    <p>One server - one adventure!</p>
+    <div class="ip-copy">
+      <input type="text" id="server-ip" value="play.norixcraft.net" readonly />
+      <button onclick="copyIP()">Copy IP</button>
     </div>
+    <p class="status">Checking server status...</p>
+  </div>
+  <div class="hero-img">
+    <img src="assets/character.png" alt="Minecraft Character" />
+  </div>
+</div>
 
-    <div class="hero">
-      <div class="hero-text">
-        <h1>NORIXCRAFT</h1>
-        <p>One server - one adventure!</p>
-        <div class="ip-copy">
-          <input type="text" id="server-ip" value="play.norixcraft.net" readonly />
-          <button onclick="copyIP()">Copy IP</button>
-        </div>
-        <p class="status">Checking server status...</p>
+  </header>  <section class="features">
+    <h2>Why Join NorixCraft?</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>Friendly Community</h3>
+        <p>Connect and play with other Minecraft lovers in a respectful environment.</p>
       </div>
-      <div class="hero-img">
-        <img src="assets/character.png" alt="Minecraft Character" />
+      <div class="card">
+        <h3>Custom Gameplay</h3>
+        <p>We offer unique plugins, custom items, and a survival twist.</p>
+      </div>
+      <div class="card">
+        <h3>Lag-Free Experience</h3>
+        <p>Hosted on powerful servers to ensure smooth and uninterrupted playtime.</p>
       </div>
     </div>
-  </header>
+  </section>  <footer>
+    <p>&copy; 2025 NorixCraft. All rights reserved.</p>
+  </footer>
 </body>
 </html>
