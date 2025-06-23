@@ -1,22 +1,16 @@
 function copyIP() {
-  const ip = document.getElementById("server-ip");
-  navigator.clipboard.writeText(ip.value);
-  alert("Server IP copied to clipboard!");
+  const ip = document.getElementById('server-ip');
+  ip.select();
+  ip.setSelectionRange(0, 99999);
+  document.execCommand('copy');
+  alert('Server IP copied!');
 }
 
-// Get server status
-document.addEventListener("DOMContentLoaded", () => {
-  const status = document.getElementById("status");
-  fetch("https://api.mcsrvstat.us/2/play.norixcraft.net")
-    .then(res => res.json())
-    .then(data => {
-      if (data.online) {
-        status.textContent = `🟢 Online: ${data.players.online} players`;
-      } else {
-        status.textContent = "🔴 Server Offline";
-      }
-    })
-    .catch(() => {
-      status.textContent = "⚠️ Failed to fetch server status";
-    });
+window.addEventListener("DOMContentLoaded", () => {
+  const status = document.querySelector(".status");
+  // Simulasi status (bisa ganti pakai API mcsrvstat.us nanti)
+  setTimeout(() => {
+    status.textContent = "Server Online: 127 players";
+    status.style.color = "#00ff88";
+  }, 1200);
 });
