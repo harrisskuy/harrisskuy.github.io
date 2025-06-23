@@ -1,0 +1,128 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #0e0e0e;
+  color: #f1f1f1;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1b1b1b;
+  padding: 1rem 2rem;
+}
+
+.logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  color: #00ffb3;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.hero {
+  background: url('https://wallpapercave.com/wp/wp2754114.png') center/cover no-repeat;
+  height: 90vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 0;
+}
+
+.hero-content {
+  z-index: 1;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  color: #00ffcc;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.ip-box {
+  margin-top: 1rem;
+  display: inline-flex;
+  background: white;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.ip-box input {
+  padding: 0.7rem;
+  border: none;
+  width: 200px;
+  font-size: 1rem;
+  color: black;
+}
+
+.ip-box button {
+  background: #00cc99;
+  color: white;
+  border: none;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+}
+
+.section {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.cards, .store-cards {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.card, .store-card {
+  background: #1f1f1f;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 250px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  transition: transform 0.3s;
+}
+
+.card:hover, .store-card:hover {
+  transform: translateY(-5px);
+}
+
+.store-card span {
+  display: block;
+  margin-top: 1rem;
+  color: #00ff99;
+  font-weight: bold;
+}
+
+footer {
+  background: #111;
+  padding: 2rem;
+  text-align: center;
+  color: #888;
+}
