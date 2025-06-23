@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NorixCraft - Minecraft Server</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script defer src="script.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">NorixCraft</div>
+    <ul class="nav-links">
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Store</a></li>
+      <li><a href="#">Vote</a></li>
+      <li><a href="#">Rules</a></li>
+      <li><a href="#">Discord</a></li>
+    </ul>
+  </nav>
+
+  <header class="hero">
+    <div class="overlay"></div>
+    <div class="hero-content">
+      <h1>Welcome to NorixCraft</h1>
+      <p>Survival | PvP | Economy | Custom Plugins</p>
+      <div class="ip-box">
+        <input type="text" id="server-ip" value="play.norixcraft.net" readonly>
+        <button onclick="copyIP()">Copy IP</button>
+      </div>
+      <div id="status" class="status">Checking server status...</div>
+    </div>
+  </header>
+
+  <section class="section cards-section">
+    <h2>Why Join Us?</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>Lag-Free Experience</h3>
+        <p>Hosted on dedicated machines to ensure smooth performance.</p>
+      </div>
+      <div class="card">
+        <h3>Custom Plugins</h3>
+        <p>Unique gameplay mechanics to make things more exciting!</p>
+      </div>
+      <div class="card">
+        <h3>Active Staff</h3>
+        <p>Helpful admins and moderators to keep the server fun and safe.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section store-preview">
+    <h2>Featured Items</h2>
+    <div class="store-cards">
+      <div class="store-card">
+        <h3>VIP Rank</h3>
+        <p>Access exclusive kits, fly, and more!</p>
+        <span>$5.00</span>
+      </div>
+      <div class="store-card">
+        <h3>Crate Keys</h3>
+        <p>Unlock random powerful rewards!</p>
+        <span>$2.00</span>
+      </div>
+      <div class="store-card">
+        <h3>Spawners</h3>
+        <p>Buy spawners for your mob farms!</p>
+        <span>$7.50</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 NorixCraft. Not affiliated with Mojang.</p>
+  </footer>
+</body>
+  </html>
