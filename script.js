@@ -8,9 +8,16 @@ function copyIP() {
 
 window.addEventListener("DOMContentLoaded", () => {
   const status = document.querySelector(".status");
-  // Simulasi status (bisa ganti pakai API mcsrvstat.us nanti)
   setTimeout(() => {
     status.textContent = "Server Online: 127 players";
     status.style.color = "#00ff88";
   }, 1200);
+
+  const mobileMenu = document.getElementById("mobile-menu");
+  const navLinks = document.querySelector(".nav-links");
+
+  mobileMenu.addEventListener("click", () => {
+    navLinks.classList.toggle("active");
+    mobileMenu.classList.toggle("open");
+  });
 });
