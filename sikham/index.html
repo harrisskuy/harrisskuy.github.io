@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ViiDev Clone UI</title>
+  <style>
+    /* CSS internal: Reset & styling dasar */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Navbar */
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #fff; position: fixed; width: 100%; top: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .navbar .logo { font-size: 1.5rem; font-weight: bold; }
+    .navbar .menu { display: flex; gap: 1rem; }
+    .navbar .menu a { padding: 0.5rem; }
+
+    /* Responsif menu mobile */
+    @media (max-width: 768px) {
+      .navbar .menu { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #fff; }
+      .navbar .menu.active { display: flex; }
+      .navbar .toggle { display: block; cursor: pointer; }
+    }
+    .navbar .toggle { display: none; }
+
+    /* Hero */
+    .hero { display: flex; align-items: center; justify-content: center; text-align: center; padding: 8rem 2rem 4rem; background: linear-gradient(to right, #6c63ff, #3f3d56); color: #fff; }
+    .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+    .hero p { font-size: 1.2rem; margin-bottom: 2rem; }
+    .hero .cta { background: #ff6584; padding: 0.75rem 1.5rem; border: none; border-radius: 25px; font-size: 1rem; cursor: pointer; color: #fff; }
+
+    /* Sections */
+    section { padding: 4rem 2rem; }
+    .services, .portfolio { display: grid; gap: 2rem; }
+    .services { grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); }
+    .service-item { background: #f9f9f9; padding: 2rem; border-radius: 8px; text-align: center; }
+    .portfolio { grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); }
+    .project-item img { width: 100%; border-radius: 8px; }
+    .project-item h3 { margin: 1rem 0 0.5rem; }
+
+    /* Footer */
+    footer { background: #2c2c2c; color: #fff; text-align: center; padding: 2rem; }
+    footer .socials a { margin: 0 0.5rem; color: #fff; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">ViiDev</div>
+    <div class="toggle" onclick="toggleMenu()">☰</div>
+    <div class="menu">
+      <a href="#services">Layanan</a>
+      <a href="#portfolio">Portfolio</a>
+      <a href="#contact">Kontak</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div>
+      <h1>Selamat Datang di ViiDev</h1>
+      <p>Membantu bisnis Anda berkembang dengan solusi digital modern dan custom.</p>
+      <button class="cta" onclick="scrollToSection('services')">Pelajari lebih lanjut</button>
+    </div>
+  </header>
+
+  <!-- Services Section -->
+  <section id="services">
+    <h2 style="text-align:center;margin-bottom:2rem;">Layanan Kami</h2>
+    <div class="services">
+      <div class="service-item">
+        <h3>Web Development</h3>
+        <p>Membangun situs web responsif dengan teknologi terbaru.</p>
+      </div>
+      <div class="service-item">
+        <h3>Mobile App</h3>
+        <p>Aplikasi mobile untuk Android & iOS dengan desain ramah pengguna.</p>
+      </div>
+      <div class="service-item">
+        <h3>UI/UX Design</h3>
+        <p>Mendesain pengalaman pengguna yang intuitif dan menarik.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Portfolio Section -->
+  <section id="portfolio">
+    <h2 style="text-align:center;margin-bottom:2rem;">Portfolio Terbaru</h2>
+    <div class="portfolio">
+      <div class="project-item">
+        <img src="https://via.placeholder.com/600x400" alt="Proyek 1">
+        <h3>Proyek 1</h3>
+        <p>Deskripsi singkat proyek pertama.</p>
+      </div>
+      <div class="project-item">
+        <img src="https://via.placeholder.com/600x400" alt="Proyek 2">
+        <h3>Proyek 2</h3>
+        <p>Deskripsi singkat proyek kedua.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact / Footer -->
+  <footer id="contact">
+    <h2>Kontak Kami</h2>
+    <p>Email: info@viidev.com | Telepon: +62 812-3456-7890</p>
+    <div class="socials">
+      <a href="#" aria-label="Twitter">T</a>
+      <a href="#" aria-label="LinkedIn">L</a>
+      <a href="#" aria-label="Instagram">I</a>
+    </div>
+  </footer>
+
+  <script>
+    function toggleMenu(){
+      document.querySelector('.menu').classList.toggle('active');
+    }
+    function scrollToSection(id){
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+
+</body>
+</html>
