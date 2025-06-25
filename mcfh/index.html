@@ -3,103 +3,127 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MCFastHost - Hosting Minecraft</title>
+  <title>MCFastHost - Minecraft Hosting</title>
   <style>
-    body {
+    :root {
+      --primary: #2563eb;
+      --background: #f8fafc;
+      --text: #0f172a;
+      --gray: #64748b;
+      --success: #22c55e;
+      --danger: #ef4444;
+    }
+
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
       font-family: 'Segoe UI', sans-serif;
-      background: #0f172a;
-      color: white;
+      background: var(--background);
+      color: var(--text);
     }
 
     header {
+      padding: 2rem 1rem;
       text-align: center;
-      padding: 2rem;
-      background-color: #1e293b;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
 
     header h1 {
-      margin: 0;
-      font-size: 2.2rem;
+      font-size: 2rem;
+      color: var(--primary);
     }
 
     header p {
-      color: #cbd5e1;
+      color: var(--gray);
       font-size: 1rem;
-      margin-top: 0.5rem;
+      margin-top: 0.3rem;
     }
 
     .products {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      padding: 2rem;
+      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
 
     .card {
-      background: #1e293b;
+      background: white;
       border-radius: 1rem;
       padding: 1.5rem;
-      text-align: center;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     .card h2 {
-      color: #facc15;
+      font-size: 1.25rem;
       margin-bottom: 0.5rem;
+      color: var(--primary);
     }
 
     .card p {
       margin: 0.3rem 0;
+      color: var(--gray);
     }
 
     .price {
       font-size: 1.2rem;
+      color: var(--success);
       font-weight: bold;
-      color: #4ade80;
+      margin-top: 1rem;
     }
 
     .btn {
-      margin-top: 1rem;
-      display: inline-block;
-      padding: 0.6rem 1.2rem;
-      background-color: #0ea5e9;
-      color: white;
+      margin-top: 1.5rem;
+      padding: 0.7rem;
+      text-align: center;
       text-decoration: none;
+      background-color: var(--primary);
+      color: white;
       border-radius: 0.5rem;
       transition: background 0.2s;
     }
 
     .btn:hover {
-      background-color: #0284c7;
+      background-color: #1d4ed8;
     }
 
     .btn.disabled {
-      background-color: #64748b;
-      pointer-events: none;
+      background-color: #94a3b8;
       cursor: not-allowed;
+      pointer-events: none;
     }
 
     footer {
       text-align: center;
       padding: 1rem;
-      background-color: #1e293b;
-      color: #94a3b8;
+      color: var(--gray);
+      font-size: 0.9rem;
+      margin-top: 3rem;
     }
   </style>
 </head>
 <body>
+
   <header>
     <h1>MCFastHost</h1>
-    <p>Hosting Minecraft dengan harga terbaik dan performa cepat!</p>
+    <p>Layanan Minecraft Hosting Terjangkau & Cepat</p>
   </header>
 
   <section class="products" id="product-list">
-    <!-- Produk akan dimuat otomatis -->
+    <!-- Produk akan dimuat di sini -->
   </section>
 
   <footer>
-    &copy; 2025 MCFastHost. All rights reserved.
+    &copy; 2025 MCFastHost. Semua hak dilindungi.
   </footer>
 
   <script>
@@ -109,9 +133,9 @@
         fetch('products.json').then(res => res.json())
       ]);
 
-      const stockRAM = parseInt(stock[0].ram); // misal 60
-
+      const stockRAM = parseInt(stock[0].ram);
       const container = document.getElementById('product-list');
+
       products.forEach(product => {
         const ram = parseInt(product.ram);
         const isAvailable = ram <= stockRAM;
@@ -123,11 +147,14 @@
           <h2>${product.name}</h2>
           <p>${product.ram} GB RAM</p>
           <p>${product.slots} Slot Player</p>
-          <p class="price">Rp${product.price} / bulan</p>
-          <a href="https://wa.me/6285846226258?text=Halo%20saya%20ingin%20order%20${encodeURIComponent(product.name)}" 
-             class="btn ${isAvailable ? '' : 'disabled'}" 
-             target="_blank">
-            ${isAvailable ? 'Order Sekarang' : 'Stok Tidak Tersedia'}
+          <p class="price">Rp${product.price.toLocaleString()} / bulan</p>
+          <a 
+            class="btn ${isAvailable ? '' : 'disabled'}" 
+            href="${isAvailable 
+              ? `https://wa.me/6285846226258?text=Halo%20saya%20ingin%20order%20${encodeURIComponent(product.name)}`
+              : '#'}"
+            target="_blank">
+            ${isAvailable ? 'Order Sekarang' : 'Stok Tidak Cukup'}
           </a>
         `;
 
