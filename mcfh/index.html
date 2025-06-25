@@ -1,47 +1,71 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MCFastHost - Minecraft Hosting</title>
   <style>
     :root {
-      --primary: #2563eb;
-      --background: #f8fafc;
-      --text: #0f172a;
+      --blue: #2563eb;
       --gray: #64748b;
       --success: #22c55e;
-      --danger: #ef4444;
+
+      --light-bg: #f8fafc;
+      --light-card: white;
+      --light-text: #0f172a;
+
+      --dark-bg: #0f172a;
+      --dark-card: #1e293b;
+      --dark-text: #e2e8f0;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    [data-theme='light'] {
+      --bg: var(--light-bg);
+      --card: var(--light-card);
+      --text: var(--light-text);
     }
+
+    [data-theme='dark'] {
+      --bg: var(--dark-bg);
+      --card: var(--dark-card);
+      --text: var(--dark-text);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: var(--background);
+      background: var(--bg);
       color: var(--text);
     }
 
     header {
       padding: 2rem 1rem;
-      text-align: center;
-      background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      background: var(--card);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1000px;
+      margin: auto;
     }
 
     header h1 {
-      font-size: 2rem;
-      color: var(--primary);
+      font-size: 1.5rem;
+      color: var(--blue);
     }
 
     header p {
       color: var(--gray);
-      font-size: 1rem;
-      margin-top: 0.3rem;
+      font-size: 0.9rem;
+    }
+
+    .toggle-theme {
+      background: none;
+      border: 1px solid var(--gray);
+      color: var(--text);
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      cursor: pointer;
     }
 
     .products {
@@ -54,72 +78,62 @@
     }
 
     .card {
-      background: white;
+      background: var(--card);
       border-radius: 1rem;
       padding: 1.5rem;
       box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
     }
 
     .card h2 {
-      font-size: 1.25rem;
+      color: var(--blue);
       margin-bottom: 0.5rem;
-      color: var(--primary);
     }
 
     .card p {
-      margin: 0.3rem 0;
       color: var(--gray);
     }
 
     .price {
-      font-size: 1.2rem;
-      color: var(--success);
       font-weight: bold;
+      color: var(--success);
       margin-top: 1rem;
     }
 
     .btn {
       margin-top: 1.5rem;
-      padding: 0.7rem;
+      display: block;
       text-align: center;
-      text-decoration: none;
-      background-color: var(--primary);
+      padding: 0.6rem;
+      background: var(--blue);
       color: white;
-      border-radius: 0.5rem;
-      transition: background 0.2s;
-    }
-
-    .btn:hover {
-      background-color: #1d4ed8;
+      border-radius: 6px;
+      text-decoration: none;
     }
 
     .btn.disabled {
-      background-color: #94a3b8;
-      cursor: not-allowed;
+      background: var(--gray);
       pointer-events: none;
     }
 
     footer {
       text-align: center;
-      padding: 1rem;
+      padding: 1.5rem;
       color: var(--gray);
-      font-size: 0.9rem;
-      margin-top: 3rem;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>MCFastHost</h1>
-    <p>Layanan Minecraft Hosting Terjangkau & Cepat</p>
+    <div>
+      <h1>MCFastHost</h1>
+      <p>Hosting Minecraft handal & terjangkau</p>
+    </div>
+    <button class="toggle-theme" onclick="toggleTheme()">🌓</button>
   </header>
 
   <section class="products" id="product-list">
-    <!-- Produk akan dimuat di sini -->
+    <!-- Produk dimuat otomatis -->
   </section>
 
   <footer>
@@ -127,37 +141,45 @@
   </footer>
 
   <script>
+    const root = document.documentElement;
+
+    function toggleTheme() {
+      const current = root.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+
+    function loadTheme() {
+      const saved = localStorage.getItem('theme') || 'light';
+      root.setAttribute('data-theme', saved);
+    }
+
+    loadTheme();
+
     async function loadProducts() {
       const [stock, products] = await Promise.all([
-        fetch('stock.json').then(res => res.json()),
-        fetch('products.json').then(res => res.json())
+        fetch('stock.json').then(r => r.json()),
+        fetch('products.json').then(r => r.json())
       ]);
 
       const stockRAM = parseInt(stock[0].ram);
       const container = document.getElementById('product-list');
 
-      products.forEach(product => {
-        const ram = parseInt(product.ram);
-        const isAvailable = ram <= stockRAM;
-
+      products.forEach((p, i) => {
+        const available = parseInt(p.ram) <= stockRAM;
         const card = document.createElement('div');
         card.className = 'card';
 
         card.innerHTML = `
-          <h2>${product.name}</h2>
-          <p>${product.ram} GB RAM</p>
-          <p>${product.slots} Slot Player</p>
-          <p class="price">Rp${product.price.toLocaleString()} / bulan</p>
-          <a 
-            class="btn ${isAvailable ? '' : 'disabled'}" 
-            href="${isAvailable 
-              ? `https://wa.me/6285846226258?text=Halo%20saya%20ingin%20order%20${encodeURIComponent(product.name)}`
-              : '#'}"
-            target="_blank">
-            ${isAvailable ? 'Order Sekarang' : 'Stok Tidak Cukup'}
+          <h2>${p.name}</h2>
+          <p>${p.ram} GB RAM</p>
+          <p>${p.slots} Slot</p>
+          <p class="price">Rp${p.price.toLocaleString()} / bulan</p>
+          <a href="checkout.html?id=${i}" class="btn ${available ? '' : 'disabled'}">
+            ${available ? 'Order Sekarang' : 'Stok Tidak Cukup'}
           </a>
         `;
-
         container.appendChild(card);
       });
     }
