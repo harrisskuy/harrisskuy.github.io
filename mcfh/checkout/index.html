@@ -11,15 +11,7 @@
       padding: 2rem;
       color: #0f172a;
     }
-    .container {
-      max-width: 700px;
-      margin: auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
-    h2 {
+    h2, h3 {
       color: #2563eb;
       margin-bottom: 1rem;
     }
@@ -54,67 +46,49 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Checkout Paket Hosting</h2><div id="product-detail">
-  <strong>Nama Paket:</strong> <span id="namaPaket">-</span><br>
-  <strong>RAM:</strong> <span id="ram">-</span> GB<br>
-  <strong>Storage:</strong> <span id="storage">-</span> GB SSD<br>
-  <strong>CPU:</strong> <span id="cpu">-</span> Core<br>
-  <strong>Harga:</strong> Rp<span id="harga">-</span><br>
-  <label for="periode">Periode Sewa (bulan)</label>
-  <select id="periode">
-    <option value="1">1 Bulan</option>
-    <option value="3">3 Bulan</option>
-    <option value="6">6 Bulan</option>
-    <option value="12">12 Bulan</option>
-  </select>
-</div>
-
-<hr style="margin: 2rem 0;">
-
-<h3>Formulir Server</h3>
-<label for="egg">Egg Server</label>
-<select id="egg">
-  <option>Paper</option>
-  <option>Spigot</option>
-  <option>Bedrock</option>
-  <option>Fabric</option>
-  <option>Forge</option>
-</select>
-
-<label for="versi">Versi Minecraft</label>
-<input type="text" id="versi" placeholder="Contoh: 1.20.4">
+  <h2>Checkout Paket Hosting</h2>  <div id="product-detail">
+    <strong>Nama Paket:</strong> <span id="namaPaket">-</span><br>
+    <strong>RAM:</strong> <span id="ram">-</span> GB<br>
+    <strong>Storage:</strong> <span id="storage">-</span> GB SSD<br>
+    <strong>CPU:</strong> <span id="cpu">-</span> Core<br>
+    <strong>Harga:</strong> Rp<span id="harga">-</span><br>
+    <label for="periode">Periode Sewa (bulan)</label>
+    <select id="periode" required>
+      <option value="1">1 Bulan</option>
+      <option value="3">3 Bulan</option>
+      <option value="6">6 Bulan</option>
+      <option value="12">12 Bulan</option>
+    </select>
+  </div>  <hr style="margin: 2rem 0;">  <h3>Formulir Server</h3>
+  <label for="egg">Egg Server</label>
+  <select id="egg" required>
+    <option>Paper</option>
+    <option>Spigot</option>
+    <option>Bedrock</option>
+    <option>Fabric</option>
+    <option>Forge</option>
+  </select><label for="versi">Versi Minecraft</label> <input type="text" id="versi" placeholder="Contoh: 1.20.4" required>
 
 <label for="catatan">Catatan</label>
-<textarea id="catatan" rows="3" placeholder="Contoh: Tolong aktifkan secepatnya"></textarea>
 
-<hr style="margin: 2rem 0;">
+  <textarea id="catatan" rows="3" placeholder="Contoh: Tolong aktifkan secepatnya"></textarea>  <hr style="margin: 2rem 0;">  <h3>Formulir Pembeli</h3>
+  <label for="namaDepan">Nama Depan</label>
+  <input type="text" id="namaDepan" required><label for="namaBelakang">Nama Belakang</label> <input type="text" id="namaBelakang" required>
 
-<h3>Formulir Pembeli</h3>
-<label for="namaDepan">Nama Depan</label>
-<input type="text" id="namaDepan">
+<label for="username">Username</label> <input type="text" id="username" required>
 
-<label for="namaBelakang">Nama Belakang</label>
-<input type="text" id="namaBelakang">
+<label for="email">Email</label> <input type="email" id="email" required>
 
-<label for="username">Username</label>
-<input type="text" id="username">
-
-<label for="email">Email</label>
-<input type="email" id="email">
-
-<label for="password">Password</label>
-<input type="password" id="password">
+<label for="password">Password</label> <input type="password" id="password" required>
 
 <label><input type="checkbox" id="sudahPunya"> Saya sudah punya akun di mcfh.gg</label>
-<div id="emailTerdaftarDiv" class="hidden">
-  <label for="emailTerdaftar">Email Terdaftar</label>
-  <input type="email" id="emailTerdaftar">
-</div>
 
-<button class="btn" onclick="kirimKeWhatsApp()">Kirim via WhatsApp</button>
+  <div id="emailTerdaftarDiv" class="hidden">
+    <label for="emailTerdaftar">Email Terdaftar</label>
+    <input type="email" id="emailTerdaftar" required>
+  </div><button class="btn" onclick="kirimKeWhatsApp()">Kirim via WhatsApp</button>
 
-  </div>  <script>
+  <script>
     const paket = {
       nama: "Paket Dewa",
       ram: 64,
@@ -131,6 +105,7 @@
 
     document.getElementById("sudahPunya").addEventListener("change", function() {
       document.getElementById("emailTerdaftarDiv").classList.toggle("hidden", !this.checked);
+      document.getElementById("emailTerdaftar").required = this.checked;
     });
 
     function kirimKeWhatsApp() {
@@ -162,4 +137,4 @@
       window.open(url, '_blank');
     }
   </script></body>
-</html>
+  </html>
