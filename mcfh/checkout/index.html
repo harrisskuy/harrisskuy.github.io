@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout - MCFastHost</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f8fafc;
+      padding: 2rem;
+      color: #0f172a;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      color: #2563eb;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.3rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+    }
+
+    .btn {
+      margin-top: 1.5rem;
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 0.7rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Checkout Paket</h2>
+    <p id="product-info">Memuat...</p>
+
+    <label for="nama">Nama Anda</label>
+    <input type="text" id="nama" placeholder="Contoh: Aris">
+
+    <label for="catatan">Catatan Tambahan</label>
+    <textarea id="catatan" rows="3" placeholder="Contoh: Tolong aktifkan server hari ini."></textarea>
+
+    <button class="btn" onclick="kirim()">Kirim via WhatsApp</button>
+  </div>
+
+  <script>
+    let product;
+
+    async function loadProduct() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get("id");
+      const data = await fetch("products.json").then(res => res.json());
+      product = data[id];
+      if (product) {
+        document.getElementById("product-info").innerText = `${product.name} - ${product.ram} GB RAM - Rp${product.price.toLocaleString()}`;
+      }
+    }
+
+    function kirim() {
+      const nama = document.getElementById("nama").value.trim();
+      const catatan = document.getElementById("catatan").value.trim();
+
+      if (!nama) {
+        alert("Masukkan nama Anda.");
+        return;
+      }
+
+      const pesan = `Halo, saya ingin order ${product.name}.\nNama: ${nama}\nCatatan: ${catatan}`;
+      const url = `https://wa.me/6285846226258?text=${encodeURIComponent(pesan)}`;
+      window.open(url, "_blank");
+    }
+
+    loadProduct();
+  </script>
+</body>
+</html>
