@@ -72,16 +72,21 @@
 <label for="catatan">Catatan</label>
 
   <textarea id="catatan" rows="3" placeholder="Contoh: Tolong aktifkan secepatnya"></textarea>  <hr style="margin: 2rem 0;">  <h3>Formulir Pembeli</h3>
-  <label for="namaDepan">Nama Depan</label>
-  <input type="text" id="namaDepan" required><label for="namaBelakang">Nama Belakang</label> <input type="text" id="namaBelakang" required>
+  <div id="formPembeli">
+    <label for="namaDepan">Nama Depan</label>
+    <input type="text" id="namaDepan" required><label for="namaBelakang">Nama Belakang</label>
+<input type="text" id="namaBelakang" required>
 
-<label for="username">Username</label> <input type="text" id="username" required>
+<label for="username">Username</label>
+<input type="text" id="username" required>
 
-<label for="email">Email</label> <input type="email" id="email" required>
+<label for="email">Email</label>
+<input type="email" id="email" required>
 
-<label for="password">Password</label> <input type="password" id="password" required>
+<label for="password">Password</label>
+<input type="password" id="password" required>
 
-<label><input type="checkbox" id="sudahPunya"> Saya sudah punya akun di mcfh.gg</label>
+  </div><label><input type="checkbox" id="sudahPunya"> Saya sudah punya akun di mcfh.gg</label>
 
   <div id="emailTerdaftarDiv" class="hidden">
     <label for="emailTerdaftar">Email Terdaftar</label>
@@ -107,9 +112,16 @@
     document.getElementById("cpu").innerText = paket.cpu;
     document.getElementById("harga").innerText = paket.harga.toLocaleString();
 
-    document.getElementById("sudahPunya").addEventListener("change", function() {
-      document.getElementById("emailTerdaftarDiv").classList.toggle("hidden", !this.checked);
-      document.getElementById("emailTerdaftar").required = this.checked;
+    const checkbox = document.getElementById("sudahPunya");
+    const formPembeli = document.getElementById("formPembeli");
+    const emailTerdaftarDiv = document.getElementById("emailTerdaftarDiv");
+    const emailTerdaftar = document.getElementById("emailTerdaftar");
+
+    checkbox.addEventListener("change", function () {
+      const checked = checkbox.checked;
+      formPembeli.classList.toggle("hidden", checked);
+      emailTerdaftarDiv.classList.toggle("hidden", !checked);
+      emailTerdaftar.required = checked;
     });
 
     function kirimKeWhatsApp() {
@@ -117,13 +129,7 @@
       const egg = document.getElementById("egg").value;
       const versi = document.getElementById("versi").value;
       const catatan = document.getElementById("catatan").value;
-
-      const namaDepan = document.getElementById("namaDepan").value;
-      const namaBelakang = document.getElementById("namaBelakang").value;
-      const username = document.getElementById("username").value;
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const sudahPunya = document.getElementById("sudahPunya").checked;
+      const sudahPunya = checkbox.checked;
       const emailTerdaftar = document.getElementById("emailTerdaftar").value;
 
       let pesan = `Checkout Paket Hosting:\n` +
@@ -131,11 +137,20 @@
         `- RAM: ${paket.ram}GB | Storage: ${paket.storage}GB | CPU: ${paket.cpu} Core\n` +
         `- Harga: Rp${paket.harga.toLocaleString()} / ${periode} bulan\n\n` +
         `-- SERVER --\n` +
-        `Egg: ${egg}\nVersi: ${versi}\nCatatan: ${catatan || '-'}\n\n` +
-        `-- PEMBELI --\n` +
-        `Nama: ${namaDepan} ${namaBelakang}\nUsername: ${username}\nEmail: ${email}\nPassword: ${password}\n`;
+        `Egg: ${egg}\nVersi: ${versi}\nCatatan: ${catatan || '-'}\n\n`;
 
-      if (sudahPunya) pesan += `Sudah punya akun: Ya\nEmail Terdaftar: ${emailTerdaftar}`;
+      if (sudahPunya) {
+        pesan += `-- PEMBELI --\nSudah punya akun: Ya\nEmail Terdaftar: ${emailTerdaftar}`;
+      } else {
+        const namaDepan = document.getElementById("namaDepan").value;
+        const namaBelakang = document.getElementById("namaBelakang").value;
+        const username = document.getElementById("username").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        pesan += `-- PEMBELI --\n` +
+          `Nama: ${namaDepan} ${namaBelakang}\nUsername: ${username}\nEmail: ${email}\nPassword: ${password}`;
+      }
 
       const url = `https://wa.me/6285846226258?text=${encodeURIComponent(pesan)}`;
       window.open(url, '_blank');
