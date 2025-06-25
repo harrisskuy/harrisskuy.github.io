@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #f8fafc;
+      background: #f1f5f9;
       padding: 2rem;
       color: #0f172a;
     }
@@ -49,6 +49,10 @@
       cursor: pointer;
       width: 100%;
     }
+
+    .btn:hover {
+      background: #1d4ed8;
+    }
   </style>
 </head>
 <body>
@@ -66,16 +70,50 @@
     <button class="btn" onclick="kirim()">Kirim via WhatsApp</button>
   </div>
 
+  <!-- INLINE PRODUCTS JSON -->
+  <script id="products" type="application/json">
+  [
+    {
+      "name": "Paket Starter",
+      "ram": "1",
+      "slots": "10",
+      "price": 10000
+    },
+    {
+      "name": "Paket Pro",
+      "ram": "2",
+      "slots": "25",
+      "price": 18000
+    },
+    {
+      "name": "Paket Sultan",
+      "ram": "4",
+      "slots": "Unlimited",
+      "price": 35000
+    },
+    {
+      "name": "Paket Dewa",
+      "ram": "64",
+      "slots": "Unlimited",
+      "price": 120000
+    }
+  ]
+  </script>
+
   <script>
     let product;
 
-    async function loadProduct() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const id = urlParams.get("id");
-      const data = await fetch("products.json").then(res => res.json());
+    function loadProduct() {
+      const params = new URLSearchParams(window.location.search);
+      const id = parseInt(params.get("id"));
+      const data = JSON.parse(document.getElementById("products").textContent);
       product = data[id];
+
+      const info = document.getElementById("product-info");
       if (product) {
-        document.getElementById("product-info").innerText = `${product.name} - ${product.ram} GB RAM - Rp${product.price.toLocaleString()}`;
+        info.innerText = `${product.name} - ${product.ram} GB RAM - Rp${product.price.toLocaleString()}`;
+      } else {
+        info.innerText = "Paket tidak ditemukan.";
       }
     }
 
@@ -89,8 +127,8 @@
       }
 
       const pesan = `Halo, saya ingin order ${product.name}.\nNama: ${nama}\nCatatan: ${catatan}`;
-      const url = `https://wa.me/6285846226258?text=${encodeURIComponent(pesan)}`;
-      window.open(url, "_blank");
+      const wa = `https://wa.me/6285846226258?text=${encodeURIComponent(pesan)}`;
+      window.open(wa, "_blank");
     }
 
     loadProduct();
