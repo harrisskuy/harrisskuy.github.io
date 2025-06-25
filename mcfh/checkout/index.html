@@ -1,137 +1,165 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout - MCFastHost</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #f1f5f9;
+      margin: 0;
       padding: 2rem;
       color: #0f172a;
     }
-
     .container {
-      max-width: 500px;
+      max-width: 700px;
       margin: auto;
       background: white;
       padding: 2rem;
       border-radius: 1rem;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
-
     h2 {
       color: #2563eb;
+      margin-bottom: 1rem;
     }
-
     label {
       display: block;
       margin-top: 1rem;
-      font-weight: bold;
+      font-weight: 600;
     }
-
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       padding: 0.6rem;
       margin-top: 0.3rem;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
     }
-
     .btn {
-      margin-top: 1.5rem;
+      margin-top: 2rem;
       background: #2563eb;
       color: white;
       border: none;
-      padding: 0.7rem 1rem;
+      padding: 0.8rem 1rem;
       border-radius: 6px;
       cursor: pointer;
       width: 100%;
     }
-
     .btn:hover {
-      background: #1d4ed8;
+      background: #1e40af;
+    }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
-
   <div class="container">
-    <h2>Checkout Paket</h2>
-    <p id="product-info">Memuat...</p>
+    <h2>Checkout Paket Hosting</h2><div id="product-detail">
+  <strong>Nama Paket:</strong> <span id="namaPaket">-</span><br>
+  <strong>RAM:</strong> <span id="ram">-</span> GB<br>
+  <strong>Storage:</strong> <span id="storage">-</span> GB SSD<br>
+  <strong>CPU:</strong> <span id="cpu">-</span> Core<br>
+  <strong>Harga:</strong> Rp<span id="harga">-</span><br>
+  <label for="periode">Periode Sewa (bulan)</label>
+  <select id="periode">
+    <option value="1">1 Bulan</option>
+    <option value="3">3 Bulan</option>
+    <option value="6">6 Bulan</option>
+    <option value="12">12 Bulan</option>
+  </select>
+</div>
 
-    <label for="nama">Nama Anda</label>
-    <input type="text" id="nama" placeholder="Contoh: Aris">
+<hr style="margin: 2rem 0;">
 
-    <label for="catatan">Catatan Tambahan</label>
-    <textarea id="catatan" rows="3" placeholder="Contoh: Tolong aktifkan server hari ini."></textarea>
+<h3>Formulir Server</h3>
+<label for="egg">Egg Server</label>
+<select id="egg">
+  <option>Paper</option>
+  <option>Spigot</option>
+  <option>Bedrock</option>
+  <option>Fabric</option>
+  <option>Forge</option>
+</select>
 
-    <button class="btn" onclick="kirim()">Kirim via WhatsApp</button>
-  </div>
+<label for="versi">Versi Minecraft</label>
+<input type="text" id="versi" placeholder="Contoh: 1.20.4">
 
-  <!-- INLINE PRODUCTS JSON -->
-  <script id="products" type="application/json">
-  [
-    {
-      "name": "Paket Starter",
-      "ram": "1",
-      "slots": "10",
-      "price": 10000
-    },
-    {
-      "name": "Paket Pro",
-      "ram": "2",
-      "slots": "25",
-      "price": 18000
-    },
-    {
-      "name": "Paket Sultan",
-      "ram": "4",
-      "slots": "Unlimited",
-      "price": 35000
-    },
-    {
-      "name": "Paket Dewa",
-      "ram": "64",
-      "slots": "Unlimited",
-      "price": 120000
+<label for="catatan">Catatan</label>
+<textarea id="catatan" rows="3" placeholder="Contoh: Tolong aktifkan secepatnya"></textarea>
+
+<hr style="margin: 2rem 0;">
+
+<h3>Formulir Pembeli</h3>
+<label for="namaDepan">Nama Depan</label>
+<input type="text" id="namaDepan">
+
+<label for="namaBelakang">Nama Belakang</label>
+<input type="text" id="namaBelakang">
+
+<label for="username">Username</label>
+<input type="text" id="username">
+
+<label for="email">Email</label>
+<input type="email" id="email">
+
+<label for="password">Password</label>
+<input type="password" id="password">
+
+<label><input type="checkbox" id="sudahPunya"> Saya sudah punya akun di mcfh.gg</label>
+<div id="emailTerdaftarDiv" class="hidden">
+  <label for="emailTerdaftar">Email Terdaftar</label>
+  <input type="email" id="emailTerdaftar">
+</div>
+
+<button class="btn" onclick="kirimKeWhatsApp()">Kirim via WhatsApp</button>
+
+  </div>  <script>
+    const paket = {
+      nama: "Paket Dewa",
+      ram: 64,
+      storage: 100,
+      cpu: 6,
+      harga: 120000
+    };
+
+    document.getElementById("namaPaket").innerText = paket.nama;
+    document.getElementById("ram").innerText = paket.ram;
+    document.getElementById("storage").innerText = paket.storage;
+    document.getElementById("cpu").innerText = paket.cpu;
+    document.getElementById("harga").innerText = paket.harga.toLocaleString();
+
+    document.getElementById("sudahPunya").addEventListener("change", function() {
+      document.getElementById("emailTerdaftarDiv").classList.toggle("hidden", !this.checked);
+    });
+
+    function kirimKeWhatsApp() {
+      const periode = document.getElementById("periode").value;
+      const egg = document.getElementById("egg").value;
+      const versi = document.getElementById("versi").value;
+      const catatan = document.getElementById("catatan").value;
+
+      const namaDepan = document.getElementById("namaDepan").value;
+      const namaBelakang = document.getElementById("namaBelakang").value;
+      const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const sudahPunya = document.getElementById("sudahPunya").checked;
+      const emailTerdaftar = document.getElementById("emailTerdaftar").value;
+
+      let pesan = `Checkout Paket Hosting:\n` +
+        `- Paket: ${paket.nama}\n` +
+        `- RAM: ${paket.ram}GB | Storage: ${paket.storage}GB | CPU: ${paket.cpu} Core\n` +
+        `- Harga: Rp${paket.harga.toLocaleString()} / ${periode} bulan\n\n` +
+        `-- SERVER --\n` +
+        `Egg: ${egg}\nVersi: ${versi}\nCatatan: ${catatan || '-'}\n\n` +
+        `-- PEMBELI --\n` +
+        `Nama: ${namaDepan} ${namaBelakang}\nUsername: ${username}\nEmail: ${email}\nPassword: ${password}\n`;
+
+      if (sudahPunya) pesan += `Sudah punya akun: Ya\nEmail Terdaftar: ${emailTerdaftar}`;
+
+      const url = `https://wa.me/6285846226258?text=${encodeURIComponent(pesan)}`;
+      window.open(url, '_blank');
     }
-  ]
-  </script>
-
-  <script>
-    let product;
-
-    function loadProduct() {
-      const params = new URLSearchParams(window.location.search);
-      const id = parseInt(params.get("id"));
-      const data = JSON.parse(document.getElementById("products").textContent);
-      product = data[id];
-
-      const info = document.getElementById("product-info");
-      if (product) {
-        info.innerText = `${product.name} - ${product.ram} GB RAM - Rp${product.price.toLocaleString()}`;
-      } else {
-        info.innerText = "Paket tidak ditemukan.";
-      }
-    }
-
-    function kirim() {
-      const nama = document.getElementById("nama").value.trim();
-      const catatan = document.getElementById("catatan").value.trim();
-
-      if (!nama) {
-        alert("Masukkan nama Anda.");
-        return;
-      }
-
-      const pesan = `Halo, saya ingin order ${product.name}.\nNama: ${nama}\nCatatan: ${catatan}`;
-      const wa = `https://wa.me/6285846226258?text=${encodeURIComponent(pesan)}`;
-      window.open(wa, "_blank");
-    }
-
-    loadProduct();
-  </script>
-</body>
+  </script></body>
 </html>
