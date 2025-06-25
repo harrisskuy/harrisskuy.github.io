@@ -176,7 +176,7 @@
           <p>${p.ram} GB RAM</p>
           <p>${p.slots} Slot</p>
           <p class="price">Rp${p.price.toLocaleString()} / bulan</p>
-          <a href="checkout.html?id=${i}" class="btn ${available ? '' : 'disabled'}">
+          <a href="checkout?id=${i}" class="btn ${available ? '' : 'disabled'}">
             ${available ? 'Order Sekarang' : 'Stok Tidak Cukup'}
           </a>
         `;
