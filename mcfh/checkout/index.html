@@ -88,14 +88,18 @@
     <input type="email" id="emailTerdaftar" required>
   </div><button class="btn" onclick="kirimKeWhatsApp()">Kirim via WhatsApp</button>
 
-  <script>
-    const paket = {
-      nama: "Paket Dewa",
-      ram: 64,
-      storage: 100,
-      cpu: 6,
-      harga: 120000
-    };
+  <script id="produk" type="application/json">
+  [
+    { "nama": "Paket Starter", "ram": 1, "storage": 10, "cpu": 1, "harga": 10000 },
+    { "nama": "Paket Pro", "ram": 2, "storage": 20, "cpu": 2, "harga": 18000 },
+    { "nama": "Paket Sultan", "ram": 4, "storage": 50, "cpu": 4, "harga": 35000 },
+    { "nama": "Paket Dewa", "ram": 64, "storage": 100, "cpu": 6, "harga": 120000 }
+  ]
+  </script>  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = parseInt(params.get('id') || 0);
+    const data = JSON.parse(document.getElementById("produk").textContent);
+    const paket = data[id] || data[0];
 
     document.getElementById("namaPaket").innerText = paket.nama;
     document.getElementById("ram").innerText = paket.ram;
@@ -137,4 +141,4 @@
       window.open(url, '_blank');
     }
   </script></body>
-  </html>
+</html>
