@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Paket Starter",
+    "ram": "1",
+    "slots": "10",
+    "price": "10000"
+  },
+  {
+    "name": "Paket Pro",
+    "ram": "2",
+    "slots": "25",
+    "price": "18000"
+  },
+  {
+    "name": "Paket Sultan",
+    "ram": "4",
+    "slots": "Unlimited",
+    "price": "35000"
+  },
+  {
+    "name": "Paket Dewa",
+    "ram": "64",
+    "slots": "Unlimited",
+    "price": "120000"
+  }
+]
