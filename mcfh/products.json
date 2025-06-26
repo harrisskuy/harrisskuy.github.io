@@ -3,35 +3,35 @@
     "name": "BSC-1G",
     "ram": "1 DDR4",
     "cpu": "2 Core CPU", 
-    "storage": "3,5 GB SSD"
+    "storage": "3,5 GB SSD", 
     "price": "5.000"
   },
   {
     "name": "BSC-2G",
     "ram": "2 DDR4",
     "cpu": "2 Core CPU", 
-    "storage": "7 GB SSD"
+    "storage": "7 GB SSD", 
     "price": "10.000"
   },
   {
     "name": "BSC-4G",
     "ram": "4 DDR4",
     "cpu": "2 Core CPU", 
-    "storage": "14 GB SSD"
+    "storage": "14 GB SSD", 
     "price": "10.000"
   },
   {
     "name": "BSC-5G",
     "ram": "5 DDR4",
     "cpu": "2 Core CPU", 
-    "storage": "17,5 GB SSD"
+    "storage": "17,5 GB SSD", 
     "price": "10.000"
   },
   {
     "name": "BSC-6G",
     "ram": "6 DDR4",
     "cpu": "2 Core CPU", 
-    "storage": "21 GB SSD"
+    "storage": "21 GB SSD", 
     "price": "10.000"
   },
     {
