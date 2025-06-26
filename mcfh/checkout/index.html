@@ -1,109 +1,223 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html><html lang="id" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout - MCFastHost</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f1f5f9;
-      margin: 0;
-      padding: 2rem;
-      color: #0f172a;
-    }
-    h2, h3 {
-      color: #2563eb;
-      margin-bottom: 1rem;
-    }
-    label {
-      display: block;
-      margin-top: 1rem;
-      font-weight: 600;
-    }
-    input, textarea, select {
-      width: 100%;
-      padding: 0.6rem;
-      margin-top: 0.3rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-    }
-    .btn {
-      margin-top: 2rem;
-      background: #2563eb;
-      color: white;
-      border: none;
-      padding: 0.8rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      width: 100%;
-    }
-    .btn:hover {
-      background: #1e40af;
-    }
-    .hidden {
-      display: none;
-    }
+    :root {
+      --blue: #2563eb;
+      --gray: #64748b;
+      --success: #22c55e;--light-bg: #f8fafc;
+  --light-card: white;
+  --light-text: #0f172a;
+
+  --dark-bg: #0f172a;
+  --dark-card: #1e293b;
+  --dark-text: #e2e8f0;
+}
+
+[data-theme='light'] {
+  --bg: var(--light-bg);
+  --card: var(--light-card);
+  --text: var(--light-text);
+}
+
+[data-theme='dark'] {
+  --bg: var(--dark-bg);
+  --card: var(--dark-card);
+  --text: var(--dark-text);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 2rem;
+}
+
+header {
+  padding: 2rem 1rem;
+  background: var(--card);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1000px;
+  margin: auto;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+}
+
+header h1 {
+  font-size: 1.5rem;
+  color: var(--blue);
+}
+
+header p {
+  color: var(--gray);
+  font-size: 0.9rem;
+}
+
+.toggle-theme {
+  background: none;
+  border: 1px solid var(--gray);
+  color: var(--text);
+  padding: 0.4rem 0.7rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+main {
+  background: var(--card);
+  max-width: 700px;
+  margin: auto;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+h2, h3 {
+  color: var(--blue);
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.3rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.btn {
+  margin-top: 2rem;
+  background: var(--blue);
+  color: white;
+  border: none;
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn:hover {
+  background: #1e40af;
+}
+
+.hidden {
+  display: none;
+}
+
+footer {
+  text-align: center;
+  padding: 2rem;
+  color: var(--gray);
+}
+
   </style>
 </head>
 <body>
-  <h2>Checkout Paket Hosting</h2>  <div id="product-detail">
-    <strong>Nama Paket:</strong> <span id="namaPaket">-</span><br>
-    <strong>RAM:</strong> <span id="ram">-</span> GB<br>
-    <strong>Storage:</strong> <span id="storage">-</span> GB SSD<br>
-    <strong>CPU:</strong> <span id="cpu">-</span> Core<br>
-    <strong>Harga:</strong> Rp<span id="harga">-</span><br>
-    <label for="periode">Periode Sewa (bulan)</label>
-    <select id="periode" required>
-      <option value="1">1 Bulan</option>
-      <option value="3">3 Bulan</option>
-      <option value="6">6 Bulan</option>
-      <option value="12">12 Bulan</option>
-    </select>
-  </div>  <hr style="margin: 2rem 0;">  <h3>Formulir Server</h3>
-  <label for="egg">Egg Server</label>
-  <select id="egg" required>
-    <option>Paper</option>
-    <option>Spigot</option>
-    <option>Bedrock</option>
-    <option>Fabric</option>
-    <option>Forge</option>
-  </select><label for="versi">Versi Minecraft</label> <input type="text" id="versi" placeholder="Contoh: 1.20.4" required>
+  <header>
+    <div>
+      <h1>MCFastHost</h1>
+      <p>Hosting Minecraft handal & terjangkau</p>
+    </div>
+    <button class="toggle-theme" onclick="toggleTheme()">🌓</button>
+  </header>  <main>
+    <h2>Checkout Paket Hosting</h2><div id="product-detail">
+  <strong>Nama Paket:</strong> <span id="namaPaket">-</span><br>
+  <strong>RAM:</strong> <span id="ram">-</span> GB<br>
+  <strong>Storage:</strong> <span id="storage">-</span> GB SSD<br>
+  <strong>CPU:</strong> <span id="cpu">-</span> Core<br>
+  <strong>Harga:</strong> Rp<span id="harga">-</span><br>
+  <label for="periode">Periode Sewa (bulan)</label>
+  <select id="periode" required>
+    <option value="1">1 Bulan</option>
+    <option value="3">3 Bulan</option>
+    <option value="6">6 Bulan</option>
+    <option value="12">12 Bulan</option>
+  </select>
+</div>
+
+<hr style="margin: 2rem 0;">
+
+<h3>Formulir Server</h3>
+<label for="egg">Egg Server</label>
+<select id="egg" required>
+  <option>Paper</option>
+  <option>Spigot</option>
+  <option>Bedrock</option>
+  <option>Fabric</option>
+  <option>Forge</option>
+</select>
+
+<label for="versi">Versi Minecraft</label>
+<input type="text" id="versi" placeholder="Contoh: 1.20.4" required>
 
 <label for="catatan">Catatan</label>
+<textarea id="catatan" rows="3" placeholder="Contoh: Tolong aktifkan secepatnya"></textarea>
 
-  <textarea id="catatan" rows="3" placeholder="Contoh: Tolong aktifkan secepatnya"></textarea>  <hr style="margin: 2rem 0;">  <h3>Formulir Pembeli</h3>
-  <div id="formPembeli">
-    <label for="namaDepan">Nama Depan</label>
-    <input type="text" id="namaDepan" required><label for="namaBelakang">Nama Belakang</label>
-<input type="text" id="namaBelakang" required>
+<hr style="margin: 2rem 0;">
 
-<label for="username">Username</label>
-<input type="text" id="username" required>
+<h3>Formulir Pembeli</h3>
+<div id="formPembeli">
+  <label for="namaDepan">Nama Depan</label>
+  <input type="text" id="namaDepan" required>
 
-<label for="email">Email</label>
-<input type="email" id="email" required>
+  <label for="namaBelakang">Nama Belakang</label>
+  <input type="text" id="namaBelakang" required>
 
-<label for="password">Password</label>
-<input type="password" id="password" required>
+  <label for="username">Username</label>
+  <input type="text" id="username" required>
 
-  </div><label><input type="checkbox" id="sudahPunya"> Saya sudah punya akun di mcfh.gg</label>
+  <label for="email">Email</label>
+  <input type="email" id="email" required>
 
-  <div id="emailTerdaftarDiv" class="hidden">
-    <label for="emailTerdaftar">Email Terdaftar</label>
-    <input type="email" id="emailTerdaftar" required>
-  </div><button class="btn" onclick="kirimKeWhatsApp()">Kirim via WhatsApp</button>
+  <label for="password">Password</label>
+  <input type="password" id="password" required>
+</div>
 
-  <script id="produk" type="application/json">
-  [
-    { "nama": "Paket Starter", "ram": 1, "storage": 10, "cpu": 1, "harga": 10000 },
-    { "nama": "Paket Pro", "ram": 2, "storage": 20, "cpu": 2, "harga": 18000 },
-    { "nama": "Paket Sultan", "ram": 4, "storage": 50, "cpu": 4, "harga": 35000 },
-    { "nama": "Paket Dewa", "ram": 64, "storage": 100, "cpu": 6, "harga": 120000 }
-  ]
-  </script>  <script>
+<label><input type="checkbox" id="sudahPunya"> Saya sudah punya akun di mcfh.gg</label>
+<div id="emailTerdaftarDiv" class="hidden">
+  <label for="emailTerdaftar">Email Terdaftar</label>
+  <input type="email" id="emailTerdaftar" required>
+</div>
+
+<button class="btn" onclick="kirimKeWhatsApp()">Kirim via WhatsApp</button>
+
+  </main>  <footer>
+    &copy; 2025 MCFastHost. Semua hak dilindungi.
+  </footer>  <script>
+    const root = document.documentElement;
+    function toggleTheme() {
+      const current = root.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    (function loadTheme() {
+      const saved = localStorage.getItem('theme') || 'light';
+      root.setAttribute('data-theme', saved);
+    })();
+
     const params = new URLSearchParams(window.location.search);
     const id = parseInt(params.get('id') || 0);
-    const data = JSON.parse(document.getElementById("produk").textContent);
+    const data = [
+      { "nama": "Paket Starter", "ram": 1, "storage": 10, "cpu": 1, "harga": 10000 },
+      { "nama": "Paket Pro", "ram": 2, "storage": 20, "cpu": 2, "harga": 18000 },
+      { "nama": "Paket Sultan", "ram": 4, "storage": 50, "cpu": 4, "harga": 35000 },
+      { "nama": "Paket Dewa", "ram": 64, "storage": 100, "cpu": 6, "harga": 120000 }
+    ];
     const paket = data[id] || data[0];
 
     document.getElementById("namaPaket").innerText = paket.nama;
