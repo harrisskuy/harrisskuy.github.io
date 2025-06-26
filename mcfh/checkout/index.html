@@ -213,11 +213,18 @@ footer {
     const params = new URLSearchParams(window.location.search);
     const id = parseInt(params.get('id') || 0);
     const data = [
-      { "nama": "Paket Starter", "ram": 1, "storage": 10, "cpu": 1, "harga": 10000 },
-      { "nama": "Paket Pro", "ram": 2, "storage": 20, "cpu": 2, "harga": 18000 },
-      { "nama": "Paket Sultan", "ram": 4, "storage": 50, "cpu": 4, "harga": 35000 },
-      { "nama": "Paket Dewa", "ram": 64, "storage": 100, "cpu": 6, "harga": 120000 }
-    ];
+  { nama: "BSC-1G", ram: 1, cpu: 2, storage: 3.5, harga: 5000 },
+  { nama: "BSC-2G", ram: 2, cpu: 2, storage: 7, harga: 10000 },
+  { nama: "BSC-4G", ram: 4, cpu: 2, storage: 14, harga: 20000 },
+  { nama: "BSC-5G", ram: 5, cpu: 2, storage: 17.5, harga: 25000 },
+  { nama: "BSC-6G", ram: 6, cpu: 2, storage: 21, harga: 30000 },
+  { nama: "BSC-7G", ram: 7, cpu: 2, storage: 24.5, harga: 35000 },
+  { nama: "BSC-8G", ram: 8, cpu: 2, storage: 28, harga: 40000 },
+  { nama: "BSC-9G", ram: 9, cpu: 2, storage: 31.5, harga: 45000 },
+  { nama: "BSC-10G", ram: 10, cpu: 2, storage: 35, harga: 50000 },
+  { nama: "BSC-11G", ram: 11, cpu: 2, storage: 38.5, harga: 55000 },
+  { nama: "BSC-12G", ram: 12, cpu: 2, storage: 42, harga: 60000 }
+];
     const paket = data[id] || data[0];
 
     document.getElementById("namaPaket").innerText = paket.nama;
