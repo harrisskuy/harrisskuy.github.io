@@ -154,49 +154,27 @@ header .logo p {
   pointer-events: none;
 }
 
-.testimonials {
+.testimonials, .faq {
   max-width: 900px;
   margin: 2rem auto;
   padding: 0 1rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
 }
 
-.testimonial-card {
+.testimonial-card, .faq-item {
   background: var(--card);
   padding: 1.5rem;
   border-radius: 1rem;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1rem;
 }
 
-.testimonial-card p {
+.testimonial-card p, .faq-item p {
   font-size: 0.95rem;
   color: var(--gray);
-  margin-bottom: 1rem;
 }
 
-.testimonial-card strong {
+.testimonial-card strong, .faq-item h3 {
   color: var(--blue);
-}
-
-.faq {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-}
-
-.faq-item {
-  background: var(--card);
-  border-radius: 0.75rem;
-  padding: 1rem 1.2rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-.faq-item h3 {
-  color: var(--blue);
-  margin-bottom: 0.5rem;
 }
 
 footer {
@@ -222,73 +200,72 @@ footer {
   </section>  <h2 class="section-title">Pilih Paket Hosting</h2>
   <section class="products" id="product-list">
     <!-- Produk dimuat otomatis -->
-  </section>  <h2 class="section-title">Apa Kata Mereka</h2>
+  </section>  <h2 class="section-title">Testimoni Pengguna</h2>
   <section class="testimonials">
     <div class="testimonial-card">
-      <p>"MCFastHost membuat server saya aktif hanya dalam hitungan menit!"</p>
-      <strong>- Rizky, Pemilik Server SMP</strong>
+      <p>"MCFastHost sangat cepat dan support-nya ramah. Server langsung aktif!"</p>
+      <strong>- Reza, Pemain Minecraft</strong>
     </div>
     <div class="testimonial-card">
-      <p>"Uptime bagus, harga murah, sangat recommended buat pemula."</p>
-      <strong>- Dimas, Pemain Minecraft</strong>
+      <p>"Dengan harga segini, saya bisa buat server komunitas tanpa lag."</p>
+      <strong>- Maya, Admin Server</strong>
     </div>
   </section>  <h2 class="section-title">Pertanyaan Umum</h2>
   <section class="faq">
     <div class="faq-item">
-      <h3>Apakah server langsung aktif setelah pembelian?</h3>
-      <p>Ya, server Anda langsung aktif setelah pembayaran berhasil dilakukan.</p>
+      <h3>Apakah server langsung aktif setelah bayar?</h3>
+      <p>Ya, server Anda akan langsung aktif setelah proses pembayaran berhasil.</p>
     </div>
     <div class="faq-item">
-      <h3>Bisa upgrade paket hosting?</h3>
-      <p>Tentu, Anda dapat meng-upgrade paket kapan saja melalui admin WhatsApp.</p>
+      <h3>Apakah saya bisa upgrade paket kapan saja?</h3>
+      <p>Tentu saja, cukup hubungi admin via WhatsApp untuk upgrade.</p>
     </div>
   </section>  <footer>
-    &copy; 2025 MCFastHost. Semua hak dilindungi. Dibuat dengan ❤️ untuk komunitas Minecraft Indonesia.
+    &copy; 2025 MCFastHost. Dibuat dengan ❤️ untuk komunitas Minecraft Indonesia.
   </footer>  <script>
     const root = document.documentElement;
-
     function toggleTheme() {
       const current = root.getAttribute('data-theme');
       const next = current === 'light' ? 'dark' : 'light';
       root.setAttribute('data-theme', next);
       localStorage.setItem('theme', next);
     }
-
-    function loadTheme() {
+    (function loadTheme() {
       const saved = localStorage.getItem('theme') || 'light';
       root.setAttribute('data-theme', saved);
-    }
-
-    loadTheme();
+    })();
 
     async function loadProducts() {
-  const [stock, products] = await Promise.all([
-    fetch('stock.json').then(r => r.json()),
-    fetch('products.json').then(r => r.json())
-  ]);
+      const [stock, products] = await Promise.all([
+        fetch('stock.json').then(r => r.json()),
+        fetch('products.json').then(r => r.json())
+      ]);
 
-  // Ambil RAM yang tersedia dalam stock.json (harus berupa angka, contoh: 10)
-  const stockRAM = parseInt(stock[0].ram);
-  const container = document.getElementById('product-list');
+      const stockRAM = parseInt(stock[0].ram);
+      const container = document.getElementById('product-list');
 
-  products.forEach((p, i) => {
-    // Ambil angka RAM dari string seperti "4 DDR4"
-    const ramAmount = parseInt(p.ram);
-    const available = ramAmount <= stockRAM;
+      products.forEach((p, i) => {
+        const ramAmount = parseInt(p.ram);
+        const available = ramAmount <= stockRAM;
+        const priceClean = parseInt(p.price.replace('.', ''));
 
-    const card = document.createElement('div');
-    card.className = 'card';
+        const card = document.createElement('div');
+        card.className = 'card';
 
-    card.innerHTML = `
-      <h2>${p.name}</h2>
-      <p><strong>RAM:</strong> ${p.ram}</p>
-      <p><strong>CPU:</strong> ${p.cpu}</p>
-      <p><strong>Storage:</strong> ${p.storage}</p>
-      <p class="price">Rp${p.price} / bulan</p>
-      <a href="checkout?id=${i}" class="btn ${available ? '' : 'disabled'}">
-        ${available ? 'Order Sekarang' : 'Stok Tidak Cukup'}
-      </a>
-    `;
-    container.appendChild(card);
-  });
-}
+        card.innerHTML = `
+          <h2>${p.name}</h2>
+          <p><strong>RAM:</strong> ${p.ram}</p>
+          <p><strong>CPU:</strong> ${p.cpu}</p>
+          <p><strong>Storage:</strong> ${p.storage}</p>
+          <p class="price">Rp${priceClean.toLocaleString('id-ID')} / bulan</p>
+          <a href="checkout?id=${i}" class="btn ${available ? '' : 'disabled'}">
+            ${available ? 'Order Sekarang' : 'Stok Tidak Cukup'}
+          </a>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    loadProducts();
+  </script></body>
+        </html>
