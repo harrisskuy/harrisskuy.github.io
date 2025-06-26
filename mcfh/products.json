@@ -1,26 +1,80 @@
 [
   {
-    "name": "Paket Starter",
-    "ram": "1",
-    "slots": "10",
-    "price": "10000"
+    "name": "BSC-1G",
+    "ram": "1 DDR4",
+    "CPU": "2 Core CPU", 
+    "Storage": "3,5 GB SSD"
+    "price": "5.000"
   },
   {
-    "name": "Paket Pro",
-    "ram": "2",
-    "slots": "25",
-    "price": "18000"
+    "name": "BSC-2G",
+    "ram": "2 DDR4",
+    "CPU": "2 Core CPU", 
+    "Storage": "7 GB SSD"
+    "price": "10.000"
   },
   {
-    "name": "Paket Sultan",
-    "ram": "4",
-    "slots": "Unlimited",
-    "price": "35000"
+    "name": "BSC-4G",
+    "ram": "4 DDR4",
+    "CPU": "2 Core CPU", 
+    "Storage": "14 GB SSD"
+    "price": "10.000"
   },
   {
-    "name": "Paket Dewa",
-    "ram": "64",
-    "slots": "Unlimited",
-    "price": "120000"
+    "name": "BSC-5G",
+    "ram": "5 DDR4",
+    "CPU": "2 Core CPU", 
+    "Storage": "17,5 GB SSD"
+    "price": "10.000"
+  },
+  {
+    "name": "BSC-6G",
+    "ram": "6 DDR4",
+    "CPU": "2 Core CPU", 
+    "Storage": "21 GB SSD"
+    "price": "10.000"
+  },
+    {
+    "name": "BSC-7G",
+    "ram": "7 DDR4",
+    "CPU": "2 Core CPU",
+    "Storage": "24,5 GB SSD",
+    "price": "35.000"
+  },
+  {
+    "name": "BSC-8G",
+    "ram": "8 DDR4",
+    "CPU": "2 Core CPU",
+    "Storage": "28 GB SSD",
+    "price": "40.000"
+  },
+  {
+    "name": "BSC-9G",
+    "ram": "9 DDR4",
+    "CPU": "2 Core CPU",
+    "Storage": "31,5 GB SSD",
+    "price": "45.000"
+  },
+  {
+    "name": "BSC-10G",
+    "ram": "10 DDR4",
+    "CPU": "2 Core CPU",
+    "Storage": "35 GB SSD",
+    "price": "50.000"
+  },
+  {
+    "name": "BSC-11G",
+    "ram": "11 DDR4",
+    "CPU": "2 Core CPU",
+    "Storage": "38,5 GB SSD",
+    "price": "55.000"
+  },
+  {
+    "name": "BSC-12G",
+    "ram": "12 DDR4",
+    "CPU": "2 Core CPU",
+    "Storage": "42 GB SSD",
+    "price": "60.000"
   }
+]
 ]
