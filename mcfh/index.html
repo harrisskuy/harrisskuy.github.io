@@ -277,11 +277,12 @@ footer {
 
         card.innerHTML = `
           <h2>${p.name}</h2>
+          <p>${p.cpu} Core CPU</p>
           <p>${p.ram} GB RAM</p>
-          <p>${p.slots} Slot</p>
+          <p>${p.storage} SSD</p>
           <p class="price">Rp${p.price.toLocaleString()} / bulan</p>
           <a href="checkout?id=${i}" class="btn ${available ? '' : 'disabled'}">
-            ${available ? 'Order Sekarang' : 'Stok Tidak Cukup'}
+            ${available ? 'Order' : 'Stok Kosong'}
           </a>
         `;
         container.appendChild(card);
