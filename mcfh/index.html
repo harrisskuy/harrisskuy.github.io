@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="id" data-theme="light">
+<!DOCTYPE html><html lang="id" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -8,139 +7,170 @@
     :root {
       --blue: #2563eb;
       --gray: #64748b;
-      --success: #22c55e;
+      --success: #22c55e;--light-bg: #f8fafc;
+  --light-card: white;
+  --light-text: #0f172a;
 
-      --light-bg: #f8fafc;
-      --light-card: white;
-      --light-text: #0f172a;
+  --dark-bg: #0f172a;
+  --dark-card: #1e293b;
+  --dark-text: #e2e8f0;
+}
 
-      --dark-bg: #0f172a;
-      --dark-card: #1e293b;
-      --dark-text: #e2e8f0;
-    }
+[data-theme='light'] {
+  --bg: var(--light-bg);
+  --card: var(--light-card);
+  --text: var(--light-text);
+}
 
-    [data-theme='light'] {
-      --bg: var(--light-bg);
-      --card: var(--light-card);
-      --text: var(--light-text);
-    }
+[data-theme='dark'] {
+  --bg: var(--dark-bg);
+  --card: var(--dark-card);
+  --text: var(--dark-text);
+}
 
-    [data-theme='dark'] {
-      --bg: var(--dark-bg);
-      --card: var(--dark-card);
-      --text: var(--dark-text);
-    }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
 
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
+header {
+  padding: 1.5rem 2rem;
+  background: var(--card);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
 
-    header {
-      padding: 2rem 1rem;
-      background: var(--card);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 1000px;
-      margin: auto;
-    }
+header .logo h1 {
+  font-size: 1.6rem;
+  color: var(--blue);
+}
 
-    header h1 {
-      font-size: 1.5rem;
-      color: var(--blue);
-    }
+header .logo p {
+  font-size: 0.85rem;
+  color: var(--gray);
+}
 
-    header p {
-      color: var(--gray);
-      font-size: 0.9rem;
-    }
+.toggle-theme {
+  background: none;
+  border: 1px solid var(--gray);
+  color: var(--text);
+  padding: 0.4rem 0.7rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
-    .toggle-theme {
-      background: none;
-      border: 1px solid var(--gray);
-      color: var(--text);
-      padding: 0.4rem 0.7rem;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+.hero {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: var(--card);
+  box-shadow: inset 0 -1px 0 var(--gray);
+}
 
-    .products {
-      max-width: 1000px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-      display: grid;
-      gap: 2rem;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    }
+.hero h2 {
+  font-size: 2rem;
+  color: var(--blue);
+}
 
-    .card {
-      background: var(--card);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-    }
+.hero p {
+  font-size: 1rem;
+  color: var(--gray);
+  margin-top: 0.5rem;
+}
 
-    .card h2 {
-      color: var(--blue);
-      margin-bottom: 0.5rem;
-    }
+.products {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
 
-    .card p {
-      color: var(--gray);
-    }
+.card {
+  background: var(--card);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s;
+}
 
-    .price {
-      font-weight: bold;
-      color: var(--success);
-      margin-top: 1rem;
-    }
+.card:hover {
+  transform: translateY(-5px);
+}
 
-    .btn {
-      margin-top: 1.5rem;
-      display: block;
-      text-align: center;
-      padding: 0.6rem;
-      background: var(--blue);
-      color: white;
-      border-radius: 6px;
-      text-decoration: none;
-    }
+.card h2 {
+  color: var(--blue);
+  margin-bottom: 0.5rem;
+}
 
-    .btn.disabled {
-      background: var(--gray);
-      pointer-events: none;
-    }
+.card p {
+  color: var(--gray);
+  font-size: 0.95rem;
+}
 
-    footer {
-      text-align: center;
-      padding: 1.5rem;
-      color: var(--gray);
-    }
+.price {
+  font-weight: bold;
+  color: var(--success);
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}
+
+.btn {
+  margin-top: 1.5rem;
+  display: block;
+  text-align: center;
+  padding: 0.6rem;
+  background: var(--blue);
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+.btn:hover {
+  background: #1d4ed8;
+}
+
+.btn.disabled {
+  background: var(--gray);
+  pointer-events: none;
+}
+
+footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--gray);
+  background: var(--card);
+  margin-top: 3rem;
+  border-top: 1px solid #e2e8f0;
+}
+
   </style>
 </head>
-<body>
-
-  <header>
-    <div>
+<body>  <header>
+    <div class="logo">
       <h1>MCFastHost</h1>
       <p>Hosting Minecraft handal & terjangkau</p>
     </div>
     <button class="toggle-theme" onclick="toggleTheme()">🌓</button>
-  </header>
-
-  <section class="products" id="product-list">
+  </header>  <section class="hero">
+    <h2>Hosting Minecraft Terbaik untuk Server Anda</h2>
+    <p>Pilih paket sesuai kebutuhan dan langsung aktif!</p>
+  </section>  <section class="products" id="product-list">
     <!-- Produk dimuat otomatis -->
-  </section>
-
-  <footer>
+  </section>  <footer>
     &copy; 2025 MCFastHost. Semua hak dilindungi.
-  </footer>
-
-  <script>
+  </footer>  <script>
     const root = document.documentElement;
 
     function toggleTheme() {
@@ -185,6 +215,5 @@
     }
 
     loadProducts();
-  </script>
-</body>
+  </script></body>
 </html>
