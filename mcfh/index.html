@@ -262,33 +262,33 @@ footer {
     loadTheme();
 
     async function loadProducts() {
-      const [stock, products] = await Promise.all([
-        fetch('stock.json').then(r => r.json()),
-        fetch('products.json').then(r => r.json())
-      ]);
+  const [stock, products] = await Promise.all([
+    fetch('stock.json').then(r => r.json()),
+    fetch('products.json').then(r => r.json())
+  ]);
 
-      const stockRAM = parseInt(stock[0].ram);
-      const container = document.getElementById('product-list');
+  // Ambil RAM yang tersedia dalam stock.json (harus berupa angka, contoh: 10)
+  const stockRAM = parseInt(stock[0].ram);
+  const container = document.getElementById('product-list');
 
-      products.forEach((p, i) => {
-        const available = parseInt(p.ram) <= stockRAM;
-        const card = document.createElement('div');
-        card.className = 'card';
+  products.forEach((p, i) => {
+    // Ambil angka RAM dari string seperti "4 DDR4"
+    const ramAmount = parseInt(p.ram);
+    const available = ramAmount <= stockRAM;
 
-        card.innerHTML = `
-          <h2>${p.name}</h2>
-          <p>${p.cpu} Core CPU</p>
-          <p>${p.ram} GB RAM</p>
-          <p>${p.storage} SSD</p>
-          <p class="price">Rp${p.price.toLocaleString()} / bulan</p>
-          <a href="checkout?id=${i}" class="btn ${available ? '' : 'disabled'}">
-            ${available ? 'Order' : 'Stok Kosong'}
-          </a>
-        `;
-        container.appendChild(card);
-      });
-    }
+    const card = document.createElement('div');
+    card.className = 'card';
 
-    loadProducts();
-  </script></body>
-</html>
+    card.innerHTML = `
+      <h2>${p.name}</h2>
+      <p><strong>RAM:</strong> ${p.ram}</p>
+      <p><strong>CPU:</strong> ${p.cpu}</p>
+      <p><strong>Storage:</strong> ${p.storage}</p>
+      <p class="price">Rp${p.price} / bulan</p>
+      <a href="checkout?id=${i}" class="btn ${available ? '' : 'disabled'}">
+        ${available ? 'Order Sekarang' : 'Stok Tidak Cukup'}
+      </a>
+    `;
+    container.appendChild(card);
+  });
+}
