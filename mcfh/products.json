@@ -38,7 +38,7 @@
     "name": "BSC-7G",
     "ram": "7 DDR4",
     "cpu": "2 Core CPU",
-    sStorage": "24,5 GB SSD",
+    "storage": "24,5 GB SSD",
     "price": "35.000"
   },
   {
