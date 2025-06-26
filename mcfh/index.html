@@ -86,6 +86,14 @@ header .logo p {
   margin-top: 0.5rem;
 }
 
+.section-title {
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  color: var(--blue);
+}
+
 .products {
   max-width: 1000px;
   margin: 2rem auto;
@@ -146,6 +154,51 @@ header .logo p {
   pointer-events: none;
 }
 
+.testimonials {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.testimonial-card {
+  background: var(--card);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+
+.testimonial-card p {
+  font-size: 0.95rem;
+  color: var(--gray);
+  margin-bottom: 1rem;
+}
+
+.testimonial-card strong {
+  color: var(--blue);
+}
+
+.faq {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.faq-item {
+  background: var(--card);
+  border-radius: 0.75rem;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.faq-item h3 {
+  color: var(--blue);
+  margin-bottom: 0.5rem;
+}
+
 footer {
   text-align: center;
   padding: 2rem 1rem;
@@ -165,11 +218,32 @@ footer {
     <button class="toggle-theme" onclick="toggleTheme()">🌓</button>
   </header>  <section class="hero">
     <h2>Hosting Minecraft Terbaik untuk Server Anda</h2>
-    <p>Pilih paket sesuai kebutuhan dan langsung aktif!</p>
-  </section>  <section class="products" id="product-list">
+    <p>Mulai dari Rp5.000/bulan, aktif seketika, performa maksimal!</p>
+  </section>  <h2 class="section-title">Pilih Paket Hosting</h2>
+  <section class="products" id="product-list">
     <!-- Produk dimuat otomatis -->
+  </section>  <h2 class="section-title">Apa Kata Mereka</h2>
+  <section class="testimonials">
+    <div class="testimonial-card">
+      <p>"MCFastHost membuat server saya aktif hanya dalam hitungan menit!"</p>
+      <strong>- Rizky, Pemilik Server SMP</strong>
+    </div>
+    <div class="testimonial-card">
+      <p>"Uptime bagus, harga murah, sangat recommended buat pemula."</p>
+      <strong>- Dimas, Pemain Minecraft</strong>
+    </div>
+  </section>  <h2 class="section-title">Pertanyaan Umum</h2>
+  <section class="faq">
+    <div class="faq-item">
+      <h3>Apakah server langsung aktif setelah pembelian?</h3>
+      <p>Ya, server Anda langsung aktif setelah pembayaran berhasil dilakukan.</p>
+    </div>
+    <div class="faq-item">
+      <h3>Bisa upgrade paket hosting?</h3>
+      <p>Tentu, Anda dapat meng-upgrade paket kapan saja melalui admin WhatsApp.</p>
+    </div>
   </section>  <footer>
-    &copy; 2025 MCFastHost. Semua hak dilindungi.
+    &copy; 2025 MCFastHost. Semua hak dilindungi. Dibuat dengan ❤️ untuk komunitas Minecraft Indonesia.
   </footer>  <script>
     const root = document.documentElement;
 
