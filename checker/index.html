@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pencocokan Kode + Scan Barcode</title>
+<style>
+  :root { font-family: system-ui, Arial, sans-serif; }
+  body { margin: 32px; }
+  h1 { font-size: 1.25rem; margin-bottom: 0.75rem; }
+  .card { max-width: 700px; padding: 16px; border: 1px solid #ddd; border-radius: 10px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  input[type="text"] { flex: 1 1 300px; padding: 10px 12px; border-radius: 8px; border: 1px solid #bbb; }
+  button { padding: 10px 14px; border-radius: 8px; border: 1px solid #999; background: #f5f5f5; cursor: pointer; }
+  button:hover { filter: brightness(0.97); }
+  .result { margin-top: 12px; font-weight: 600; }
+  .ok { color: #0a7a29; }
+  .no { color: #b00020; }
+  details { margin-top: 16px; }
+  code { user-select: all; }
+  ul { margin: 8px 0 0 18px; }
+  .small { font-size: 0.9rem; color: #555; }
+  del { color: #999; }
+  video { width: 100%; border-radius: 8px; margin-top: 10px; display: none; }
+</style>
+</head>
+<body>
+<h1>Pencocokan Kode + Scan Barcode</h1>
+<div class="card">
+  <div class="row">
+    <input id="kodeInput" type="text" list="kodeList" placeholder="Tempel/ketik kode di sini…" autofocus />
+    <button id="cekBtn" type="button">Cek</button>
+    <button id="resetBtn" type="button" title="Kosongkan input">Reset</button>
+    <button id="scanBtn" type="button">Scan Barcode</button>
+  </div>
+  <video id="preview"></video>
+  <div id="hasil" class="result"></div>
+
+  <details>
+    <summary>Daftar kode yang tersedia (klik untuk lihat)</summary>
+    <ul id="daftarKode"></ul>
+    <p class="small">Total: <span id="totalKode"></span> kode.</p>
+  </details>
+</div>
+
+<datalist id="kodeList"></datalist>
+
+<!-- QuaggaJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+<script>
+const KODES = [
+  "P/04.f/01.16/III-22/42666","P/04.f/01.16/III-22/42667","P/04.f/01.16/III-22/42668",
+  "P/04.f/01.16/III-22/42669","P/04.f/01.16/III-22/42670","P/04.f/01.16/VII-23/46417",
+  "P/04.f/01.16/VII-23/46418","P/04.f/01.16/VIII-22/42961","P/04.f/01.16/VIII-22/42962",
+  "P/04.f/01.16/VIII-22/42963","P/04.f/01.16/VIII-22/42964","P/04.f/01.16/VIII-22/42965",
+  "P/04.f/01.16/VIII-22/42966","P/04.f/01.16/VIII-23/46497","P/04.f/01.25/III-23/45475",
+  "P/04.f/01.25/III-23/45476","P/04.f/01.25/III-23/45477","P/04.f/01.25/III-23/45478",
+  "P/04.f/01.25/III-23/45479","P/04.f/01.25/VI-23/46487"
+];
+const norm = s => (s || "").normalize("NFC").trim();
+
+const ul = document.getElementById("daftarKode");
+const dataList = document.getElementById("kodeList");
+const totalKode = document.getElementById("totalKode");
+KODES.forEach(k => {
+  const li = document.createElement("li");
+  li.innerHTML = `<code>${k}</code>`;
+  ul.appendChild(li);
+  const opt = document.createElement("option");
+  opt.value = k;
+  dataList.appendChild(opt);
+});
+totalKode.textContent = KODES.length;
+
+function coretKode(kode) {
+  const items = ul.querySelectorAll("li");
+  items.forEach(li => {
+    if (li.textContent.trim() === kode) {
+      li.innerHTML = `<del><code>${kode}</code></del>`;
+    }
+  });
+}
+
+function cekKode() {
+  const input = document.getElementById("kodeInput");
+  const val = norm(input.value);
+  const hasil = document.getElementById("hasil");
+
+  if (!val) {
+    hasil.textContent = "Masukkan kode terlebih dahulu.";
+    hasil.className = "result";
+    return;
+  }
+  const cocok = KODES.includes(val);
+  if (cocok) {
+    hasil.innerHTML = `✅ <span class="ok">Cocok</span> — kode <code>${val}</code> ditemukan di daftar.`;
+    coretKode(val);
+  } else {
+    const suggestion = KODES.filter(k => k.toLowerCase().startsWith(val.toLowerCase())).slice(0, 5);
+    hasil.innerHTML = `❌ <span class="no">Tidak cocok</span> — kode <code>${val}</code> tidak ada di daftar.` +
+      (suggestion.length ? `<br><span class="small">Mungkin maksud Anda:</span> <ul>${suggestion.map(s => `<li><code>${s}</code></li>`).join("")}</ul>` : "");
+  }
+}
+
+document.getElementById("cekBtn").addEventListener("click", cekKode);
+document.getElementById("kodeInput").addEventListener("keydown", e => { if (e.key === "Enter") cekKode(); });
+document.getElementById("resetBtn").addEventListener("click", () => {
+  document.getElementById("kodeInput").value = "";
+  document.getElementById("hasil").textContent = "";
+  document.getElementById("kodeInput").focus();
+});
+
+// === Scan Barcode ===
+const scanBtn = document.getElementById("scanBtn");
+const video = document.getElementById("preview");
+
+scanBtn.addEventListener("click", async () => {
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Browser ini tidak mendukung kamera.");
+      return;
+    }
+    // Minta izin kamera
+    await navigator.mediaDevices.getUserMedia({ video: true });
+    video.style.display = "block";
+
+    Quagga.init({
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: video,
+        constraints: {
+          facingMode: { ideal: "environment" }
+        }
+      },
+      decoder: {
+        readers: [
+          "code_128_reader",
+          "ean_reader",
+          "ean_8_reader",
+          "code39_reader"
+        ]
+      },
+      locate: true
+    }, err => {
+      if (err) {
+        console.error("Quagga init error:", err);
+        alert("Gagal mengakses kamera: " + err.message);
+        return;
+      }
+      Quagga.start();
+    });
+
+    Quagga.onDetected(data => {
+      const kode = data.codeResult.code;
+      document.getElementById("kodeInput").value = kode;
+      cekKode();
+      Quagga.stop();
+      video.style.display = "none";
+    });
+
+  } catch (err) {
+    console.error("Kamera gagal dibuka:", err);
+    alert("Izin kamera ditolak atau tidak tersedia.");
+  }
+});
+</script>
+</body>
+</html>
