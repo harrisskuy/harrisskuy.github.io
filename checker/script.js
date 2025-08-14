@@ -43,71 +43,11 @@ function cekKode() {
       }</ul>` : "");
   }
 }
+
 document.getElementById("cekBtn").addEventListener("click", cekKode);
 document.getElementById("kodeInput").addEventListener("keydown", e => { if (e.key === "Enter") cekKode(); });
 document.getElementById("resetBtn").addEventListener("click", () => {
   document.getElementById("kodeInput").value = "";
   document.getElementById("hasil").textContent = "";
   document.getElementById("kodeInput").focus();
-});
-
-// === Kamera Manual ===
-const cameraSelect = document.getElementById("cameraSelect");
-async function loadCameras() {
-  try {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevices = devices.filter(d => d.kind === "videoinput");
-    cameraSelect.innerHTML = videoDevices.map((d, i) =>
-      `<option value="${d.deviceId}">${d.label || `Kamera ${i+1}`}</option>`
-    ).join("");
-  } catch (err) {
-    console.error("Gagal memuat daftar kamera:", err);
-  }
-}
-loadCameras();
-
-const scanBtn = document.getElementById("scanBtn");
-const video = document.getElementById("preview");
-scanBtn.addEventListener("click", async () => {
-  try {
-    const deviceId = cameraSelect.value;
-    await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId } } });
-    video.style.display = "block";
-
-    Quagga.init({
-      inputStream: {
-        name: "Live",
-        type: "LiveStream",
-        target: video,
-        constraints: { deviceId: { exact: deviceId } }
-      },
-      decoder: {
-        readers: [
-          "code_128_reader",
-          "ean_reader",
-          "ean_8_reader",
-          "code39_reader"
-        ]
-      },
-      locate: true
-    }, err => {
-      if (err) {
-        console.error("Quagga init error:", err);
-        alert("Gagal mengakses kamera: " + err.message);
-        return;
-      }
-      Quagga.start();
-    });
-
-    Quagga.onDetected(data => {
-      const kode = data.codeResult.code;
-      document.getElementById("kodeInput").value = kode;
-      cekKode();
-      Quagga.stop();
-      video.style.display = "none";
-    });
-  } catch (err) {
-    console.error("Kamera gagal dibuka:", err);
-    alert("Izin kamera ditolak atau tidak tersedia.");
-  }
 });
