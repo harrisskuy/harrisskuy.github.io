@@ -40,7 +40,10 @@
     <video id="video" autoplay class="w-full rounded-lg hidden"></video>
 
     <!-- Tombol Absen -->
-    <button onclick="kirimAbsensi()" class="w-full bg-blue-900 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition">✅ Absen Masuk</button>
+    <div class="flex space-x-3">
+      <button onclick="kirimAbsensi('Masuk')" class="w-1/2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition">✅ Absen Masuk</button>
+      <button onclick="kirimAbsensi('Pulang')" class="w-1/2 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition">📤 Absen Pulang</button>
+    </div>
   </div>
 
   <!-- Toast -->
@@ -77,12 +80,12 @@
       return {tgl, jam};
     }
 
-    async function kirimAbsensi() {
+    async function kirimAbsensi(tipe) {
       const nama = document.getElementById('nama').value;
       const lokasi = document.getElementById('lokasi').value;
       const {tgl, jam} = getDateTime();
 
-      const pesan = `✅ Absensi Masuk\n〰️〰️〰〰〰〰〰〰〰〰\n\n👤 Nama : ${nama}\n📍 Lokasi : ${lokasi}\n📅 Tanggal : ${tgl}\n⏰ Jam : ${jam}\n\n〰️〰️〰〰〰〰〰〰〰〰`;
+      const pesan = `✅ Absensi ${tipe}\n〰️〰️〰〰〰〰〰〰〰〰\n\n👤 Nama : ${nama}\n📍 Lokasi : ${lokasi}\n📅 Tanggal : ${tgl}\n⏰ Jam : ${jam}\n\n〰️〰️〰〰〰〰〰〰〰〰`;
 
       if (kameraToggle.checked && video.srcObject) {
         let canvas = document.createElement('canvas');
@@ -106,7 +109,7 @@
         });
       }
 
-      showToast("✅ Absensi berhasil dikirim!");
+      showToast(`✅ Absensi ${tipe} berhasil dikirim!`);
     }
 
     function showToast(msg) {
