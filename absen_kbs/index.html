@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Absensi Online</title>
+  <style>
+    :root {
+      --primary: #3b82f6;   /* biru soft */
+      --primary-dark: #2563eb;
+      --danger: #ef4444;
+      --bg: #f0f4f9;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+    }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 18px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: var(--text);
+      font-size: 22px;
+    }
+    select {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 15px;
+      background: #f9fafb;
+      transition: border 0.2s;
+    }
+    select:focus {
+      border: 1px solid var(--primary);
+      outline: none;
+    }
+    .toggle {
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    video {
+      display: none;
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 12px;
+    }
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+    button {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+      transition: 0.3s;
+      color: white;
+    }
+    .btn-in { background: var(--primary); }
+    .btn-in:hover { background: var(--primary-dark); }
+    .btn-out { background: var(--danger); }
+    .btn-out:hover { background: #dc2626; }
+    .status {
+      margin-top: 18px;
+      font-size: 14px;
+      color: var(--muted);
+      min-height: 22px;
+    }
+
+    /* Responsif */
+    @media (max-width: 500px) {
+      h2 { font-size: 20px; }
+      .btn-group { flex-direction: column; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>📋 Absensi Online</h2>
+    
+    <select id="nama">
+      <option value="">-- Pilih Nama --</option>
+      <option value="Alkham Rizky Fauzan">Alkham Rizky Fauzan</option>
+    </select>
+
+    <select id="lokasi">
+      <option value="">-- Pilih Lokasi Kerja --</option>
+      <option value="Terminal Purabaya">Terminal Purabaya</option>
+      <option value="BPN Sidoarjo">BPN Sidoarjo</option>
+    </select>
+
+    <div class="toggle">
+      <label for="kamera">📷 Kamera:</label>
+      <input type="checkbox" id="kamera">
+    </div>
+
+    <video id="preview" autoplay playsinline></video>
+    
+    <div class="btn-group">
+      <button class="btn-in" onclick="absen('Masuk')">✅ Masuk</button>
+      <button class="btn-out" onclick="absen('Pulang')">❌ Pulang</button>
+    </div>
+    
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const TOKEN = "8389980675:AAGQxVZPy66O03DhzBGP5TT90rOjVuTsCvs";
+    const CHAT_ID = "5934666948";
+    const URL_MSG = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
+    const URL_PHOTO = `https://api.telegram.org/bot${TOKEN}/sendPhoto`;
+
+    const kameraToggle = document.getElementById("kamera");
+    const video = document.getElementById("preview");
+    let stream = null;
+
+    // Toggle kamera
+    kameraToggle.addEventListener("change", async () => {
+      if (kameraToggle.checked) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          video.srcObject = stream;
+          video.style.display = "block";
+        } catch (e) {
+          document.getElementById("status").innerText = "❌ Tidak bisa akses kamera.";
+          kameraToggle.checked = false;
+        }
+      } else {
+        if (stream) {
+          let tracks = stream.getTracks();
+          tracks.forEach(track => track.stop());
+        }
+        video.style.display = "none";
+      }
+    });
+
+    function formatWaktu() {
+      let d = new Date();
+      let tanggal = d.toLocaleDateString("id-ID", { day:"2-digit", month:"2-digit", year:"numeric" });
+      let jam = d.toLocaleTimeString("id-ID", { hour12:false });
+      return { tanggal, jam };
+    }
+
+    async function absen(tipe) {
+      let nama = document.getElementById("nama").value;
+      let lokasi = document.getElementById("lokasi").value;
+      
+      if (!nama) {
+        document.getElementById("status").innerText = "⚠️ Silakan pilih nama!";
+        return;
+      }
+      if (!lokasi) {
+        document.getElementById("status").innerText = "⚠️ Silakan pilih lokasi!";
+        return;
+      }
+
+      let { tanggal, jam } = formatWaktu();
+      let header = tipe === "Masuk" ? "✅ Absensi Masuk" : "❌ Absensi Pulang";
+
+      let pesan = `${header}\n〰️〰️〰〰〰〰〰〰〰〰️\n\n👤 Nama : ${nama}\n📍 Lokasi : ${lokasi}\n📅 Tanggal : ${tanggal}\n⏰ Jam : ${jam}\n\n〰️〰️〰〰〰〰〰〰〰〰️`;
+
+      if (kameraToggle.checked && stream) {
+        // Ambil foto dari video
+        let canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        let ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0);
+        canvas.toBlob(async (blob) => {
+          let formData = new FormData();
+          formData.append("chat_id", CHAT_ID);
+          formData.append("caption", pesan);
+          formData.append("photo", blob, "absensi.jpg");
+
+          try {
+            await fetch(URL_PHOTO, { method: "POST", body: formData });
+            document.getElementById("status").innerText = `✅ Absensi ${tipe} + Foto terkirim!`;
+          } catch {
+            document.getElementById("status").innerText = "❌ Gagal kirim foto.";
+          }
+        }, "image/jpeg");
+      } else {
+        // Kirim pesan dengan teks tambahan 🚫Foto Dimatikan!
+        pesan += `\n\n<i>🚫Foto Dimatikan!</i>`;
+        try {
+          await fetch(URL_MSG, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: CHAT_ID, text: pesan, parse_mode: "HTML" })
+          });
+          document.getElementById("status").innerText = `✅ Absensi ${tipe} terkirim tanpa foto!`;
+        } catch {
+          document.getElementById("status").innerText = "❌ Gagal kirim pesan.";
+        }
+      }
+    }
+  </script>
+</body>
+</html>
