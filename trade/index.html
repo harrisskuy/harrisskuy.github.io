@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Forex Trading Statistics Dashboard — Contoh</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --muted:#9aa6b2;
+      --accent:#4f46e5;
+      --glass: rgba(255,255,255,0.03);
+      --card-pad:16px;
+      --radius:10px;
+      --text:#e6eef6;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#071027 0%, #07142a 100%);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:20px;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      margin-bottom:18px;
+    }
+    header h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:0.2px;
+    }
+    .layout{
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap:18px;
+    }
+
+    /* Left column */
+    .panel{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:var(--card-pad);
+      box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .account-summary .row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      padding:8px 0;
+      border-bottom:1px dashed rgba(255,255,255,0.02);
+    }
+    .account-summary .row:last-child{border-bottom:0}
+    .muted{color:var(--muted); font-size:13px}
+    .big{font-weight:700; font-size:20px}
+
+    .small-stats{
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:8px;
+      margin-top:12px;
+    }
+    .stat{
+      background:var(--glass);
+      padding:10px;
+      border-radius:8px;
+      text-align:center;
+    }
+    .stat .label{font-size:12px; color:var(--muted)}
+    .stat .value{font-weight:700; margin-top:6px}
+
+    /* Main column */
+    .grid-main{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:18px;
+    }
+
+    .charts{
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap:18px;
+    }
+
+    canvas{background:transparent; display:block; width:100% !important; height:260px !important}
+
+    .table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    .table th, .table td{
+      padding:8px 10px;
+      text-align:left;
+      border-bottom:1px solid rgba(255,255,255,0.03);
+    }
+    .table th{color:var(--muted); font-weight:600; font-size:12px}
+
+    .trades-wrap{max-height:360px; overflow:auto; margin-top:10px}
+
+    .legend-pill{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.02);
+      margin-right:8px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    footer{margin-top:18px; color:var(--muted); font-size:13px}
+
+    /* responsive */
+    @media (max-width:980px){
+      .layout{grid-template-columns:1fr; }
+      .charts{grid-template-columns:1fr}
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>Forex Stats Dashboard — Contoh</h1>
+      <div class="muted">Contoh data dan visualisasi untuk akun trading</div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- Left column -->
+    <div class="panel account-summary" id="leftPanel">
+      <h3 style="margin:0 0 10px 0">Account Summary</h3>
+
+      <div id="accountMeta"></div>
+
+      <div class="small-stats" style="margin-top:12px">
+        <div class="stat">
+          <div class="label">Total Trades</div>
+          <div class="value" id="stat_total_trades">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Win Rate</div>
+          <div class="value" id="stat_win_rate">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Profit Factor</div>
+          <div class="value" id="stat_profit_factor">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Max Drawdown</div>
+          <div class="value" id="stat_drawdown">—</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <div class="muted">Latest trades</div>
+        <div class="trades-wrap" id="latestTrades"></div>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div class="grid-main">
+      <div class="panel charts">
+        <div>
+          <h3 style="margin:0 0 8px 0">Equity Curve & Drawdown</h3>
+          <canvas id="equityChart"></canvas>
+          <div style="display:flex; gap:12px; margin-top:10px;">
+            <div class="legend-pill" id="legend_balance">Balance: —</div>
+            <div class="legend-pill" id="legend_equity">Equity: —</div>
+            <div class="legend-pill" id="legend_dd">Max DD: —</div>
+          </div>
+        </div>
+
+        <div style="padding-left:8px">
+          <h3 style="margin:0 0 8px 0">Performance Snapshot</h3>
+          <canvas id="bySymbolChart" style="height:260px;"></canvas>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3 style="margin:0 0 8px 0">Monthly Performance</h3>
+        <canvas id="byMonthChart"></canvas>
+      </div>
+
+      <div class="panel">
+        <h3 style="margin:0 0 8px 0">Trade History</h3>
+
+        <table class="table" id="tradeTable">
+          <thead>
+            <tr>
+              <th>Ticket</th><th>Symbol</th><th>Type</th><th>Lots</th><th>Open</th><th>Close</th><th>Profit</th>
+            </tr>
+          </thead>
+          <tbody id="tradeTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3 style="margin:0 0 8px 0">Risk Metrics</h3>
+        <div class="muted">Sharpe Ratio</div>
+        <div style="font-weight:700; margin:6px 0 12px 0" id="risk_sharpe">—</div>
+
+        <div class="muted">Average Win / Loss</div>
+        <div style="display:flex; gap:12px; margin-top:6px">
+          <div class="stat" style="flex:1">
+            <div class="label">Avg Win</div>
+            <div class="value" id="avg_win">—</div>
+          </div>
+          <div class="stat" style="flex:1">
+            <div class="label">Avg Loss</div>
+            <div class="value" id="avg_loss">—</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="muted">Largest Win</div>
+          <div style="font-weight:700" id="largest_win">—</div>
+          <div class="muted" style="margin-top:8px">Largest Loss</div>
+          <div style="font-weight:700" id="largest_loss">—</div>
+        </div>
+      </div>
+
+      <footer>File contoh — simpan sebagai <code>dashboard_forex.html</code> dan buka di browser.</footer>
+    </div>
+  </div>
+
+<script>
+/* ---------- DATA JSON (ditempel langsung) ---------- */
+const DATA = {
+  "account": {
+    "account_id": "ACC12345",
+    "broker": "ICMarkets",
+    "currency": "USD",
+    "balance": 10500.75,
+    "equity": 10420.30,
+    "total_deposit": 10000,
+    "total_withdrawal": 0,
+    "growth_percent": 5.0,
+    "total_trades": 120,
+    "win_rate": 62.5,
+    "profit_factor": 1.85,
+    "max_drawdown_percent": 12.3
+  },
+  "trades": [
+    {
+      "ticket": 1001,
+      "symbol": "EURUSD",
+      "type": "buy",
+      "lots": 0.5,
+      "open_time": "2025-08-01 10:15:00",
+      "close_time": "2025-08-01 14:20:00",
+      "open_price": 1.0950,
+      "close_price": 1.0980,
+      "stop_loss": 1.0920,
+      "take_profit": 1.1000,
+      "commission": -2.5,
+      "swap": 0.0,
+      "profit": 150.0
+    },
+    {
+      "ticket": 1002,
+      "symbol": "GBPJPY",
+      "type": "sell",
+      "lots": 0.3,
+      "open_time": "2025-08-02 09:00:00",
+      "close_time": "2025-08-02 11:10:00",
+      "open_price": 183.50,
+      "close_price": 184.20,
+      "stop_loss": 184.50,
+      "take_profit": 182.80,
+      "commission": -1.5,
+      "swap": -0.5,
+      "profit": -210.0
+    },
+    {
+      "ticket": 1003,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "lots": 0.1,
+      "open_time": "2025-08-03 08:30:00",
+      "close_time": "2025-08-03 15:45:00",
+      "open_price": 1920.5,
+      "close_price": 1934.0,
+      "stop_loss": 1910.0,
+      "take_profit": 1940.0,
+      "commission": -3.0,
+      "swap": 0.0,
+      "profit": 500.0
+    },
+    {
+      "ticket": 1004,
+      "symbol": "EURUSD",
+      "type": "sell",
+      "lots": 0.2,
+      "open_time": "2025-08-04 11:10:00",
+      "close_time": "2025-08-04 14:00:00",
+      "open_price": 1.1002,
+      "close_price": 1.0988,
+      "stop_loss": 1.1025,
+      "take_profit": 1.0970,
+      "commission": -1.8,
+      "swap": -0.2,
+      "profit": 28.0
+    },
+    {
+      "ticket": 1005,
+      "symbol": "GBPJPY",
+      "type": "buy",
+      "lots": 0.5,
+      "open_time": "2025-08-05 07:45:00",
+      "close_time": "2025-08-05 12:50:00",
+      "open_price": 182.10,
+      "close_price": 181.60,
+      "stop_loss": 183.50,
+      "take_profit": 180.50,
+      "commission": -3.0,
+      "swap": 0.0,
+      "profit": -250.0
+    }
+    /* NOTE:
+       Untuk contoh ringkas ini saya menggunakan 5 trade.
+       Di implementasi real: masukkan seluruh trades Anda di sini.
+    */
+  ],
+  "performance": {
+    "by_symbol": [
+      { "symbol": "EURUSD", "trades": 40, "win_rate": 70, "net_profit": 820.0 },
+      { "symbol": "GBPJPY", "trades": 30, "win_rate": 55, "net_profit": -320.0 },
+      { "symbol": "XAUUSD", "trades": 20, "win_rate": 65, "net_profit": 450.0 }
+    ],
+    "by_month": [
+      { "month": "2025-06", "trades": 50, "net_profit": 520.0 },
+      { "month": "2025-07", "trades": 40, "net_profit": -150.0 },
+      { "month": "2025-08", "trades": 30, "net_profit": 280.0 }
+    ],
+    "by_day_of_week": [
+      { "day": "Monday", "trades": 30, "win_rate": 60, "net_profit": 200.0 },
+      { "day": "Friday", "trades": 40, "win_rate": 65, "net_profit": 400.0 }
+    ]
+  },
+  "risk": {
+    "max_drawdown_percent": 12.3,
+    "average_loss": -95.5,
+    "average_win": 130.0,
+    "largest_win": 500.0,
+    "largest_loss": -350.0,
+    "sharpe_ratio": 1.2
+  }
+};
+
+/* ---------- UTIL & RENDER ---------- */
+
+function formatCurrency(n){
+  const v = Number(n) || 0;
+  return v.toLocaleString('en-US', {style:'currency', currency: DATA.account.currency, maximumFractionDigits:2});
+}
+function formatNumber(n, digits=2){ return (Number(n) || 0).toFixed(digits); }
+
+function renderAccount(){
+  const acc = DATA.account;
+  const meta = document.getElementById('accountMeta');
+  meta.innerHTML = `
+    <div class="row"><div class="muted">Account ID</div><div>${acc.account_id}</div></div>
+    <div class="row"><div class="muted">Broker</div><div>${acc.broker}</div></div>
+    <div class="row"><div class="muted">Balance / Equity</div><div class="big">${formatCurrency(acc.balance)} / ${formatCurrency(acc.equity)}</div></div>
+    <div class="row"><div class="muted">Total Deposit</div><div>${formatCurrency(acc.total_deposit)}</div></div>
+    <div class="row"><div class="muted">Growth</div><div>${formatNumber(acc.growth_percent,2)}%</div></div>
+  `;
+
+  document.getElementById('stat_total_trades').innerText = acc.total_trades;
+  document.getElementById('stat_win_rate').innerText = acc.win_rate + '%';
+  document.getElementById('stat_profit_factor').innerText = acc.profit_factor;
+  document.getElementById('stat_drawdown').innerText = acc.max_drawdown_percent + '%';
+
+  document.getElementById('legend_balance').innerText = `Balance: ${formatCurrency(acc.balance)}`;
+  document.getElementById('legend_equity').innerText = `Equity: ${formatCurrency(acc.equity)}`;
+  document.getElementById('legend_dd').innerText = `Max DD: ${acc.max_drawdown_percent}%`;
+}
+
+function renderLatestTrades(){
+  // show latest 5 by close_time
+  const arr = DATA.trades.slice().sort((a,b)=> new Date(b.close_time) - new Date(a.close_time)).slice(0,5);
+  const container = document.getElementById('latestTrades');
+  container.innerHTML = arr.map(t=>{
+    const sign = t.profit >=0 ? '+' : '';
+    return `<div style="padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.02)">
+      <div style="display:flex;justify-content:space-between">
+        <div><strong>${t.symbol}</strong> <span class="muted">(${t.type})</span></div>
+        <div style="font-weight:700">${sign}${formatNumber(t.profit,2)}</div>
+      </div>
+      <div class="muted" style="font-size:12px">${t.open_time} → ${t.close_time}</div>
+    </div>`;
+  }).join('');
+}
+
+/* Build cumulative equity series from trades (sorted by close_time) */
+function buildEquitySeries(initialBalance = DATA.account.total_deposit || DATA.account.balance){
+  // Use initialBalance as starting point, then apply profit of each trade in chronological order
+  const trades = DATA.trades.slice().sort((a,b)=> new Date(a.close_time) - new Date(b.close_time));
+  const labels = [];
+  const balanceSeries = [];
+  const drawdownSeries = [];
+  let bal = Number(initialBalance) || 0;
+  let peak = bal;
+  let maxDDPercent = 0;
+  for(const t of trades){
+    bal += Number(t.profit || 0);
+    labels.push(t.close_time.split(' ')[0] + ' ' + t.close_time.split(' ')[1].slice(0,5));
+    balanceSeries.push(Number(bal.toFixed(2)));
+    // drawdown
+    if(bal > peak) peak = bal;
+    const dd = (peak - bal) / peak * 100;
+    drawdownSeries.push(Number(dd.toFixed(2)));
+    if(dd > maxDDPercent) maxDDPercent = dd;
+  }
+  return {labels, balanceSeries, drawdownSeries, finalBalance: bal, maxDDPercent};
+}
+
+let equityChartInstance = null;
+let bySymbolChartInstance = null;
+let byMonthChartInstance = null;
+
+function renderEquityChart(){
+  const out = buildEquitySeries(DATA.account.total_deposit || DATA.account.balance);
+  const ctx = document.getElementById('equityChart');
+  if(equityChartInstance) equityChartInstance.destroy();
+
+  equityChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: out.labels,
+      datasets: [
+        {
+          label: 'Equity (simulated cumulative)',
+          data: out.balanceSeries,
+          tension: 0.18,
+          borderWidth: 2,
+          pointRadius: 2,
+          fill: true,
+          backgroundColor: getGradient(ctx, 'rgba(79,70,229,0.12)'),
+          borderColor: 'rgba(79,70,229,0.95)',
+        },
+        {
+          label: 'Drawdown %',
+          data: out.drawdownSeries,
+          type: 'line',
+          yAxisID: 'y2',
+          tension: 0.18,
+          borderWidth: 1.5,
+          borderDash: [4,4],
+          pointRadius: 0,
+          borderColor: 'rgba(220,38,38,0.9)',
+        }
+      ]
+    },
+    options: {
+      maintainAspectRatio:false,
+      interaction:{mode:'index', intersect:false},
+      plugins:{
+        legend:{display:true, labels:{color:'#cbd5e1'}},
+        tooltip:{mode:'index', intersect:false}
+      },
+      scales:{
+        x:{ ticks:{color:'#9aa6b2'} },
+        y:{ position:'left', ticks:{color:'#9aa6b2'} },
+        y2:{
+          position:'right',
+          ticks:{color:'#fca5a5'},
+          grid:{ drawOnChartArea:false },
+        }
+      }
+    }
+  });
+
+  document.getElementById('legend_balance').innerText = `Final Bal: ${formatCurrency(out.finalBalance)}`;
+  document.getElementById('legend_dd').innerText = `Max DD: ${out.maxDDPercent.toFixed(2)}%`;
+}
+
+/* simple gradient util */
+function getGradient(canvas, color) {
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createLinearGradient(0,0,0,300);
+  g.addColorStop(0, color);
+  g.addColorStop(1, 'rgba(255,255,255,0.0)');
+  return g;
+}
+
+function renderBySymbolChart(){
+  const data = DATA.performance.by_symbol || [];
+  const labels = data.map(d=>d.symbol);
+  const values = data.map(d=>d.net_profit);
+  const ctx = document.getElementById('bySymbolChart');
+  if(bySymbolChartInstance) bySymbolChartInstance.destroy();
+
+  bySymbolChartInstance = new Chart(ctx, {
+    type:'pie',
+    data:{
+      labels,
+      datasets:[{
+        data: values,
+        borderWidth:1
+      }]
+    },
+    options:{
+      plugins:{
+        legend:{position:'bottom', labels:{color:'#cbd5e1'}},
+        tooltip:{callbacks:{label: function(ctx){
+          return ctx.label + ': ' + ctx.formattedValue + ' ' + DATA.account.currency;
+        }}}
+      }
+    }
+  });
+}
+
+/* monthly bar chart */
+function renderByMonthChart(){
+  const data = DATA.performance.by_month || [];
+  const labels = data.map(d=>d.month);
+  const vals = data.map(d=>d.net_profit);
+  const ctx = document.getElementById('byMonthChart');
+  if(byMonthChartInstance) byMonthChartInstance.destroy();
+
+  byMonthChartInstance = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        label:'Net Profit',
+        data:vals,
+        borderRadius:6,
+        borderSkipped:false
+      }]
+    },
+    options:{
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label: function(ctx){
+        return ctx.formattedValue + ' ' + DATA.account.currency;
+      }}}},
+      scales:{
+        x:{ ticks:{color:'#9aa6b2'} },
+        y:{ ticks:{color:'#9aa6b2'} }
+      }
+    }
+  });
+}
+
+/* render trade table */
+function renderTradeTable(){
+  const body = document.getElementById('tradeTableBody');
+  const rows = DATA.trades.slice().sort((a,b)=> new Date(b.close_time) - new Date(a.close_time));
+  body.innerHTML = rows.map(t=>{
+    const profitClass = t.profit >= 0 ? 'color: #86efac' : 'color:#fda4af';
+    const sign = t.profit >=0 ? '+' : '';
+    return `<tr>
+      <td>${t.ticket}</td>
+      <td>${t.symbol}</td>
+      <td>${t.type}</td>
+      <td>${t.lots}</td>
+      <td class="muted">${t.open_time}</td>
+      <td class="muted">${t.close_time}</td>
+      <td style="${profitClass}; font-weight:700">${sign}${formatNumber(t.profit,2)}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* render risk panel */
+function renderRisk(){
+  const r = DATA.risk || {};
+  document.getElementById('risk_sharpe').innerText = (r.sharpe_ratio || '—');
+  document.getElementById('avg_win').innerText = formatCurrency(r.average_win || 0);
+  document.getElementById('avg_loss').innerText = formatCurrency(r.average_loss || 0);
+  document.getElementById('largest_win').innerText = formatCurrency(r.largest_win || 0);
+  document.getElementById('largest_loss').innerText = formatCurrency(r.largest_loss || 0);
+}
+
+/* kickoff */
+function init(){
+  renderAccount();
+  renderLatestTrades();
+  renderEquityChart();
+  renderBySymbolChart();
+  renderByMonthChart();
+  renderTradeTable();
+  renderRisk();
+}
+
+init();
+
+</script>
+</body>
+  </html>
