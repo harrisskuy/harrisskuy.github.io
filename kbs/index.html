@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Absensi</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #fff9c4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      text-align: center;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    header h2 {
+      margin: 0;
+      font-weight: bold;
+      font-size: 20px;
+    }
+    .profile {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #ccc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 10px;
+      color: red;
+      cursor: pointer;
+      text-align: center;
+    }
+    h1 {
+      margin: 10px 0;
+      font-size: 24px;
+    }
+    .date-time {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+    .btns {
+      display: flex;
+      justify-content: space-around;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 15px;
+      border-radius: 10px;
+      background: white;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      font-size: 16px;
+      transition: 0.2s;
+    }
+    .btn:hover {
+      background: #f0f0f0;
+    }
+    form {
+      text-align: left;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    select, input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px;
+      }
+      h1 {
+        font-size: 20px;
+      }
+      .btn {
+        font-size: 14px;
+        padding: 12px;
+      }
+      .profile {
+        width: 40px;
+        height: 40px;
+        font-size: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h2>ABSENSI</h2>
+      <div class="profile">foto<br>profil</div>
+    </header>
+
+    <h1 id="greeting">Selamat Pagi!</h1>
+    <div class="date-time" id="dateTime"></div>
+
+    <div class="btns">
+      <button class="btn" onclick="clockIn()">Clock In</button>
+      <button class="btn" onclick="clockOut()">Clock Out</button>
+    </div>
+
+    <form>
+      <label>Nama :</label>
+      <select id="nama">
+        <option>Alkham Rizky Fauzan</option>
+        <option>Febri</option>
+        <option>Aris</option>
+      </select>
+
+      <label>Penempatan :</label>
+      <select id="penempatan">
+        <option>Terminal Purabaya, BPN Sidoarjo</option>
+        <option>Surabaya</option>
+        <option>Gresik</option>
+      </select>
+
+      <label>Shift :</label>
+      <input type="text" id="shift" readonly>
+    </form>
+  </div>
+
+  <script>
+    function updateDateTime() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' };
+      const dateStr = now.toLocaleDateString('id-ID', options);
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('dateTime').innerText = `${dateStr} | ${timeStr} WIB`;
+
+      // update greeting
+      let hour = now.getHours();
+      let greet = "Selamat Pagi!";
+      if (hour >= 12 && hour < 15) greet = "Selamat Siang!";
+      else if (hour >= 15 && hour < 18) greet = "Selamat Sore!";
+      else if (hour >= 18) greet = "Selamat Malam!";
+      document.getElementById('greeting').innerText = greet;
+
+      // update shift
+      let shift = "";
+      if (hour >= 7 && hour < 15) shift = "Shift Pagi";
+      else if (hour >= 15 && hour < 23) shift = "Shift Sore";
+      else shift = "Shift Malam";
+      document.getElementById('shift').value = shift;
+    }
+
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    function clockIn() {
+      alert("Clock In berhasil pada " + new Date().toLocaleTimeString('id-ID'));
+    }
+    function clockOut() {
+      alert("Clock Out berhasil pada " + new Date().toLocaleTimeString('id-ID'));
+    }
+  </script>
+</body>
+</html>
