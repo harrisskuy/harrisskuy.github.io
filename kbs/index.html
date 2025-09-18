@@ -2,184 +2,204 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Absensi</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600&display=swap');
+
     body {
-      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      font-family: 'Nunito', sans-serif;
       background: #fff9c4;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 500px;
-      margin: auto;
-      padding: 20px;
-      text-align: center;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    header h2 {
-      margin: 0;
-      font-weight: bold;
-      font-size: 20px;
-    }
-    .profile {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: #fff;
-      border: 2px solid #ccc;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 10px;
-      color: red;
-      cursor: pointer;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 420px;
+      width: 100%;
+      background: #fff9c4;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       text-align: center;
+      animation: fadeSlide 1s ease forwards;
+      opacity: 0;
+      transform: translateY(30px);
+      position: relative;
+    }
+    @keyframes fadeSlide {
+      to { opacity: 1; transform: translateY(0); }
     }
     h1 {
-      margin: 10px 0;
-      font-size: 24px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.8rem;
+      margin: 10px 0 0 0;
     }
     .date-time {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 20px;
+      font-size: 0.9rem;
+      margin: 5px 0 20px 0;
+      color: #333;
     }
-    .btns {
+    .buttons {
       display: flex;
-      justify-content: space-around;
-      gap: 15px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      margin: 20px 0;
+      gap: 10px;
     }
     .btn {
       flex: 1;
-      min-width: 120px;
-      padding: 15px;
+      background: #fff;
+      border: 2px solid #333;
       border-radius: 10px;
-      background: white;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-      font-weight: bold;
-      cursor: pointer;
-      border: none;
-      font-size: 16px;
-      transition: 0.2s;
-    }
-    .btn:hover {
-      background: #f0f0f0;
-    }
-    form {
-      text-align: left;
-    }
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    select, input {
-      width: 100%;
       padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-top: 5px;
-      font-size: 14px;
-      box-sizing: border-box;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
-
-    /* RESPONSIVE */
+    .btn img { width: 50px; height: 50px; margin-bottom: 5px; }
+    .btn:hover { background: #f1f1f1; transform: translateY(-3px); }
+    label { display: block; text-align: left; font-weight: 600; margin: 10px 0 5px; }
+    select, input {
+      width: 100%; padding: 10px; border: 2px solid #ccc; border-radius: 8px; font-size: 1rem;
+    }
+    .profile {
+      width: 60px; height: 60px; border-radius: 50%; background: #fff; border: 2px solid #ccc;
+      position: absolute; right: 20px; top: 20px; object-fit: cover;
+    }
     @media (max-width: 480px) {
-      .container {
-        padding: 15px;
-      }
-      h1 {
-        font-size: 20px;
-      }
-      .btn {
-        font-size: 14px;
-        padding: 12px;
-      }
-      .profile {
-        width: 40px;
-        height: 40px;
-        font-size: 8px;
-      }
+      .buttons { flex-direction: column; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <h2>ABSENSI</h2>
-      <div class="profile">foto<br>profil</div>
-    </header>
-
-    <h1 id="greeting">Selamat Pagi!</h1>
+    <img src="https://via.placeholder.com/60" alt="profile" class="profile">
+    <h2 style="text-align:left; margin:0;">ABSENSI</h2>
+    <h1>Selamat Pagi!</h1>
     <div class="date-time" id="dateTime"></div>
 
-    <div class="btns">
-      <button class="btn" onclick="clockIn()">Clock In</button>
-      <button class="btn" onclick="clockOut()">Clock Out</button>
+    <div class="buttons">
+      <div class="btn" onclick="setShift('in')">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828817.png" alt="Clock In">
+        Clock In
+      </div>
+      <div class="btn" onclick="setShift('out')">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828945.png" alt="Clock Out">
+        Clock Out
+      </div>
     </div>
 
     <form>
-      <label>Nama :</label>
+      <label for="nama">Nama :</label>
       <select id="nama">
+        <option value="">-- Pilih Nama --</option>
         <option>Alkham Rizky Fauzan</option>
-        <option>Febri</option>
-        <option>Aris</option>
+        <option>Febrianto</option>
+        <option>Aris Santoso</option>
       </select>
 
-      <label>Penempatan :</label>
+      <label for="penempatan">Penempatan :</label>
       <select id="penempatan">
-        <option>Terminal Purabaya, BPN Sidoarjo</option>
-        <option>Surabaya</option>
-        <option>Gresik</option>
+        <option value="">-- Pilih Penempatan --</option>
+        <option>Terminal Purabaya</option>
+        <option>Terminal Joyoboyo</option>
+        <option>Terminal Bungurasih</option>
       </select>
 
-      <label>Shift :</label>
-      <input type="text" id="shift" readonly>
+      <label for="shift">Shift :</label>
+      <input type="text" id="shift" readonly placeholder="Klik Clock In / Out">
     </form>
   </div>
 
   <script>
+    // GANTI INI DENGAN PUNYA ANDA
+    const BOT_TOKEN = "8389980675:AAFhxLsTZINSlOucEbKKGLFzH1ZMnHQl5o4"; 
+    const CHAT_ID = "5934666948"; 
+
     function updateDateTime() {
       const now = new Date();
-      const options = { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' };
-      const dateStr = now.toLocaleDateString('id-ID', options);
-      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-      document.getElementById('dateTime').innerText = `${dateStr} | ${timeStr} WIB`;
+      const days = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+      const day = days[now.getDay()];
+      const date = now.toLocaleDateString('id-ID');
+      const time = now.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+      document.getElementById("dateTime").innerText = `${day}, ${date} | ${time} WIB`;
+    }
 
-      // update greeting
-      let hour = now.getHours();
-      let greet = "Selamat Pagi!";
-      if (hour >= 12 && hour < 15) greet = "Selamat Siang!";
-      else if (hour >= 15 && hour < 18) greet = "Selamat Sore!";
-      else if (hour >= 18) greet = "Selamat Malam!";
-      document.getElementById('greeting').innerText = greet;
-
-      // update shift
+    function setShift(type) {
+      const now = new Date();
+      const hour = now.getHours();
+      const minute = now.getMinutes();
+      const totalMinutes = hour * 60 + minute;
       let shift = "";
-      if (hour >= 7 && hour < 15) shift = "Shift Pagi";
-      else if (hour >= 15 && hour < 23) shift = "Shift Sore";
-      else shift = "Shift Malam";
-      document.getElementById('shift').value = shift;
+
+      if(type === 'in'){ 
+        if(totalMinutes >= 240 && totalMinutes < 840){ shift = "Pagi"; }
+        else if(totalMinutes >= 660 && totalMinutes < 1320){ shift = "Siang"; }
+        else { shift = "Break"; }
+      } else { 
+        if(totalMinutes >= 840 && totalMinutes < 960){ shift = "Pagi"; }
+        else if(totalMinutes >= 1320 || totalMinutes < 0){ shift = "Siang"; }
+        else { shift = "Di luar jam clock out"; }
+      }
+
+      document.getElementById("shift").value = shift;
+      sendToTelegram(type, shift);
     }
 
-    setInterval(updateDateTime, 1000);
+    function sendToTelegram(type, shift) {
+      const nama = document.getElementById("nama").value || "-";
+      const penempatan = document.getElementById("penempatan").value || "-";
+      const now = new Date();
+
+      const tanggal = now.toLocaleDateString("id-ID"); 
+      const jam = now.toLocaleTimeString("id-ID", {hour12: false}); 
+
+      const judul = type === "in" ? "✅ Absensi Masuk" : "✅ Absensi Pulang";
+
+      const pesan = `${judul}
+〰️〰️〰〰〰〰〰〰〰〰
+
+👤 Nama : ${nama}
+📍 Lokasi : ${penempatan}
+📅 Tanggal : ${tanggal}
+⏰ Jam : ${jam}
+📜 Shift : ${shift}
+
+〰️〰️〰〰〰〰〰〰〰〰
+
+🌴 Terimakasih!`;
+
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: pesan
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data.ok){
+          alert("✅ Absensi terkirim ke Telegram!");
+        } else {
+          alert("❌ Gagal mengirim ke Telegram");
+          console.error(data);
+        }
+      })
+      .catch(err => {
+        alert("⚠️ Error koneksi ke Telegram");
+        console.error(err);
+      });
+    }
+
     updateDateTime();
-
-    function clockIn() {
-      alert("Clock In berhasil pada " + new Date().toLocaleTimeString('id-ID'));
-    }
-    function clockOut() {
-      alert("Clock Out berhasil pada " + new Date().toLocaleTimeString('id-ID'));
-    }
+    setInterval(updateDateTime, 60000);
   </script>
 </body>
 </html>
