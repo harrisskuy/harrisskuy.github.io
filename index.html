@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PIXEL ACTIVITY SYSTEM (PAS-87)</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================================================
+           1. RESET & CSS VARIABLES (RETRO CYBERPUNK THEME)
+           ========================================================================== */
+        :root {
+            --bg-color: #0a0a0f;
+            --terminal-dark: #050508;
+            --neon-cyan: #00f0ff;
+            --neon-green: #39ff14;
+            --neon-magenta: #ff0055;
+            --text-white: #ffffff;
+            --pixel-border: 4px solid #00f0ff;
+            --font-pixel: 'Press Start 2P', monospace;
+            --font-terminal: 'VT323', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: var(--font-terminal);
+            color: var(--text-white);
+            font-size: 18px;
+        }
+
+        /* ==========================================================================
+           2. CRT EFFECT, SCANLINES, AND NOISE OVERLAYS
+           ========================================================================== */
+        .crt-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 6px 100%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .crt-overlay::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: rgba(18, 16, 16, 0.1);
+            opacity: 0;
+            z-index: 9999;
+            pointer-events: none;
+            animation: crt-flicker 0.15s infinite;
+        }
+
+        @keyframes crt-flicker {
+            0% { opacity: 0.27861; }
+            50% { opacity: 0.22; }
+            100% { opacity: 0.25148; }
+        }
+
+        .scanline {
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(to bottom, rgba(0, 240, 255, 0), rgba(0, 240, 255, 0.08) 50%, rgba(0, 240, 255, 0));
+            position: absolute;
+            top: -100px;
+            left: 0;
+            z-index: 10;
+            pointer-events: none;
+            animation: scanline-move 6s linear infinite;
+        }
+
+        @keyframes scanline-move {
+            0% { top: -100px; }
+            100% { top: 100%; }
+        }
+
+        /* ==========================================================================
+           3. RETRO BOOTING LAYER
+           ========================================================================== */
+        #boot-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--terminal-dark);
+            z-index: 10000;
+            padding: 20px;
+            font-family: var(--font-terminal);
+            color: var(--neon-green);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow-y: hidden;
+        }
+
+        /* ==========================================================================
+           4. MAIN INTERFACE STRUCTURE (PIXEL DESIGN)
+           ========================================================================== */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* HEADER LOGIC */
+        header {
+            background-color: var(--terminal-dark);
+            border-bottom: 4px solid var(--neon-cyan);
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 4px 10px rgba(0, 240, 255, 0.3);
+            z-index: 100;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: var(--font-pixel);
+            font-size: 11px;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 5px var(--neon-cyan);
+        }
+
+        .sys-status-container {
+            display: flex;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .badge {
+            padding: 2px 6px;
+            border: 2px solid;
+            font-weight: bold;
+            background: #000;
+            text-transform: uppercase;
+        }
+        .badge-online { border-color: var(--neon-green); color: var(--neon-green); }
+        .badge-offline { border-color: var(--neon-magenta); color: var(--neon-magenta); }
+        .badge-gps { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+
+        .header-bottom {
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            color: #888;
+            border-top: 1px dashed #333;
+            padding-top: 4px;
+        }
+
+        /* CAMERA & PREVIEW VIEWPORT */
+        .viewport-container {
+            flex: 1;
+            position: relative;
+            background-color: #000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #camera-stream, #captured-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(1); /* Default back camera */
+        }
+
+        #captured-preview {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; z-index: 50;
+        }
+
+        /* PIXEL OVERLAY GRID SYSTEM */
+        .pixel-grid-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .camera-crosshair {
+            position: absolute;
+            width: 40px; height: 40px;
+            border: 2px solid rgba(0, 240, 255, 0.4);
+            pointer-events: none;
+            z-index: 6;
+        }
+        .camera-crosshair::before {
+            content: ''; position: absolute; top: 50%; left: -10px; right: -10px; height: 2px; background: rgba(0,240,255,0.2);
+        }
+        .camera-crosshair::after {
+            content: ''; position: absolute; left: 50%; top: -10px; bottom: -10px; width: 2px; background: rgba(0,240,255,0.2);
+        }
+
+        /* WATERMARK LIVE OVERLAY (VISUAL ONLY) */
+        .live-watermark {
+            position: absolute;
+            bottom: 15px; left: 15px; right: 15px;
+            background: rgba(0, 0, 0, 0.65);
+            border-left: 4px solid var(--neon-cyan);
+            padding: 8px;
+            font-family: var(--font-terminal);
+            font-size: 16px;
+            line-height: 1.3;
+            color: #fff;
+            pointer-events: none;
+            z-index: 20;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* BOTTOM NAV BAR & PIXEL BUTTONS */
+        .control-panel {
+            background-color: var(--terminal-dark);
+            border-top: 4px solid var(--neon-cyan);
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .btn-pixel {
+            font-family: var(--font-pixel);
+            font-size: 11px;
+            padding: 12px 16px;
+            background-color: #000;
+            color: var(--neon-cyan);
+            border: 4px solid var(--neon-cyan);
+            cursor: pointer;
+            position: relative;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 4px 4px 0px rgba(0,240,255,0.3);
+            transition: all 0.1s ease;
+        }
+        .btn-pixel:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px rgba(0,240,255,0);
+        }
+        .btn-pixel:disabled {
+            border-color: #444;
+            color: #444;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-capture {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            box-shadow: 4px 4px 0px rgba(57,255,20,0.3);
+            padding: 16px 20px;
+            font-size: 13px;
+        }
+
+        .btn-danger {
+            border-color: var(--neon-magenta);
+            color: var(--neon-magenta);
+            box-shadow: 4px 4px 0px rgba(255,0,85,0.3);
+        }
+
+        /* UI SUB-GROUPS */
+        .mode-group {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+        }
+        #capture-controls { display: flex; }
+        #preview-controls { display: none; }
+
+        /* MODAL / NOTIFICATION OVERLAY */
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5,5,8,0.9);
+            z-index: 999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--font-pixel);
+            font-size: 14px;
+            color: var(--neon-cyan);
+        }
+
+        .pixel-spinner {
+            width: 48px; height: 48px;
+            border: 6px solid #000;
+            border-top-color: var(--neon-cyan);
+            border-bottom-color: var(--neon-cyan);
+            animation: spin 0.8s steps(4) infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* CONFIG MODAL FOR TESTING */
+        .config-trigger {
+            position: absolute; top: 8px; right: 8px;
+            background: none; border: none; color: #444;
+            font-size: 10px; cursor: pointer; z-index: 105;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="crt-overlay"></div>
+
+    <div id="boot-screen">
+        <div id="boot-log"></div>
+    </div>
+
+    <div id="loading-overlay">
+        <div class="pixel-spinner"></div>
+        <div id="loading-text">PROCESSING...</div>
+    </div>
+
+    <div class="app-container">
+        
+        <header>
+            <div class="header-top">
+                <div class="logo">PAS-87 // SYS_ACTIVE</div>
+                <div class="sys-status-container">
+                    <div id="net-status" class="badge badge-online">ONLINE</div>
+                    <div id="gps-status" class="badge badge-gps">GPS: ACQ</div>
+                </div>
+            </div>
+            <div class="header-bottom">
+                <div>SYS_OP: <span id="user-display" style="color:var(--neon-cyan)">LOADING</span></div>
+                <div id="live-clock">00:00:00</div>
+            </div>
+        </header>
+
+        <div class="viewport-container">
+            <div class="scanline"></div>
+            <div class="pixel-grid-overlay"></div>
+            <div class="camera-crosshair"></div>
+            
+            <video id="camera-stream" autoplay playsinline></video>
+            <img id="captured-preview" alt="Preview Image Asset">
+
+            <div class="live-watermark" id="wm-overlay-text">
+                INITIALIZING WATERMARK ENGINE...
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div id="capture-controls" class="mode-group">
+                <button class="btn-pixel" id="btn-switch">SWITCH</button>
+                <button class="btn-pixel btn-capture" id="btn-capture">CAPTURE</button>
+                <button class="btn-pixel" id="btn-config" style="font-size:8px;">CONFIG</button>
+            </div>
+            
+            <div id="preview-controls" class="mode-group">
+                <button class="btn-pixel btn-danger" id="btn-retake">RETAKE</button>
+                <button class="btn-pixel btn-capture" id="btn-upload">UPLOAD</button>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="processing-canvas" style="display:none;"></canvas>
+
+    <script>
+        /**
+         * ==========================================================================
+         * APPLICATION CONFIGURATION & STATE STORAGE
+         * ==========================================================================
+         */
+        // MASUKKAN TELEGRAM CREDENTIALS DI SINI
+        const BOT_TOKEN = "ISI_BOT_TOKEN"; 
+        const CHAT_ID = "ISI_CHAT_ID";
+
+        const CONFIG = {
+            botToken: BOT_TOKEN,
+            chatId: CHAT_ID,
+            imageMaxWeight: 512000, // 500KB Max
+            targetWidth: 1020,     // Optimal High-Res Downscale Size
+            targetHeight: 1280
+        };
+
+        const APP_STATE = {
+            currentStream: null,
+            facingMode: 'environment', // Default ke Kamera Belakang
+            currentGeo: { lat: "0.0000", lon: "0.0000", accuracy: 0, isFake: false },
+            username: "BUDI",
+            activityCounter: parseInt(localStorage.getItem('pas_act_count') || '1'),
+            currentSessionId: Math.random().toString(36).substring(2, 10).toUpperCase(),
+            activeBlob: null,
+            isProcessing: false,
+            db: null
+        };
+
+        // Anti Spam Lock Variable
+        let lastCaptureTime = 0;
+
+        /**
+         * ==========================================================================
+         * BOOTING SEQUENCE ENGINE (SIMULATION)
+         * ==========================================================================
+         */
+        const bootLog = document.getElementById('boot-log');
+        const bootLines = [
+            "CORE::INITIALIZING PIXEL ACTIVITY SYSTEM (PAS-87)...",
+            "SYS::INJECTING ANTI-GALLERY STORAGE GUARD...",
+            "STORAGE::VOLATILE RUNTIME MEMORY ALLOCATED [OK]",
+            "SECURITY::DISABLING CONSOLE INSPECTOR SHUTDOWN ROUTINE...",
+            "NET::ESTABLISHING SECURE PIPELINE TO TELEGRAM NODE...",
+            "HARDWARE::LOCATING AND ACQUIRING CAMERA ARRAYS...",
+            "GPS::SYNCHRONIZING ORBITAL GEOLOCATION BEACONS...",
+            "SUCCESS::SYSTEM BOOT COMPLETED. ENTERING INTERFACE..."
+        ];
+
+        function runBootingSequence() {
+            let idx = 0;
+            function printLine() {
+                if(idx < bootLines.length) {
+                    const p = document.createElement('p');
+                    p.innerHTML = `> ${bootLines[idx]}`;
+                    bootLog.appendChild(p);
+                    idx++;
+                    setTimeout(printLine, Math.random() * 200 + 100);
+                } else {
+                    setTimeout(() => {
+                        document.getElementById('boot-screen').style.display = 'none';
+                        initializeApplicationCore();
+                    }, 600);
+                }
+            }
+            printLine();
+        }
+
+        /**
+         * ==========================================================================
+         * CORE SECURITY ARMORED PROTOCOLS
+         * ==========================================================================
+         */
+        function deploySecurityShields() {
+            // Disable Klik Kanan Context Menu
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            
+            // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+            document.addEventListener('keydown', e => {
+                if (e.keyCode === 123 || 
+                    (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || 
+                    (e.ctrlKey && e.keyCode === 85)) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        }
+
+        /**
+         * ==========================================================================
+         * INDEXED DB ARCHITECTURE (OFFLINE TEMPORARY QUEUE SYSTEM)
+         * ==========================================================================
+         */
+        function initOfflineDatabase() {
+            return new Promise((resolve) => {
+                const request = indexedDB.open("PAS_VolatileDB", 1);
+                request.onupgradeneeded = (e) => {
+                    let db = e.target.result;
+                    if(!db.objectStoreNames.contains("uploadQueue")) {
+                        db.createObjectStore("uploadQueue", { keyPath: "id", autoIncrement: true });
+                    }
+                };
+                request.onsuccess = (e) => {
+                    APP_STATE.db = e.target.result;
+                    resolve();
+                };
+                request.onerror = () => {
+                    console.error("DB Initialization Failed. Running fallback temporary memory stack.");
+                    resolve();
+                };
+            });
+        }
+
+        function queueOfflineActivity(data) {
+            if(!APP_STATE.db) return;
+            const transaction = APP_STATE.db.transaction(["uploadQueue"], "readwrite");
+            const store = transaction.objectStore("uploadQueue");
+            store.add(data);
+        }
+
+        function processOfflineQueue() {
+            if(!navigator.onLine || !APP_STATE.db) return;
+            
+            const transaction = APP_STATE.db.transaction(["uploadQueue"], "readwrite");
+            const store = transaction.objectStore("uploadQueue");
+            const request = store.openCursor();
+
+            request.onsuccess = async (e) => {
+                const cursor = e.target.result;
+                if (cursor) {
+                    const record = cursor.value;
+                    const success = await transmitDataToTelegramDirectly(record.blob, record.caption);
+                    if(success) {
+                        cursor.delete();
+                        showNotification("QUEUE TRANSMITTED SUCCESSFULLY!");
+                    }
+                    cursor.continue();
+                }
+            };
+        }
+
+        /**
+         * ==========================================================================
+         * SUBSYSTEM ENGINE (CLOCK, GEOLOCATION, FACE DETECTION STATUS)
+         * ==========================================================================
+         */
+        function startLiveClock() {
+            const clockEl = document.getElementById('live-clock');
+            setInterval(() => {
+                const now = new Date();
+                clockEl.innerText = now.toLocaleTimeString('id-ID');
+                updateLiveWatermarkText();
+            }, 1000);
+        }
+
+        function startGeolocationTracking() {
+            const gpsBadge = document.getElementById('gps-status');
+            if (!navigator.geolocation) {
+                gpsBadge.innerText = "GPS: NO_SUP";
+                gpsBadge.className = "badge badge-offline";
+                return;
+            }
+
+            const options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
+            
+            navigator.geolocation.watchPosition(
+                (pos) => {
+                    APP_STATE.currentGeo.lat = pos.coords.latitude.toFixed(4);
+                    APP_STATE.currentGeo.lon = pos.coords.longitude.toFixed(4);
+                    APP_STATE.currentGeo.accuracy = pos.coords.accuracy;
+                    
+                    // Deteksi Fake GPS Sederhana (Akurasi Terlalu Sempurna 0m atau Kecepatan Mustahil)
+                    if(pos.coords.accuracy === 0) {
+                        APP_STATE.currentGeo.isFake = true;
+                    }
+
+                    gpsBadge.innerText = APP_STATE.currentGeo.isFake ? "GPS: FAKE!" : "GPS: LOCK";
+                    gpsBadge.className = APP_STATE.currentGeo.isFake ? "badge badge-offline" : "badge badge-gps";
+                    updateLiveWatermarkText();
+                },
+                (err) => {
+                    gpsBadge.innerText = "GPS: WARN";
+                    gpsBadge.className = "badge badge-offline";
+                }, 
+                options
+            );
+        }
+
+        function generateActivityID() {
+            const now = new Date();
+            const dateStr = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+            const padCounter = String(APP_STATE.activityCounter).padStart(4, '0');
+            return `ACT-${dateStr}-${padCounter}`;
+        }
+
+        function updateLiveWatermarkText() {
+            const overlay = document.getElementById('wm-overlay-text');
+            const now = new Date();
+            const timeStr = now.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'}) + " " + now.toLocaleTimeString('id-ID');
+            
+            overlay.innerHTML = `
+                PIXEL ACTIVITY SYSTEM v1.87<br>
+                ${timeStr}<br>
+                COORDS: ${APP_STATE.currentGeo.lat}, ${APP_STATE.currentGeo.lon}<br>
+                OPERATOR: USER-${APP_STATE.username}<br>
+                NET: ${navigator.onLine ? "ONLINE" : "OFFLINE"}<br>
+                ID: ${generateActivityID()}
+            `;
+        }
+
+        /**
+         * ==========================================================================
+         * CAMERA HARDWARE MANAGEMENT
+         * ==========================================================================
+         */
+        async function startCameraHardware() {
+            if (APP_STATE.currentStream) {
+                APP_STATE.currentStream.getTracks().forEach(track => track.stop());
+            }
+
+            const videoConstraints = {
+                facingMode: APP_STATE.facingMode,
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            };
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+                APP_STATE.currentStream = stream;
+                const videoEl = document.getElementById('camera-stream');
+                videoEl.srcObject = stream;
+                
+                // Mirroring effect jika menggunakan kamera depan
+                if(APP_STATE.facingMode === 'user') {
+                    videoEl.style.transform = "scaleX(-1)";
+                } else {
+                    videoEl.style.transform = "scaleX(1)";
+                }
+            } catch (err) {
+                alert("Gagal mengakses kamera internal: " + err.message);
+            }
+        }
+
+        /**
+         * ==========================================================================
+         * PROCESSING ENGINE (CAPTURE, WATERMARK BURN, & NATIVE COMPRESSION)
+         * ==========================================================================
+         */
+        async function runCaptureEngine() {
+            // Anti-Spam Barrier
+            const nowTime = Date.now();
+            if(nowTime - lastCaptureTime < 2000) return;
+            lastCaptureTime = nowTime;
+
+            toggleSpinner(true, "CAPTURING IMAGE DATA...");
+
+            const video = document.getElementById('camera-stream');
+            const canvas = document.getElementById('processing-canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Setup Dimensi Canvas Sesuai Target Kompresi Rasio
+            canvas.width = CONFIG.targetWidth;
+            canvas.height = CONFIG.targetHeight;
+
+            // Render Frame Video ke Canvas Sementara
+            ctx.save();
+            if(APP_STATE.facingMode === 'user') {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+            
+            // Hitung Crop Center Cover Object Fit Matrix
+            let videoWidth = video.videoWidth;
+            let videoHeight = video.videoHeight;
+            let targetRatio = canvas.width / canvas.height;
+            let sourceRatio = videoWidth / videoHeight;
+            let sx, sy, sw, sh;
+
+            if (sourceRatio > targetRatio) {
+                sh = videoHeight;
+                sw = videoHeight * targetRatio;
+                sx = (videoWidth - sw) / 2;
+                sy = 0;
+            } else {
+                sw = videoWidth;
+                sh = videoWidth / targetRatio;
+                sx = 0;
+                sy = (videoHeight - sh) / 2;
+            }
+
+            ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
+
+            // LAKUKAN SIMULASI/EKSEKUSI NATIVE FACE DETECTION JIKA DUKUNGAN TERSEDIA
+            let faceWarningText = "";
+            if ('FaceDetector' in window) {
+                try {
+                    const detector = new FaceDetector({ maxDetectedFaces: 5, fastMode: true });
+                    const faces = await detector.detect(canvas);
+                    if(faces.length === 0) {
+                        faceWarningText = " [WARNING: NO FACE DETECTED]";
+                    }
+                } catch(e) { console.log("Face detector working fault ignored."); }
+            }
+
+            // BURN WATERMARK SECARA PERMANEN KE DALAM CANVAS ALIRAN DATA RAM
+            const wmBoxHeight = 180;
+            ctx.fillStyle = "rgba(5, 5, 8, 0.75)";
+            ctx.fillRect(0, canvas.height - wmBoxHeight, canvas.width, wmBoxHeight);
+            
+            // Border Aksentuasi Cyan Pixel Style
+            ctx.fillStyle = "#00f0ff";
+            ctx.fillRect(0, canvas.height - wmBoxHeight, 12, wmBoxHeight);
+
+            // Tulis Teks Data ke Gambar Termatrikulasi
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "24px 'Courier New', Courier, monospace"; // Fallback aman teks pixel canvas
+            
+            const timestamp = new Date().toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'}) + " " + new Date().toLocaleTimeString('id-ID');
+            const currentActID = generateActivityID();
+
+            let textLines = [
+                `SYSTEM: PIXEL ACTIVITY SYSTEM OVERLAY ENGINE v1.87`,
+                `TIMESTAMP: ${timestamp}${faceWarningText}`,
+                `COORDINATES: ${APP_STATE.currentGeo.lat}, ${APP_STATE.currentGeo.lon} (ACCURACY: ${APP_STATE.currentGeo.accuracy}m)`,
+                `OPERATOR DATA: USER-${APP_STATE.username} // ID: ${currentActID}`,
+                `SECURE PLATFORM STATUS: ${navigator.onLine ? "ONLINE_PIPELINE" : "LOCAL_VOLATILE_QUEUE"}`
+            ];
+
+            textLines.forEach((line, index) => {
+                ctx.fillText(line.toUpperCase(), 30, (canvas.height - wmBoxHeight) + 35 + (index * 30));
+            });
+
+            // KONVERSI CANVAS KE BLOB SECARA IN-MEMORY (COMPRESSION PROTOCOL)
+            let quality = 0.85;
+            let blobData = null;
+            
+            // Looping kompresi adaptif untuk memastikan ukuran di bawah 500KB
+            do {
+                blobData = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+                quality -= 0.1;
+            } while (blobData.size > CONFIG.imageMaxWeight && quality > 0.3);
+
+            APP_STATE.activeBlob = blobData;
+
+            // Set ke Elemen Preview Gambar via ObjectURL Sementara Memory RAM
+            const previewImg = document.getElementById('captured-preview');
+            const objectURL = URL.createObjectURL(blobData);
+            previewImg.src = objectURL;
+
+            // Switch Tampilan UI ke Preview Panel Mode
+            document.getElementById('camera-stream').style.display = 'none';
+            previewImg.style.display = 'block';
+            document.getElementById('capture-controls').style.display = 'none';
+            document.getElementById('preview-controls').style.display = 'flex';
+
+            toggleSpinner(false);
+        }
+
+        function runRetakeEngine() {
+            const previewImg = document.getElementById('captured-preview');
+            
+            // Hapus Dan Bebaskan Alokasi Objek URL Dari Memory Browser Detik Ini Juga
+            if(previewImg.src.startsWith('blob:')) {
+                URL.revokeObjectURL(previewImg.src);
+            }
+            
+            previewImg.src = "";
+            previewImg.style.display = 'none';
+            
+            // Hapus Pointer Variabel Blob Untuk GC (Garbage Collection)
+            APP_STATE.activeBlob = null;
+
+            document.getElementById('camera-stream').style.display = 'block';
+            document.getElementById('capture-controls').style.display = 'flex';
+            document.getElementById('preview-controls').style.display = 'none';
+        }
+
+        /**
+         * ==========================================================================
+         * TRANSMISSION GATEWAY NETWORKING ENGINE (TELEGRAM INTERACTION)
+         * ==========================================================================
+         */
+        async function transmitDataToTelegramDirectly(blob, captionText) {
+            if(CONFIG.botToken === "ISI_BOT_TOKEN" || CONFIG.chatId === "ISI_CHAT_ID") {
+                alert("Pengiriman dibatalkan. Konfigurasi BOT_TOKEN / CHAT_ID Telegram belum diisi!");
+                return false;
+            }
+
+            const formData = new FormData();
+            formData.append('chat_id', CONFIG.chatId);
+            formData.append('photo', blob, 'activity_pixel.jpg');
+            formData.append('caption', captionText);
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${CONFIG.botToken}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+                return response.ok;
+            } catch (err) {
+                console.error("Transmission fault network error:", err);
+                return false;
+            }
+        }
+
+        async function processUploadWorkflow() {
+            if(!APP_STATE.activeBlob) return;
+
+            toggleSpinner(true, "TRANSMITTING DATA STREAM...");
+            const currentActID = generateActivityID();
+
+            const caption = `
+===== PIXEL ACTIVITY REPORT =====
+ID: ${currentActID}
+USER: ${APP_STATE.username}
+TIME: ${new Date().toLocaleString('id-ID')}
+GPS: ${APP_STATE.currentGeo.lat}, ${APP_STATE.currentGeo.lon}
+SESSION_ID: ${APP_STATE.currentSessionId}
+STATUS: ${navigator.onLine ? "DIRECT_UPLOAD" : "OFFLINE_QUEUED"}
+=================================
+`;
+
+            if (navigator.onLine) {
+                const isSuccess = await transmitDataToTelegramDirectly(APP_STATE.activeBlob, caption);
+                if (isSuccess) {
+                    showNotification("TRANSMISSION SUCCESSFUL!");
+                    finalizeSuccessfulActivity();
+                } else {
+                    showNotification("BROKER ERROR! SAVING TO OFFLINE QUEUE.");
+                    saveToQueueLocalStorageFallback(caption);
+                }
+            } else {
+                showNotification("NO CARRIER CONNECTED! QUEUED LOCALLY.");
+                saveToQueueLocalStorageFallback(caption);
+            }
+        }
+
+        function saveToQueueLocalStorageFallback(caption) {
+            // Fallback structural jika IndexedDB gagal, simpan format base64 terenkapsulasi ke queue offline
+            const reader = new FileReader();
+            reader.readAsDataURL(APP_STATE.activeBlob);
+            reader.onloadend = function() {
+                const base64data = reader.result;
+                const queueItem = {
+                    id: Date.now(),
+                    blobAsBase64: base64data,
+                    caption: caption
+                };
+                
+                // Masukkan ke array localStorage
+                let currentQueue = JSON.parse(localStorage.getItem('pas_offline_queue') || '[]');
+                currentQueue.push(queueItem);
+                localStorage.setItem('pas_offline_queue', JSON.stringify(currentQueue));
+                
+                finalizeSuccessfulActivity();
+            }
+        }
+
+        function finalizeSuccessfulActivity() {
+            // Increment ID transaksi internal
+            APP_STATE.activityCounter++;
+            localStorage.setItem('pas_act_count', APP_STATE.activityCounter.toString());
+
+            // RESET MEMORY TOTAL - ANTI FILE TRACE AT STORAGE
+            const canvas = document.getElementById('processing-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Sapu Canvas Bersih
+
+            runRetakeEngine();
+            toggleSpinner(false);
+        }
+
+        /**
+         * ==========================================================================
+         * BACKGROUND AUTOMATIC SYNC MANAGER FOR LOCAL QUEUE
+         * ==========================================================================
+         */
+        async function processLocalStorageOfflineQueueSync() {
+            if(!navigator.onLine) return;
+            let currentQueue = JSON.parse(localStorage.getItem('pas_offline_queue') || '[]');
+            if(currentQueue.length === 0) return;
+
+            showNotification(`SYNCING ${currentQueue.length} COLD DATA PACKETS...`);
+
+            let remainingQueue = [];
+
+            for(let item of currentQueue) {
+                // Convert Base64 back to pure Volatile Blob Asset
+                const response = await fetch(item.blobAsBase64);
+                const blob = await response.blob();
+                
+                const success = await transmitDataToTelegramDirectly(blob, item.caption);
+                if(!success) {
+                    remainingQueue.push(item); // Masukkan kembali jika gagal kirim ulang
+                }
+            }
+
+            localStorage.setItem('pas_offline_queue', JSON.stringify(remainingQueue));
+            if(remainingQueue.length === 0) {
+                showNotification("ALL OFFLINE QUEUE SYNCED!");
+            }
+        }
+
+        /**
+         * ==========================================================================
+         * UI REFRESH AND UTILITY HOOKS
+         * ==========================================================================
+         */
+        function toggleSpinner(show, text = "PROCESSING...") {
+            const overlay = document.getElementById('loading-overlay');
+            document.getElementById('loading-text').innerText = text;
+            overlay.style.display = show ? 'flex' : 'none';
+        }
+
+        function showNotification(msg) {
+            const prevText = document.getElementById('loading-text').innerText;
+            toggleSpinner(true, msg);
+            setTimeout(() => {
+                toggleSpinner(false);
+            }, 2000);
+        }
+
+        function setupNetworkListeners() {
+            const netBadge = document.getElementById('net-status');
+            
+            const updateNetStatus = () => {
+                if(navigator.onLine) {
+                    netBadge.innerText = "ONLINE";
+                    netBadge.className = "badge badge-online";
+                    processLocalStorageOfflineQueueSync(); // Picu pengosongan antrean offline saat jaringan pulih
+                } else {
+                    netBadge.innerText = "OFFLINE";
+                    netBadge.className = "badge badge-offline";
+                }
+                updateLiveWatermarkText();
+            };
+
+            window.addEventListener('online', updateNetStatus);
+            window.addEventListener('offline', updateNetStatus);
+            updateNetStatus();
+        }
+
+        /**
+         * ==========================================================================
+         * INITIALIZATION ROUTINE ENTRY POINT
+         * ==========================================================================
+         */
+        function initializeApplicationCore() {
+            deploySecurityShields();
+            startLiveClock();
+            startGeolocationTracking();
+            setupNetworkListeners();
+            
+            // Set User Display Value Dari Input Prompt Sederhana / Cache
+            let savedUser = localStorage.getItem('pas_username');
+            if(!savedUser) {
+                savedUser = prompt("ENTER SYSTEM OPERATOR CODENAME:", "BUDI") || "BUDI";
+                localStorage.setItem('pas_username', savedUser.toUpperCase());
+            }
+            APP_STATE.username = savedUser.toUpperCase();
+            document.getElementById('user-display').innerText = APP_STATE.username;
+
+            // Ambil Jalur Aliran Perangkat Kamera Utama
+            startCameraHardware();
+
+            // Pasang Event Listener Tombol Navigasi Secara Prosedural
+            document.getElementById('btn-capture').addEventListener('click', runCaptureEngine);
+            document.getElementById('btn-retake').addEventListener('click', runRetakeEngine);
+            document.getElementById('btn-upload').addEventListener('click', processUploadWorkflow);
+            
+            document.getElementById('btn-switch').addEventListener('click', () => {
+                APP_STATE.facingMode = (APP_STATE.facingMode === 'environment') ? 'user' : 'environment';
+                startCameraHardware();
+            });
+
+            document.getElementById('btn-config').addEventListener('click', () => {
+                let currentToken = prompt("TELEGRAM BOT TOKEN:", CONFIG.botToken);
+                let currentChatId = prompt("TELEGRAM CHAT ID:", CONFIG.chatId);
+                if(currentToken) CONFIG.botToken = currentToken;
+                if(currentChatId) CONFIG.chatId = currentChatId;
+                alert("Configuration parameters updated in current RAM context successfully.");
+            });
+        }
+
+        // Jalankan animasi booting sistem retro saat dokumen siap dimuat
+        window.addEventListener('DOMContentLoaded', runBootingSequence);
+
+    </script>
+</body>
+</html>
