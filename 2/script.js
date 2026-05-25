@@ -1,9 +1,8 @@
 /**
- * Attenda - Premium Attendance System (Pure ES6 Implementation)
- * Architecture: Event-driven UI updates, localStorage state caching, single-page simulation.
+ * Attenda - Premium Attendance System (With Selfie Verification & Excuse Management)
  */
 
-// --- INITIAL CONTEXT DATA STATE ---
+// --- INITIAL DATA STATE ---
 const state = {
     user: {
         name: "Sarah Jenkins",
@@ -15,12 +14,13 @@ const state = {
     history: [
         { id: 1, nama: "Sarah Jenkins", tanggal: "2026-05-22", masuk: "07:52", keluar: "17:05", status: "Tepat Waktu" },
         { id: 2, nama: "Sarah Jenkins", tanggal: "2026-05-21", masuk: "08:14", keluar: "17:00", status: "Terlambat" },
-        { id: 3, nama: "Sarah Jenkins", tanggal: "2026-05-20", masuk: "07:45", keluar: "17:10", status: "Tepat Waktu" },
+        { id: 3, nama: "Sarah Jenkins", tanggal: "2026-05-20", masuk: "00:00", keluar: "00:00", status: "Izin" },
     ],
     checkedInToday: false,
     checkedOutToday: false,
     checkInTime: null,
-    checkOutTime: null
+    checkOutTime: null,
+    hasUploadedSelfie: false // Guard variable untuk validasi foto selfie
 };
 
 // --- DOM ELEMENT SELECTION ---
@@ -43,42 +43,48 @@ const dom = {
     actionClock: document.getElementById('actionClock'),
     actionDate: document.getElementById('actionDate'),
     
-    // Feature Attendance Elements
+    // Attendance Feature Elements
     btnCheckIn: document.getElementById('btnCheckIn'),
     btnCheckOut: document.getElementById('btnCheckOut'),
     attendanceBanner: document.getElementById('attendanceBanner'),
     statusText: document.getElementById('statusText'),
     quickStatus: document.getElementById('quickStatus'),
     
+    // Camera Simulator Components
+    btnUploadSelfie: document.getElementById('btnUploadSelfie'),
+    selfieInput: document.getElementById('selfieInput'),
+    cameraBlank: document.getElementById('cameraBlank'),
+    selfiePreview: document.getElementById('selfiePreview'),
+    cameraLine: document.getElementById('cameraLine'),
+    
+    // Tab Elements
+    tabButtons: document.querySelectorAll('.tab-btn'),
+    tabContents: document.querySelectorAll('.tab-content'),
+    formIzin: document.getElementById('formIzin'),
+
     // Stats Elements
     statHadir: document.getElementById('statHadir'),
     statTelat: document.getElementById('statTelat'),
     statIzin: document.getElementById('statIzin'),
     statAlpha: document.getElementById('statAlpha'),
     
-    // Table Core Elements
+    // Table Elements
     tableBody: document.getElementById('tableBody'),
     tableSearch: document.getElementById('tableSearch'),
     statusFilter: document.getElementById('statusFilter'),
     
-    // Toast Anchor
     toastContainer: document.getElementById('toastContainer'),
     miniCalendar: document.getElementById('miniCalendar')
 };
 
-// --- REALTIME TIMEENGINE (INDONESIAN STYLE) ---
+// --- REALTIME TIME ENGINE ---
 const updateClockEngine = () => {
     const now = new Date();
-    
-    // Custom Time Format
     const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
     const timeString = now.toLocaleTimeString('id-ID', timeOptions) + " WIB";
-    
-    // Custom Date Format
     const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const dateString = now.toLocaleDateString('id-ID', dateOptions);
     
-    // Inject components
     if(dom.txtClock) dom.txtClock.textContent = timeString;
     if(dom.txtDate) dom.txtDate.textContent = dateString;
     if(dom.actionClock) dom.actionClock.textContent = timeString.replace(" WIB", "");
@@ -87,11 +93,10 @@ const updateClockEngine = () => {
 setInterval(updateClockEngine, 1000);
 updateClockEngine();
 
-// --- PREMIUM NOTIFICATION TOAST ---
+// --- TOAST NOTIFICATION ---
 const showToast = (message, type = 'success') => {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    
     let icon = '<i class="fa-solid fa-circle-check"></i>';
     if(type === 'danger') icon = '<i class="fa-solid fa-circle-xmark"></i>';
     if(type === 'warning') icon = '<i class="fa-solid fa-triangle-exclamation"></i>';
@@ -105,77 +110,44 @@ const showToast = (message, type = 'success') => {
     }, 4000);
 };
 
-// --- AUTHENTICATION FLOW (SIMULATION) ---
-dom.loginForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    
-    // Simple Validation Sandbox
-    if(email === 'admin@attenda.com' && password === 'password') {
-        dom.loader.style.opacity = '1';
-        dom.loader.style.visibility = 'visible';
+// --- TAB SWITCHING SYSTEM ---
+dom.tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const targetTab = button.getAttribute('data-tab');
         
-        setTimeout(() => {
-            dom.authPage.classList.add('hidden');
-            dom.mainApp.classList.remove('hidden');
-            dom.loader.style.opacity = '0';
-            dom.loader.style.visibility = 'hidden';
-            showToast('Selamat Datang! Login berhasil.', 'success');
-            initAppDashboard();
-        }, 1200);
-    } else {
-        showToast('Kredensial salah! Gunakan akun demo.', 'danger');
-    }
-});
-
-dom.btnLogout.addEventListener('click', () => {
-    dom.mainApp.classList.add('hidden');
-    dom.authPage.classList.remove('hidden');
-    showToast('Anda telah keluar dari sistem.', 'info');
-});
-
-// --- NAVIGATION SPA ENGINE ---
-dom.menuItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetSectionId = item.getAttribute('data-target');
+        dom.tabButtons.forEach(btn => btn.classList.remove('active'));
+        dom.tabContents.forEach(content => content.classList.remove('active'));
         
-        dom.menuItems.forEach(i => i.classList.remove('active'));
-        dom.appSections.forEach(s => s.classList.remove('active-section'));
-        
-        item.classList.add('active');
-        document.getElementById(targetSectionId).classList.add('active-section');
-        
-        // Mobile layout responsiveness sidebar collapsing
-        if(window.innerWidth <= 768) {
-            dom.sidebar.classList.remove('open');
-        }
+        button.classList.add('active');
+        document.getElementById(targetTab).classList.add('active');
     });
 });
 
-// Sidebar Drawer Callbacks
-dom.toggleSidebar.addEventListener('click', () => dom.sidebar.classList.add('open'));
-dom.closeSidebar.addEventListener('click', () => dom.sidebar.classList.remove('open'));
-
-// --- PREMIUM DARK MODE ENGINE ---
-const initThemeMode = () => {
-    const cachedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', cachedTheme);
-    dom.themeToggle.innerHTML = cachedTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-regular fa-moon"></i>';
-};
-
-dom.themeToggle.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    dom.themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-regular fa-moon"></i>';
-    showToast(`Mode ${newTheme === 'dark' ? 'Gelap' : 'Terang'} diaktifkan.`, 'success');
+// --- CAMERA SIMULATOR CONTROLLER ---
+dom.btnUploadSelfie.addEventListener('click', () => {
+    dom.selfieInput.click();
 });
 
-// --- CORE APP BUSINESS LOGIC (ATTENDANCE ACTIONS) ---
+dom.selfieInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(file) {
+        const reader = new FileReader();
+        dom.cameraLine.style.display = 'block'; // Efek garis scanner aktif
+        
+        reader.onload = function(event) {
+            setTimeout(() => {
+                dom.cameraBlank.classList.add('hidden');
+                dom.selfiePreview.classList.remove('hidden');
+                dom.selfiePreview.src = event.target.result;
+                state.hasUploadedSelfie = true;
+                showToast('Foto selfie berhasil diverifikasi oleh sistem!', 'success');
+            }, 1000); // Simulasi pemrosesan AI wajah selama 1 detik
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+// --- ABSENSI DAN PENGAJUAN IZIN LOGIC ---
 const updateAttendanceUIState = () => {
     if(state.checkedInToday) {
         dom.btnCheckIn.disabled = true;
@@ -184,21 +156,26 @@ const updateAttendanceUIState = () => {
         dom.statusText.innerHTML = `Sudah Check In Masuk pukul <strong>${state.checkInTime}</strong>`;
         dom.btnCheckOut.disabled = false;
     }
-    
     if(state.checkedOutToday) {
         dom.btnCheckOut.disabled = true;
         dom.quickStatus.textContent = "Selesai Kerja";
         dom.statusText.innerHTML = `Sudah Check Out Pulang pukul <strong>${state.checkOutTime}</strong>`;
         dom.attendanceBanner.style.borderColor = "var(--success)";
+        dom.cameraLine.style.display = 'none';
     }
 };
 
 dom.btnCheckIn.addEventListener('click', () => {
+    // Validasi apakah karyawan sudah mengunggah selfie
+    if(!state.hasUploadedSelfie) {
+        showToast('Gagal! Anda wajib mengambil foto selfie terlebih dahulu.', 'danger');
+        return;
+    }
+
     const now = new Date();
     const curHour = now.getHours();
     const curMin = now.getMinutes();
     
-    // Status assessment
     let logStatus = "Tepat Waktu";
     if (curHour > 8 || (curHour === 8 && curMin > 15)) {
         logStatus = "Terlambat";
@@ -213,7 +190,6 @@ dom.btnCheckIn.addEventListener('click', () => {
     state.checkedInToday = true;
     state.checkInTime = timeStr;
     
-    // Push modern data entry array
     state.history.unshift({
         id: Date.now(),
         nama: state.user.name,
@@ -237,20 +213,46 @@ dom.btnCheckOut.addEventListener('click', () => {
     state.checkedOutToday = true;
     state.checkOutTime = timeStr;
     
-    // Update structural history index mapping
     if(state.history.length > 0) {
         state.history[0].keluar = timeStr;
     }
     
-    showToast('Presensi pulang berhasil tercatat. Hati-hati di jalan!', 'success');
+    showToast('Presensi pulang berhasil tercatat.', 'success');
     updateAttendanceUIState();
     renderHistoryTable();
 });
 
-// --- RENDER TABLES & SEARCH SYSTEM ---
+// Submit Form Izin / Sakit
+dom.formIzin.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const jenis = document.getElementById('jenisIzin').value;
+    const keterangan = document.getElementById('keteranganIzin').value;
+    const now = new Date();
+    const dateISO = now.toISOString().split('T')[0];
+
+    // Update State
+    state.stats.izin += 1;
+    state.history.unshift({
+        id: Date.now(),
+        nama: state.user.name,
+        tanggal: dateISO,
+        masuk: "00:00",
+        keluar: "00:00",
+        status: jenis
+    });
+
+    showToast(`Pengajuan ${jenis} berhasil dikirim ke HRD.`, 'success');
+    dom.formIzin.reset();
+    
+    // Switch ke tab dashboard untuk melihat update data
+    dom.menuItems[0].click();
+    updateDashboardStats();
+    renderHistoryTable();
+});
+
+// --- ROUTINE UI RENDERING ---
 const renderHistoryTable = (filterText = "", statusSelect = "all") => {
     dom.tableBody.innerHTML = "";
-    
     const filtered = state.history.filter(item => {
         const matchesSearch = item.tanggal.includes(filterText) || item.status.toLowerCase().includes(filterText.toLowerCase());
         const matchesStatus = statusSelect === 'all' || item.status === statusSelect;
@@ -264,7 +266,9 @@ const renderHistoryTable = (filterText = "", statusSelect = "all") => {
 
     filtered.forEach(item => {
         const tr = document.createElement('tr');
-        const badgeClass = item.status === 'Tepat Waktu' ? 'success' : 'warning';
+        let badgeClass = 'success';
+        if(item.status === 'Terlambat') badgeClass = 'warning';
+        if(item.status === 'Izin' || item.status === 'Sakit') badgeClass = 'info';
         
         tr.innerHTML = `
             <td><strong>${item.nama}</strong></td>
@@ -280,7 +284,6 @@ const renderHistoryTable = (filterText = "", statusSelect = "all") => {
 dom.tableSearch.addEventListener('input', (e) => renderHistoryTable(e.target.value, dom.statusFilter.value));
 dom.statusFilter.addEventListener('change', (e) => renderHistoryTable(dom.tableSearch.value, e.target.value));
 
-// --- DASHBOARD WIDGETS RENDERING ---
 const updateDashboardStats = () => {
     dom.statHadir.textContent = state.stats.hadir;
     dom.statTelat.textContent = state.stats.telat;
@@ -291,15 +294,11 @@ const updateDashboardStats = () => {
 const renderMiniCalendar = () => {
     const days = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
     dom.miniCalendar.innerHTML = "";
-    
     days.forEach(d => {
         const head = document.createElement('div');
-        head.className = "calendar-day-head";
-        head.textContent = d;
+        head.className = "calendar-day-head"; head.textContent = d;
         dom.miniCalendar.appendChild(head);
     });
-    
-    // Render static mock block dates
     for(let i = 20; i <= 26; i++) {
         const dayEl = document.createElement('div');
         dayEl.className = "calendar-day" + (i === 25 ? " active" : "");
@@ -308,7 +307,62 @@ const renderMiniCalendar = () => {
     }
 };
 
-// --- CHART.JS CONFIGURATION ---
+// --- AUTH & CONFIG MANAGEMENT ---
+dom.loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    if(email === 'admin@attenda.com' && password === 'password') {
+        dom.loader.style.opacity = '1'; dom.loader.style.visibility = 'visible';
+        setTimeout(() => {
+            dom.authPage.classList.add('hidden');
+            dom.mainApp.classList.remove('hidden');
+            dom.loader.style.opacity = '0'; dom.loader.style.visibility = 'hidden';
+            showToast('Selamat Datang! Login berhasil.', 'success');
+            initAppDashboard();
+        }, 1200);
+    } else {
+        showToast('Kredensial salah!', 'danger');
+    }
+});
+
+dom.btnLogout.addEventListener('click', () => {
+    dom.mainApp.classList.add('hidden');
+    dom.authPage.classList.remove('hidden');
+    showToast('Anda telah keluar dari sistem.', 'info');
+});
+
+dom.menuItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetSectionId = item.getAttribute('data-target');
+        dom.menuItems.forEach(i => i.classList.remove('active'));
+        dom.appSections.forEach(s => s.classList.remove('active-section'));
+        item.classList.add('active');
+        document.getElementById(targetSectionId).classList.add('active-section');
+        if(window.innerWidth <= 768) dom.sidebar.classList.remove('open');
+    });
+});
+
+dom.toggleSidebar.addEventListener('click', () => dom.sidebar.classList.add('open'));
+dom.closeSidebar.addEventListener('click', () => dom.sidebar.classList.remove('open'));
+
+const initThemeMode = () => {
+    const cachedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', cachedTheme);
+    dom.themeToggle.innerHTML = cachedTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-regular fa-moon"></i>';
+};
+
+dom.themeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    dom.themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-regular fa-moon"></i>';
+    showToast(`Mode ${newTheme === 'dark' ? 'Gelap' : 'Terang'} aktif.`, 'success');
+});
+
 let weeklyChartInstance = null;
 const initWeeklyChart = () => {
     const ctx = document.getElementById('weeklyChart').getContext('2d');
@@ -321,47 +375,24 @@ const initWeeklyChart = () => {
                 data: [8, 8.5, 7.8, 9, 8.2],
                 backgroundColor: '#2563eb',
                 borderRadius: 6,
-                borderSkipped: false,
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { grid: { display: false }, border: { display: false } },
-                x: { grid: { display: false }, border: { display: false } }
-            }
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 };
+const updateChartData = () => { if(weeklyChartInstance) { weeklyChartInstance.data.datasets[0].data[4] = 8.5; weeklyChartInstance.update(); } };
 
-const updateChartData = () => {
-    if(weeklyChartInstance) {
-        // Mocking behavior addition for chart updates
-        weeklyChartInstance.data.datasets[0].data[4] = 8.8; 
-        weeklyChartInstance.update();
-    }
-};
-
-// --- APPLICATION INITIALIZER ---
 const initAppDashboard = () => {
     updateDashboardStats();
     renderMiniCalendar();
     initWeeklyChart();
     renderHistoryTable();
-    
-    // Profile metadata injections
     document.querySelectorAll('.user-name').forEach(el => el.textContent = state.user.name);
     document.querySelectorAll('.user-role').forEach(el => el.textContent = state.user.role);
     document.querySelectorAll('.user-email').forEach(el => el.textContent = state.user.email);
 };
 
-// Application Startup Bootstrapping
 window.addEventListener('DOMContentLoaded', () => {
     initThemeMode();
-    setTimeout(() => {
-        dom.loader.style.opacity = '0';
-        dom.loader.style.visibility = 'hidden';
-    }, 600);
+    setTimeout(() => { dom.loader.style.opacity = '0'; dom.loader.style.visibility = 'hidden'; }, 600);
 });
