@@ -8,10 +8,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
-
-<link rel="stylesheet" href="style.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF & jsPDF-AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -334,18 +339,15 @@
                                 <i class="fa-solid fa-magnifying-glass"></i>
                                 <input type="text" id="tableSearch" placeholder="Cari berdasarkan tanggal atau status...">
                             </div>
-                            <div class="filter-box" style="display: flex; gap: 12px; align-items: center;">
-    <select id="statusFilter">
-        <option value="all">Semua Status</option>
-        <option value="Tepat Waktu">Tepat Waktu</option>
-        <option value="Terlambat">Terlambat</option>
-        <option value="Izin">Izin</option>
-        <option value="Sakit">Sakit</option>
-    </select>
-    <button class="btn btn-primary" id="btnDownloadPDF" style="padding: 10px 16px; white-space: nowrap;">
-        <i class="fa-solid fa-file-pdf"></i> Download PDF
-    </button>
-</div>
+                            <div class="filter-box">
+                                <select id="statusFilter">
+                                    <option value="all">Semua Status</option>
+                                    <option value="Tepat Waktu">Tepat Waktu</option>
+                                    <option value="Terlambat">Terlambat</option>
+                                    <option value="Izin">Izin</option>
+                                    <option value="Sakit">Sakit</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="table-responsive">
