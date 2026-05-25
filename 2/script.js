@@ -22,143 +22,6 @@ const state = {
     checkOutTime: null,
     hasUploadedSelfie: false // Guard variable untuk validasi foto selfie
 };
-// =========================================================================
-// FITUR EKSPOR PDF (TERSTRUKTUR)
-// =========================================================================
-const generateAttendancePDF = () => {
-    // 1. Ambil data yang saat ini lolos filter di screen pengguna
-    const filterText = dom.tableSearch.value.toLowerCase();
-    const statusSelect = dom.statusFilter.value;
-
-    const filteredData = state.history.filter(item => {
-        const matchesSearch = item.tanggal.includes(filterText) || item.status.toLowerCase().includes(filterText);
-        const matchesStatus = statusSelect === 'all' || item.status === statusSelect;
-        return matchesSearch && matchesStatus;
-    });
-
-    // Validasi jika data kosong
-    if (filteredData.length === 0) {
-        showToast('Gagal cetak! Tidak ada data riwayat yang sesuai untuk diunduh.', 'danger');
-        return;
-    }
-
-    // 2. Inisialisasi jsPDF (A4 Portrait)
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-
-    // Konfigurasi Warna Utama (Senada dengan tema Attenda Blue #2563eb)
-    const primaryColor = [37, 99, 235]; 
-    const textColor = [15, 23, 42];    
-
-    // 3. Render Header Document
-    doc.setFont("Inter", "bold");
-    doc.setFontSize(22);
-    doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-    doc.text("ATTENDA", 14, 20);
-
-    doc.setFontSize(9);
-    doc.setFont("Inter", "normal");
-    doc.setTextColor(100, 116, 139); 
-    doc.text("Premium Attendance & HR System", 14, 25);
-
-    // Garis Batas Header
-    doc.setDrawColor(226, 232, 240);
-    doc.setLineWidth(0.5);
-    doc.line(14, 28, 196, 28);
-
-    // 4. Render Metadata Informasi Karyawan
-    doc.setFont("Inter", "bold");
-    doc.setFontSize(12);
-    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-    doc.text("LAPORAN KEHADIRAN KARYAWAN", 14, 38);
-
-    doc.setFont("Inter", "normal");
-    doc.setFontSize(10);
-    doc.text(`Nama Karyawan : ${state.user.name}`, 14, 46);
-    doc.text(`Jabatan / Divisi : ${state.user.role} / ${state.user.division}`, 14, 52);
-    doc.text(`Email Resmi     : ${state.user.email}`, 14, 58);
-    doc.text(`Tanggal Cetak   : ${dom.txtDate.textContent}`, 14, 64);
-
-    // Keterangan filter jika user sedang menyaring data
-    if (statusSelect !== 'all' || filterText !== '') {
-        doc.setFont("Inter", "italic");
-        doc.setFontSize(9);
-        doc.text(`*Kriteria Cetak: Status [${statusSelect}], Kata Kunci ["${filterText || '-'}"]`, 14, 71);
-    }
-
-    // 5. Mapping Data Menjadi Format Tabel
-    const tableBodyData = filteredData.map((item, index) => [
-        index + 1,
-        item.tanggal,
-        item.masuk === "00:00" ? "-" : item.masuk,
-        item.keluar === "00:00" ? "-" : item.keluar,
-        item.status
-    ]);
-
-    // 6. Generate Tabel Otomatis Menggunakan AutoTable
-    doc.autoTable({
-        startY: statusSelect !== 'all' || filterText !== '' ? 75 : 69,
-        head: [['No', 'Tanggal', 'Jam Masuk', 'Jam Keluar', 'Status']],
-        body: tableBodyData,
-        theme: 'striped',
-        headStyles: {
-            fillColor: primaryColor,
-            textColor: [255, 255, 255],
-            fontStyle: 'bold',
-            halign: 'left'
-        },
-        styles: {
-            font: 'Inter',
-            fontSize: 10,
-            cellPadding: 4
-        },
-        columnStyles: {
-            0: { cellWidth: 12 }, 
-            1: { cellWidth: 40 },
-            2: { cellWidth: 35 },
-            3: { cellWidth: 35 },
-            4: { fontStyle: 'bold' } 
-        },
-        didParseCell: function(data) {
-            // Memberikan pewarnaan teks dinamis khusus pada kolom status
-            if (data.column.index === 4 && data.cell.section === 'body') {
-                const statusValue = data.cell.text[0];
-                if (statusValue === 'Tepat Waktu') data.cell.styles.textColor = [16, 185, 129]; // Hijau
-                if (statusValue === 'Terlambat') data.cell.styles.textColor = [245, 158, 11];   // Kuning
-                if (statusValue === 'Izin' || statusValue === 'Sakit') data.cell.styles.textColor = [37, 99, 235]; // Biru
-            }
-        }
-    });
-
-    // 7. Area Tanda Tangan (Footer Approval)
-    const finalY = doc.lastAutoTable.finalY + 15;
-
-    // Jika jarak ke bawah kertas terlalu mepet, lempar area ttd ke halaman baru
-    if (finalY > 245) {
-        doc.addPage();
-        doc.setFont("Inter", "normal");
-        doc.text("Disetujui oleh,", 14, 30);
-        doc.setDrawColor(150, 150, 150);
-        doc.line(14, 50, 70, 50);
-        doc.setFont("Inter", "bold");
-        doc.text("HRD Department", 14, 55);
-    } else {
-        doc.setFont("Inter", "normal");
-        doc.text("Disetujui oleh,", 14, finalY);
-        doc.setDrawColor(150, 150, 150);
-        doc.line(14, finalY + 20, 70, finalY + 20);
-        doc.setFont("Inter", "bold");
-        doc.text("HRD Department", 14, finalY + 25);
-    }
-
-    // 8. Unduh File PDF
-    const fileNameClean = state.user.name.replace(/\s+/g, '_');
-    doc.save(`Riwayat_Presensi_${fileNameClean}.pdf`);
-    showToast('File PDF Berhasil diunduh!', 'success');
-};
-
-// Pasang Event Listener ke Tombol
-dom.btnDownloadPDF.addEventListener('click', generateAttendancePDF);
 
 // --- DOM ELEMENT SELECTION ---
 const dom = {
@@ -173,10 +36,6 @@ const dom = {
     sidebar: document.getElementById('sidebar'),
     menuItems: document.querySelectorAll('.menu-item'),
     appSections: document.querySelectorAll('.app-section'),
-    toastContainer: document.getElementById('toastContainer'),
-    miniCalendar: document.getElementById('miniCalendar'),
-    btnDownloadPDF: document.getElementById('btnDownloadPDF') // <-- Tambahkan baris ini
-};
     
     // Realtime Strings
     txtClock: document.getElementById('txtClock'),
@@ -215,7 +74,8 @@ const dom = {
     statusFilter: document.getElementById('statusFilter'),
     
     toastContainer: document.getElementById('toastContainer'),
-    miniCalendar: document.getElementById('miniCalendar')
+    miniCalendar: document.getElementById('miniCalendar'),
+    btnDownloadPDF: document.getElementById('btnDownloadPDF')
 };
 
 // --- REALTIME TIME ENGINE ---
@@ -532,6 +392,135 @@ const initAppDashboard = () => {
     document.querySelectorAll('.user-role').forEach(el => el.textContent = state.user.role);
     document.querySelectorAll('.user-email').forEach(el => el.textContent = state.user.email);
 };
+
+
+// =========================================================================
+// FITUR EKSPOR PDF (TERSTRUKTUR)
+// =========================================================================
+const generateAttendancePDF = () => {
+    const filterText = dom.tableSearch.value.toLowerCase();
+    const statusSelect = dom.statusFilter.value;
+
+    const filteredData = state.history.filter(item => {
+        const matchesSearch = item.tanggal.includes(filterText) || item.status.toLowerCase().includes(filterText);
+        const matchesStatus = statusSelect === 'all' || item.status === statusSelect;
+        return matchesSearch && matchesStatus;
+    });
+
+    if (filteredData.length === 0) {
+        showToast('Gagal cetak! Tidak ada data riwayat yang sesuai untuk diunduh.', 'danger');
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+    const primaryColor = [37, 99, 235]; 
+    const textColor = [15, 23, 42];    
+
+    doc.setFont("Inter", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    doc.text("ATTENDA", 14, 20);
+    
+    doc.setFontSize(9);
+    doc.setFont("Inter", "normal");
+    doc.setTextColor(100, 116, 139); 
+    doc.text("Premium Attendance & HR System", 14, 25);
+
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.5);
+    doc.line(14, 28, 196, 28);
+
+    doc.setFont("Inter", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+    doc.text("LAPORAN KEHADIRAN KARYAWAN", 14, 38);
+
+    doc.setFont("Inter", "normal");
+    doc.setFontSize(10);
+    doc.text(`Nama Karyawan : ${state.user.name}`, 14, 46);
+    doc.text(`Jabatan / Divisi : ${state.user.role} / ${state.user.division}`, 14, 52);
+    doc.text(`Email Resmi     : ${state.user.email}`, 14, 58);
+    doc.text(`Tanggal Cetak   : ${dom.txtDate.textContent}`, 14, 64);
+
+    if (statusSelect !== 'all' || filterText !== '') {
+        doc.setFont("Inter", "italic");
+        doc.setFontSize(9);
+        doc.text(`*Kriteria Cetak: Status [${statusSelect}], Kata Kunci ["${filterText || '-'}"]`, 14, 71);
+    }
+
+    const tableBodyData = filteredData.map((item, index) => [
+        index + 1,
+        item.tanggal,
+        item.masuk === "00:00" ? "-" : item.masuk,
+        item.keluar === "00:00" ? "-" : item.keluar,
+        item.status
+    ]);
+
+    doc.autoTable({
+        startY: statusSelect !== 'all' || filterText !== '' ? 75 : 69,
+        head: [['No', 'Tanggal', 'Jam Masuk', 'Jam Keluar', 'Status']],
+        body: tableBodyData,
+        theme: 'striped',
+        headStyles: {
+            fillColor: primaryColor,
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            halign: 'left'
+        },
+        styles: {
+            font: 'Inter',
+            fontSize: 10,
+            cellPadding: 4
+        },
+        columnStyles: {
+            0: { cellWidth: 12 }, 
+            1: { cellWidth: 40 },
+            2: { cellWidth: 35 },
+            3: { cellWidth: 35 },
+            4: { fontStyle: 'bold' } 
+        },
+        didParseCell: function(data) {
+            if (data.column.index === 4 && data.cell.section === 'body') {
+                const statusValue = data.cell.text[0];
+                if (statusValue === 'Tepat Waktu') data.cell.styles.textColor = [16, 185, 129]; 
+                if (statusValue === 'Terlambat') data.cell.styles.textColor = [245, 158, 11];   
+                if (statusValue === 'Izin' || statusValue === 'Sakit') data.cell.styles.textColor = [37, 99, 235]; 
+            }
+        }
+    });
+
+    const finalY = doc.lastAutoTable.finalY + 15;
+    
+    if (finalY > 245) {
+        doc.addPage();
+        doc.setFont("Inter", "normal");
+        doc.text("Disetujui oleh,", 14, 30);
+        doc.setDrawColor(150, 150, 150);
+        doc.line(14, 50, 70, 50);
+        doc.setFont("Inter", "bold");
+        doc.text("HRD Department", 14, 55);
+    } else {
+        doc.setFont("Inter", "normal");
+        doc.text("Disetujui oleh,", 14, finalY);
+        doc.setDrawColor(150, 150, 150);
+        doc.line(14, finalY + 20, 70, finalY + 20);
+        doc.setFont("Inter", "bold");
+        doc.text("HRD Department", 14, finalY + 25);
+    }
+
+    const fileNameClean = state.user.name.replace(/\s+/g, '_');
+    doc.save(`Riwayat_Presensi_${fileNameClean}.pdf`);
+    showToast('File PDF Berhasil diunduh!', 'success');
+};
+
+// Pasang Event Listener ke Tombol
+document.addEventListener('DOMContentLoaded', () => {
+    if(dom.btnDownloadPDF) {
+        dom.btnDownloadPDF.addEventListener('click', generateAttendancePDF);
+    }
+});
 
 window.addEventListener('DOMContentLoaded', () => {
     initThemeMode();
