@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404: Waduh, Kesasar!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        .error-code {
+            font-size: 150px;
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(45deg, #ff7675, #ffecef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .astronaut {
+            font-size: 80px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: spin 20s linear infinite;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: #ffeaa7;
+        }
+
+        p {
+            font-size: 18px;
+            color: #dfe6e9;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #0984e3;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(9, 132, 227, 0.4);
+        }
+
+        .btn:hover {
+            background-color: #74b9ff;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(116, 185, 255, 0.6);
+        }
+
+        /* Animasi lucu */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Efek bintang jatuh fiktif */
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="error-code">404</div>
+        <div class="astronaut">👨‍🚀</div>
+        <h1>Waduh! Kamu Terlempar ke Black Hole!</h1>
+        <p>Halaman yang kamu cari gak ada. Mungkin digondol kucing, atau kamu typo pas ngetik alamatnya. Santai, jangan panik, tarik napas dalam-dalam...</p>
+        
+        <!-- Ganti href dengan link website utamamu -->
+        <a href="/" class="btn">Bawa Aku Pulang, Capt!</a>
+    </div>
+
+    <script>
+        // Iseng nambahin bintang-bintang di background biar estetik
+        for (let i = 0; i < 50; i++) {
+            let star = document.createElement('div');
+            star.className = 'star';
+            star.style.top = Math.random() * 100 + 'vh';
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.opacity = Math.random();
+            document.body.appendChild(star);
+        }
+    </script>
+
+</body>
+</html>
