@@ -1,9 +1,11 @@
 /**
  * Attenda - Premium Attendance System (With Selfie Verification & Excuse Management)
+ * Fully Integrated with Firebase Realtime Database
  */
+
 // 1. Import fungsi dari SDK Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 // 2. Konfigurasi Firebase milikmu
 const firebaseConfig = {
@@ -17,13 +19,13 @@ const firebaseConfig = {
   measurementId: "G-7FFGRGG273"
 };
 
-// 3. Inisialisasi
+// 3. Inisialisasi Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
 console.log("Firebase dari script.js berhasil tersambung!");
 
-// Contoh test kirim data
+// Pengecekan awal ke server (Test koneksi bawaan)
 set(ref(database, 'test_koneksi'), {
     status: "Sukses tersambung lewat script.js!",
     waktu: new Date().toISOString()
@@ -47,7 +49,8 @@ const state = {
     checkedOutToday: false,
     checkInTime: null,
     checkOutTime: null,
-    hasUploadedSelfie: false // Guard variable untuk validasi foto selfie
+    hasUploadedSelfie: false, // Guard variable untuk validasi foto selfie
+    currentAttendanceKey: null // Menyimpan ID unik transaksi absensi aktif dari Firebase
 };
 
 // --- DOM ELEMENT SELECTION ---
@@ -152,30 +155,36 @@ dom.tabButtons.forEach(button => {
 });
 
 // --- CAMERA SIMULATOR CONTROLLER ---
-dom.btnUploadSelfie.addEventListener('click', () => {
-    dom.selfieInput.click();
-});
+if(dom.btnUploadSelfie) {
+    dom.btnUploadSelfie.addEventListener('click', () => {
+        dom.selfieInput.click();
+    });
+}
 
-dom.selfieInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if(file) {
-        const reader = new FileReader();
-        dom.cameraLine.style.display = 'block'; // Efek garis scanner aktif
-        
-        reader.onload = function(event) {
-            setTimeout(() => {
-                dom.cameraBlank.classList.add('hidden');
-                dom.selfiePreview.classList.remove('hidden');
-                dom.selfiePreview.src = event.target.result;
-                state.hasUploadedSelfie = true;
-                showToast('Foto selfie berhasil diverifikasi oleh sistem!', 'success');
-            }, 1000); // Simulasi pemrosesan AI wajah selama 1 detik
+if(dom.selfieInput) {
+    dom.selfieInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if(file) {
+            const reader = new FileReader();
+            if(dom.cameraLine) dom.cameraLine.style.display = 'block'; // Efek garis scanner aktif
+            
+            reader.onload = function(event) {
+                setTimeout(() => {
+                    if(dom.cameraBlank) dom.cameraBlank.classList.add('hidden');
+                    if(dom.selfiePreview) {
+                        dom.selfiePreview.classList.remove('hidden');
+                        dom.selfiePreview.src = event.target.result;
+                    }
+                    state.hasUploadedSelfie = true;
+                    showToast('Foto selfie berhasil diverifikasi oleh sistem!', 'success');
+                }, 1000); // Simulasi pemrosesan AI wajah selama 1 detik
+            }
+            reader.readAsDataURL(file);
         }
-        reader.readAsDataURL(file);
-    }
-});
+    });
+}
 
-// --- ABSENSI DAN PENGAJUAN IZIN LOGIC ---
+// --- ABSENSI DAN PENGAJUAN IZIN LOGIC (INTEGRASI FIREBASE) ---
 const updateAttendanceUIState = () => {
     if(state.checkedInToday) {
         dom.btnCheckIn.disabled = true;
@@ -189,97 +198,160 @@ const updateAttendanceUIState = () => {
         dom.quickStatus.textContent = "Selesai Kerja";
         dom.statusText.innerHTML = `Sudah Check Out Pulang pukul <strong>${state.checkOutTime}</strong>`;
         dom.attendanceBanner.style.borderColor = "var(--success)";
-        dom.cameraLine.style.display = 'none';
+        if(dom.cameraLine) dom.cameraLine.style.display = 'none';
     }
 };
 
-dom.btnCheckIn.addEventListener('click', () => {
-    // Validasi apakah karyawan sudah mengunggah selfie
-    if(!state.hasUploadedSelfie) {
-        showToast('Gagal! Anda wajib mengambil foto selfie terlebih dahulu.', 'danger');
-        return;
-    }
+// 1. Aksi Tombol Check In
+if(dom.btnCheckIn) {
+    dom.btnCheckIn.addEventListener('click', () => {
+        // Validasi apakah karyawan sudah mengunggah selfie
+        if(!state.hasUploadedSelfie) {
+            showToast('Gagal! Anda wajib mengambil foto selfie terlebih dahulu.', 'danger');
+            return;
+        }
 
-    const now = new Date();
-    const curHour = now.getHours();
-    const curMin = now.getMinutes();
-    
-    let logStatus = "Tepat Waktu";
-    if (curHour > 8 || (curHour === 8 && curMin > 15)) {
-        logStatus = "Terlambat";
-        state.stats.telat += 1;
-    } else {
-        state.stats.hadir += 1;
-    }
-    
-    const timeStr = `${String(curHour).padStart(2, '0')}:${String(curMin).padStart(2, '0')}`;
-    const dateISO = now.toISOString().split('T')[0];
-    
-    state.checkedInToday = true;
-    state.checkInTime = timeStr;
-    
-    state.history.unshift({
-        id: Date.now(),
-        nama: state.user.name,
-        tanggal: dateISO,
-        masuk: timeStr,
-        keluar: "--:--",
-        status: logStatus
+        const now = new Date();
+        const curHour = now.getHours();
+        const curMin = now.getMinutes();
+        
+        let logStatus = "Tepat Waktu";
+        if (curHour > 8 || (curHour === 8 && curMin > 15)) {
+            logStatus = "Terlambat";
+            state.stats.telat += 1;
+        } else {
+            state.stats.hadir += 1;
+        }
+        
+        const timeStr = `${String(curHour).padStart(2, '0')}:${String(curMin).padStart(2, '0')}`;
+        const dateISO = now.toISOString().split('T')[0];
+        
+        // Buat objek data terstruktur untuk dikirim ke Firebase
+        const dataAbsenMasuk = {
+            nama: state.user.name,
+            email: state.user.email,
+            divisi: state.user.division,
+            tanggal: dateISO,
+            masuk: timeStr,
+            keluar: "--:--",
+            status: logStatus,
+            waktu_system: now.toISOString()
+        };
+
+        // KIRIM KE FIREBASE (Nama rumpun tabel: data_absensi)
+        const dbRef = ref(database, 'data_absensi');
+        push(dbRef, dataAbsenMasuk)
+        .then((snapshot) => {
+            // Amankan KEY unik baris data ini untuk update saat Check Out nanti
+            state.currentAttendanceKey = snapshot.key; 
+
+            // Update UI & State lokal
+            state.checkedInToday = true;
+            state.checkInTime = timeStr;
+            
+            state.history.unshift({
+                id: snapshot.key,
+                ...dataAbsenMasuk
+            });
+            
+            showToast(`Presensi masuk berhasil! Status: ${logStatus}`, logStatus === 'Terlambat' ? 'warning' : 'success');
+            updateAttendanceUIState();
+            renderHistoryTable();
+            updateDashboardStats();
+            updateChartData();
+        })
+        .catch((error) => {
+            console.error("Firebase Error:", error);
+            showToast("Gagal menyimpan absensi ke server.", "danger");
+        });
     });
-    
-    showToast(`Presensi masuk berhasil! Status: ${logStatus}`, logStatus === 'Terlambat' ? 'warning' : 'success');
-    updateAttendanceUIState();
-    renderHistoryTable();
-    updateDashboardStats();
-    updateChartData();
-});
+}
 
-dom.btnCheckOut.addEventListener('click', () => {
-    const now = new Date();
-    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    
-    state.checkedOutToday = true;
-    state.checkOutTime = timeStr;
-    
-    if(state.history.length > 0) {
-        state.history[0].keluar = timeStr;
-    }
-    
-    showToast('Presensi pulang berhasil tercatat.', 'success');
-    updateAttendanceUIState();
-    renderHistoryTable();
-});
+// 2. Aksi Tombol Check Out
+if(dom.btnCheckOut) {
+    dom.btnCheckOut.addEventListener('click', () => {
+        const now = new Date();
+        const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        
+        // Proteksi jika kunci referensi data kosong
+        if (!state.currentAttendanceKey) {
+            showToast("Error: Sesi data Check-In tidak ditemukan.", "danger");
+            return;
+        }
 
-// Submit Form Izin / Sakit
-dom.formIzin.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const jenis = document.getElementById('jenisIzin').value;
-    const keterangan = document.getElementById('keteranganIzin').value;
-    const now = new Date();
-    const dateISO = now.toISOString().split('T')[0];
-
-    // Update State
-    state.stats.izin += 1;
-    state.history.unshift({
-        id: Date.now(),
-        nama: state.user.name,
-        tanggal: dateISO,
-        masuk: "00:00",
-        keluar: "00:00",
-        status: jenis
+        // UPDATE DATA KE FIREBASE berdasarkan KEY check-in sebelumnya pada bagian field "keluar"
+        const checkoutRef = ref(database, `data_absensi/${state.currentAttendanceKey}/keluar`);
+        
+        set(checkoutRef, timeStr)
+        .then(() => {
+            state.checkedOutToday = true;
+            state.checkOutTime = timeStr;
+            
+            if(state.history.length > 0) {
+                state.history[0].keluar = timeStr;
+            }
+            
+            showToast('Presensi pulang berhasil tercatat di server.', 'success');
+            updateAttendanceUIState();
+            renderHistoryTable();
+        })
+        .catch((error) => {
+            console.error("Firebase Error:", error);
+            showToast("Gagal memperbarui jam pulang di server.", "danger");
+        });
     });
+}
 
-    showToast(`Pengajuan ${jenis} berhasil dikirim ke HRD.`, 'success');
-    dom.formIzin.reset();
-    
-    // Switch ke tab dashboard untuk melihat update data
-    dom.menuItems[0].click();
-    updateDashboardStats();
-    renderHistoryTable();
-});
+// 3. Submit Form Izin / Sakit
+if(dom.formIzin) {
+    dom.formIzin.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const jenis = document.getElementById('jenisIzin').value;
+        const keterangan = document.getElementById('keteranganIzin').value;
+        const now = new Date();
+        const dateISO = now.toISOString().split('T')[0];
+
+        const dataIzin = {
+            nama: state.user.name,
+            email: state.user.email,
+            divisi: state.user.division,
+            tanggal: dateISO,
+            masuk: "00:00",
+            keluar: "00:00",
+            status: jenis,
+            keterangan: keterangan,
+            waktu_system: now.toISOString()
+        };
+
+        // KIRIM KE FIREBASE
+        const dbRef = ref(database, 'data_absensi');
+        push(dbRef, dataIzin)
+        .then((snapshot) => {
+            // Update State Lokal
+            state.stats.izin += 1;
+            state.history.unshift({
+                id: snapshot.key,
+                ...dataIzin
+            });
+
+            showToast(`Pengajuan ${jenis} berhasil dikirim ke database HRD.`, 'success');
+            dom.formIzin.reset();
+            
+            // Alihkan halaman ke tab dashboard utama
+            if(dom.menuItems[0]) dom.menuItems[0].click();
+            updateDashboardStats();
+            renderHistoryTable();
+        })
+        .catch((error) => {
+            console.error("Firebase Error:", error);
+            showToast("Gagal memproses pengajuan izin ke server.", "danger");
+        });
+    });
+}
 
 // --- ROUTINE UI RENDERING ---
 const renderHistoryTable = (filterText = "", statusSelect = "all") => {
+    if(!dom.tableBody) return;
     dom.tableBody.innerHTML = "";
     const filtered = state.history.filter(item => {
         const matchesSearch = item.tanggal.includes(filterText) || item.status.toLowerCase().includes(filterText.toLowerCase());
@@ -309,17 +381,18 @@ const renderHistoryTable = (filterText = "", statusSelect = "all") => {
     });
 };
 
-dom.tableSearch.addEventListener('input', (e) => renderHistoryTable(e.target.value, dom.statusFilter.value));
-dom.statusFilter.addEventListener('change', (e) => renderHistoryTable(dom.tableSearch.value, e.target.value));
+if(dom.tableSearch) dom.tableSearch.addEventListener('input', (e) => renderHistoryTable(e.target.value, dom.statusFilter.value));
+if(dom.statusFilter) dom.statusFilter.addEventListener('change', (e) => renderHistoryTable(dom.tableSearch.value, e.target.value));
 
 const updateDashboardStats = () => {
-    dom.statHadir.textContent = state.stats.hadir;
-    dom.statTelat.textContent = state.stats.telat;
-    dom.statIzin.textContent = state.stats.izin;
-    dom.statAlpha.textContent = state.stats.alpha;
+    if(dom.statHadir) dom.statHadir.textContent = state.stats.hadir;
+    if(dom.statTelat) dom.statTelat.textContent = state.stats.telat;
+    if(dom.statIzin) dom.statIzin.textContent = state.stats.izin;
+    if(dom.statAlpha) dom.statAlpha.textContent = state.stats.alpha;
 };
 
 const renderMiniCalendar = () => {
+    if(!dom.miniCalendar) return;
     const days = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
     dom.miniCalendar.innerHTML = "";
     days.forEach(d => {
@@ -336,30 +409,34 @@ const renderMiniCalendar = () => {
 };
 
 // --- AUTH & CONFIG MANAGEMENT ---
-dom.loginForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    
-    if(email === 'admin@attenda.com' && password === 'password') {
-        dom.loader.style.opacity = '1'; dom.loader.style.visibility = 'visible';
-        setTimeout(() => {
-            dom.authPage.classList.add('hidden');
-            dom.mainApp.classList.remove('hidden');
-            dom.loader.style.opacity = '0'; dom.loader.style.visibility = 'hidden';
-            showToast('Selamat Datang! Login berhasil.', 'success');
-            initAppDashboard();
-        }, 1200);
-    } else {
-        showToast('Kredensial salah!', 'danger');
-    }
-});
+if(dom.loginForm) {
+    dom.loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        if(email === 'admin@attenda.com' && password === 'password') {
+            dom.loader.style.opacity = '1'; dom.loader.style.visibility = 'visible';
+            setTimeout(() => {
+                dom.authPage.classList.add('hidden');
+                dom.mainApp.classList.remove('hidden');
+                dom.loader.style.opacity = '0'; dom.loader.style.visibility = 'hidden';
+                showToast('Selamat Datang! Login berhasil.', 'success');
+                initAppDashboard();
+            }, 1200);
+        } else {
+            showToast('Kredensial salah!', 'danger');
+        }
+    });
+}
 
-dom.btnLogout.addEventListener('click', () => {
-    dom.mainApp.classList.add('hidden');
-    dom.authPage.classList.remove('hidden');
-    showToast('Anda telah keluar dari sistem.', 'info');
-});
+if(dom.btnLogout) {
+    dom.btnLogout.addEventListener('click', () => {
+        dom.mainApp.classList.add('hidden');
+        dom.authPage.classList.remove('hidden');
+        showToast('Anda telah keluar dari sistem.', 'info');
+    });
+}
 
 dom.menuItems.forEach(item => {
     item.addEventListener('click', (e) => {
@@ -373,27 +450,31 @@ dom.menuItems.forEach(item => {
     });
 });
 
-dom.toggleSidebar.addEventListener('click', () => dom.sidebar.classList.add('open'));
-dom.closeSidebar.addEventListener('click', () => dom.sidebar.classList.remove('open'));
+if(dom.toggleSidebar) dom.toggleSidebar.addEventListener('click', () => dom.sidebar.classList.add('open'));
+if(dom.closeSidebar) dom.closeSidebar.addEventListener('click', () => dom.sidebar.remove('open'));
 
 const initThemeMode = () => {
     const cachedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', cachedTheme);
-    dom.themeToggle.innerHTML = cachedTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-regular fa-moon"></i>';
+    if(dom.themeToggle) dom.themeToggle.innerHTML = cachedTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-regular fa-moon"></i>';
 };
 
-dom.themeToggle.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    dom.themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-regular fa-moon"></i>';
-    showToast(`Mode ${newTheme === 'dark' ? 'Gelap' : 'Terang'} aktif.`, 'success');
-});
+if(dom.themeToggle) {
+    dom.themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        dom.themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-regular fa-moon"></i>';
+        showToast(`Mode ${newTheme === 'dark' ? 'Gelap' : 'Terang'} aktif.`, 'success');
+    });
+}
 
 let weeklyChartInstance = null;
 const initWeeklyChart = () => {
-    const ctx = document.getElementById('weeklyChart').getContext('2d');
+    const canvas = document.getElementById('weeklyChart');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
     weeklyChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -420,13 +501,12 @@ const initAppDashboard = () => {
     document.querySelectorAll('.user-email').forEach(el => el.textContent = state.user.email);
 };
 
-
 // =========================================================================
 // FITUR EKSPOR REPORT PDF (TERSTRUKTUR)
 // =========================================================================
 const generateAttendancePDF = () => {
-    const filterText = dom.tableSearch.value.toLowerCase();
-    const statusSelect = dom.statusFilter.value;
+    const filterText = dom.tableSearch ? dom.tableSearch.value.toLowerCase() : "";
+    const statusSelect = dom.statusFilter ? dom.statusFilter.value : "all";
 
     // Filter data sesuai apa yang tampil di layar input user
     const filteredData = state.history.filter(item => {
@@ -474,7 +554,7 @@ const generateAttendancePDF = () => {
     doc.text(`Nama Karyawan : ${state.user.name}`, 14, 46);
     doc.text(`Jabatan / Divisi : ${state.user.role} / ${state.user.division}`, 14, 52);
     doc.text(`Email Resmi     : ${state.user.email}`, 14, 58);
-    doc.text(`Tanggal Cetak   : ${dom.txtDate.textContent}`, 14, 64);
+    doc.text(`Tanggal Cetak   : ${dom.txtDate ? dom.txtDate.textContent : "-"}`, 14, 64);
 
     // Info Filter Aktif
     if (statusSelect !== 'all' || filterText !== '') {
@@ -555,5 +635,10 @@ window.addEventListener('DOMContentLoaded', () => {
     // Event Listener PDF
     if(dom.btnDownloadPDF) dom.btnDownloadPDF.addEventListener('click', generateAttendancePDF);
     initThemeMode();
-    setTimeout(() => { dom.loader.style.opacity = '0'; dom.loader.style.visibility = 'hidden'; }, 600);
+    setTimeout(() => { 
+        if(dom.loader) {
+            dom.loader.style.opacity = '0'; 
+            dom.loader.style.visibility = 'hidden'; 
+        }
+    }, 600);
 });
