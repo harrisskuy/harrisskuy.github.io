@@ -1,6 +1,33 @@
 /**
  * Attenda - Premium Attendance System (With Selfie Verification & Excuse Management)
  */
+// 1. Import fungsi dari SDK Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+// 2. Konfigurasi Firebase milikmu
+const firebaseConfig = {
+  apiKey: "AIzaSyDZD0pTupUtyLpqHS4uGREaibcU7zdtWeY",
+  authDomain: "attenda-a3948.firebaseapp.com",
+  databaseURL: "https://attenda-a3948-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "attenda-a3948",
+  storageBucket: "attenda-a3948.firebasestorage.app",
+  messagingSenderId: "606148983468",
+  appId: "1:606148983468:web:4e6b8b28a657ce706f7d09",
+  measurementId: "G-7FFGRGG273"
+};
+
+// 3. Inisialisasi
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+console.log("Firebase dari script.js berhasil tersambung!");
+
+// Contoh test kirim data
+set(ref(database, 'test_koneksi'), {
+    status: "Sukses tersambung lewat script.js!",
+    waktu: new Date().toISOString()
+});
 
 // --- INITIAL DATA STATE ---
 const state = {
