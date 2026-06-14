@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HRIS Presensi - Dashboard Utama</title>
+    <title>HRIS Presensi Enterprise - Geofencing & Roster Shift System</title>
+    <!-- Google Fonts & Font Awesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -48,13 +49,11 @@
             line-height: 1.5;
         }
 
-        /* --- UI UTAMA / LAYOUT --- */
         .app-container {
             display: flex;
             min-height: 100vh;
         }
 
-        /* Sidebar Styling */
         aside {
             width: 260px;
             background: var(--bg-card);
@@ -103,7 +102,6 @@
             color: white;
         }
 
-        /* Main Content area */
         main {
             flex-grow: 1;
             padding: 2rem;
@@ -139,7 +137,6 @@
             font-weight: bold;
         }
 
-        /* --- SECTIONS (LOGIN & DASHBOARD) --- */
         .page-section {
             display: none;
         }
@@ -149,7 +146,6 @@
             animation: fadeIn 0.4s ease;
         }
 
-        /* Auth Screen */
         .auth-container {
             display: flex;
             align-items: center;
@@ -202,7 +198,6 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
         }
 
-        /* Utility Buttons */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -219,14 +214,14 @@
 
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-dark); }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-primary:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-danger:hover { opacity: 0.9; }
+        .btn-danger:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
 
-        /* --- DASHBOARD ELEMENTS --- */
         .grid-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -259,7 +254,6 @@
             margin-bottom: 2rem;
         }
 
-        /* Camera / Preview Area */
         .camera-panel {
             background: var(--bg-card);
             padding: 1.5rem;
@@ -271,7 +265,7 @@
         .webcam-wrapper {
             position: relative;
             width: 100%;
-            padding-top: 75%; /* 4:3 Aspect Ratio */
+            padding-top: 75%;
             background: #000;
             border-radius: 8px;
             overflow: hidden;
@@ -287,7 +281,6 @@
             object-fit: cover;
         }
 
-        /* Table & History CSS */
         .table-container {
             background: var(--bg-card);
             border-radius: 12px;
@@ -323,8 +316,8 @@
         }
         .status-badge.in { background: rgba(16, 185, 129, 0.1); color: var(--success); }
         .status-badge.out { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .status-badge.warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
 
-        /* UI Utilities (Toast, Spinner, Toggle) */
         .theme-toggle {
             cursor: pointer;
             font-size: 1.25rem;
@@ -365,12 +358,23 @@
             display: inline-block;
         }
 
-        /* --- ANIMASI --- */
+        .geofence-alert {
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .geofence-alert.success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .geofence-alert.danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- RESPONSIF MODES --- */
         @media (max-width: 768px) {
             .app-container { flex-direction: column; }
             aside { width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding: 1rem; }
@@ -383,32 +387,35 @@
 </head>
 <body>
 
+    <!-- HALAMAN OTENTIKASI (SECURE LOGIN JSON) -->
     <div id="authSection" class="auth-container">
         <div class="auth-card">
             <div class="brand" style="justify-content: center; margin-bottom: 1.5rem;">
-                <i class="fa-solid fa-fingerprint fa-2x"></i>
-                <h2>HRIS Portal</h2>
+                <i class="fa-solid fa-shield-halved fa-2x"></i>
+                <h2>HRIS Secure</h2>
             </div>
-            <form id="loginForm" onsubmit="handleLogin(event)">
+            <form id="loginForm" onsubmit="handleSecureLogin(event)">
                 <div class="form-group">
-                    <label for="empId">ID Karyawan</label>
-                    <input type="text" id="empId" class="form-control" placeholder="Contoh: EMP-1024" required>
+                    <label for="username">Username</label>
+                    <input type="text" id="username" class="form-control" placeholder="Masukkan username" required>
                 </div>
                 <div class="form-group">
-                    <label for="empName">Nama Lengkap</label>
-                    <input type="text" id="empName" class="form-control" placeholder="Nama Sesuai KTP" required>
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Masuk ke Dashboard</button>
+                <button type="submit" class="btn btn-primary">Masuk Sistem</button>
             </form>
         </div>
     </div>
 
+    <!-- MAIN PANEL APLIKASI -->
     <div id="appDashboard" class="app-container" style="display: none;">
+        <!-- Navigasi / Sidebar -->
         <aside>
             <div>
                 <div class="brand">
                     <i class="fa-solid fa-fingerprint"></i>
-                    <span>HRIS App</span>
+                    <span>HRIS Pro</span>
                 </div>
                 <ul class="nav-menu">
                     <li><a onclick="switchPage('dashboard')" id="nav-dashboard" class="nav-item active"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a></li>
@@ -424,72 +431,83 @@
             </div>
         </aside>
 
+        <!-- Area Konten Utama -->
         <main>
             <header>
                 <div>
-                    <h1 id="welcomeText">Halo, Pengguna</h1>
-                    <p style="color: var(--text-muted);" id="liveClock">Memuat Waktu Terkini...</p>
+                    <h1 id="welcomeText">Selamat Datang</h1>
+                    <p style="color: var(--text-muted);" id="liveClock">Sinkronisasi Waktu...</p>
                 </div>
                 <div class="user-profile">
-                    <div class="avatar" id="userAvatar">U</div>
+                    <div class="avatar" id="userAvatar">-</div>
                     <div>
-                        <h4 id="profileName">Nama Karyawan</h4>
-                        <small style="color: var(--text-muted);" id="profileId">ID Karyawan</small>
+                        <h4 id="profileName">-</h4>
+                        <small style="color: var(--text-muted);" id="profileId">-</small>
                     </div>
                 </div>
             </header>
 
+            <!-- SUB-PAGE: DASHBOARD UTAMA -->
             <section id="page-dashboard" class="page-section active">
                 <div class="grid-stats">
                     <div class="card">
                         <div class="card-icon" style="background: rgba(37,99,235,0.1); color: var(--primary);"><i class="fa-solid fa-calendar-day"></i></div>
-                        <div><small style="color: var(--text-muted);">Status Hari Ini</small><h3 id="statStatus">Belum Hadir</h3></div>
+                        <div><small style="color: var(--text-muted);">Status Kehadiran</small><h3 id="statStatus">Mengecek...</h3></div>
                     </div>
                     <div class="card">
                         <div class="card-icon" style="background: rgba(16,185,129,0.1); color: var(--success);"><i class="fa-solid fa-business-time"></i></div>
-                        <div><small style="color: var(--text-muted);">Jam Check In</small><h3 id="statCheckIn">--:--</h3></div>
+                        <div><small style="color: var(--text-muted);">Jadwal Shift Kerja</small><h3 id="statJadwal">--:--</h3></div>
                     </div>
                     <div class="card">
-                        <div class="card-icon" style="background: rgba(239,68,68,0.1); color: var(--danger);"><i class="fa-solid fa-door-open"></i></div>
-                        <div><small style="color: var(--text-muted);">Jam Check Out</small><h3 id="statCheckOut">--:--</h3></div>
+                        <div class="card-icon" style="background: rgba(245,158,11,0.1); color: var(--warning);"><i class="fa-solid fa-clock"></i></div>
+                        <div><small style="color: var(--text-muted);">Jam Check In</small><h3 id="statCheckIn">--:--</h3></div>
                     </div>
                 </div>
 
+                <!-- NOTIFIKASI VALIDASI RADIUS GEOFENCING -->
+                <div id="geofenceZoneStatus" class="geofence-alert danger">
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span>Mencari Koordinat GPS Anda...</span>
+                </div>
+
                 <div class="grid-actions">
+                    <!-- Kamera & Presensi -->
                     <div class="camera-panel">
-                        <h3 style="margin-bottom: 1rem; text-align: left;"><i class="fa-solid fa-camera"></i> Validasi Identitas & Lokasi</h3>
+                        <h3 style="margin-bottom: 1rem; text-align: left;"><i class="fa-solid fa-camera"></i> Verifikasi Wajah (Biometrik)</h3>
                         <div class="webcam-wrapper">
-                            <video id="webcam" autoplay playsinline class="active"></video>
+                            <video id="webcam" autoplay playsinline></video>
                             <canvas id="canvas" style="display:none;"></canvas>
                             <img id="photoPreview" style="display:none;" alt="Preview Foto">
                         </div>
                         <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
-                            <button id="btnCapture" onclick="capturePhoto()" class="btn btn-primary" style="background:#64748b;"><i class="fa-solid fa-camera-retro"></i> Ambil Foto Ulang</button>
+                            <button id="btnCapture" onclick="capturePhoto()" class="btn btn-primary" style="background:#64748b;"><i class="fa-solid fa-camera-retro"></i> Ambil Foto</button>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <button id="btnCheckIn" onclick="handleAttendance('Masuk')" class="btn btn-primary" style="background: var(--success);"><i class="fa-solid fa-sign-in-alt"></i> Check In</button>
+                            <button id="btnCheckIn" onclick="handleAttendance('Masuk')" class="btn btn-primary" style="background: var(--success);" disabled><i class="fa-solid fa-sign-in-alt"></i> Check In</button>
                             <button id="btnCheckOut" onclick="handleAttendance('Pulang')" class="btn btn-danger" disabled><i class="fa-solid fa-sign-out-alt"></i> Check Out</button>
                         </div>
                     </div>
 
+                    <!-- Detail Titik Koordinat -->
                     <div class="card" style="flex-direction: column; align-items: flex-start; justify-content: flex-start; padding: 1.5rem;">
-                        <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-map-location-dot"></i> Telemetri Geolokasi</h3>
+                        <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-map-location-dot"></i> Telemetri Titik GPS</h3>
                         <div class="form-group" style="width: 100%;">
                             <label>Garis Lintang (Latitude)</label>
-                            <input type="text" id="geoLat" class="form-control" readonly placeholder="Mencari GPS...">
+                            <input type="text" id="geoLat" class="form-control" readonly placeholder="Mencari lintang...">
                         </div>
                         <div class="form-group" style="width: 100%;">
                             <label>Garis Bujur (Longitude)</label>
-                            <input type="text" id="geoLng" class="form-control" readonly placeholder="Mencari GPS...">
+                            <input type="text" id="geoLng" class="form-control" readonly placeholder="Mencari bujur...">
                         </div>
-                        <div id="geoStatus" style="font-size:0.875rem; margin-bottom: 1rem; font-weight: 500;">
-                            <i class="fa-solid fa-circle-notch fa-spin"></i> Menghubungkan ke Satelit GPS...
+                        <div class="form-group" style="width: 100%;">
+                            <label>Jarak Anda ke Kantor</label>
+                            <input type="text" id="geoDistance" class="form-control" readonly style="font-weight:bold; color:var(--primary);" placeholder="Menghitung jarak...">
                         </div>
-                        <a id="geoMapLink" target="_blank" class="btn btn-primary" style="background: #0f172a; text-decoration: none; width: auto; display:none;"><i class="fa-solid fa-map-pin"></i> Lihat di Google Maps</a>
+                        <a id="geoMapLink" target="_blank" class="btn btn-primary" style="background: #0f172a; text-decoration: none; width: auto; display:none;"><i class="fa-solid fa-map-pin"></i> Lihat Lokasi Saya</a>
                     </div>
                 </div>
             </section>
 
+            <!-- SUB-PAGE: RIWAYAT LOG -->
             <section id="page-history" class="page-section">
                 <h2 style="margin-bottom: 1.5rem;">Log Riwayat Absensi Anda</h2>
                 <div class="table-container">
@@ -502,7 +520,7 @@
                                 <th>Masuk</th>
                                 <th>Pulang</th>
                                 <th>Koordinat</th>
-                                <th>Status</th>
+                                <th>Status Kehadiran</th>
                             </tr>
                         </thead>
                         <tbody id="historyTableBody">
@@ -516,26 +534,37 @@
         </main>
     </div>
 
+    <!-- Wadah Toast Notifikasi -->
     <div id="toast-container"></div>
 
     <script>
-        // CONFIGURATION GOOGLE APPS SCRIPT WEB APP URL
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw41uzQ2xCkdImxhCPtqbtPgM3KvFxBel8viwqywcoqBtWvTLLb4llmbeKXYWsY1pEl/exec";
+        // ==========================================
+        // 1. KONFIGURASI BACKEND CLOUD & GEOFENCING
+        // ==========================================
+        const SCRIPT_URL = "PASTE_GOOGLE_APPS_SCRIPT_URL_HERE";
 
-        // Global Application State
+        // Konfigurasi Target Koordinat Pusat Kantor & Jarak Toleransi Radius Maksimal
+        const KANTOR_CONFIG = {
+            latitude: -6.9024812, 
+            longitude: 107.6187212,
+            maxRadiusMeter: 100 // Karyawan harus berada < 100 meter dari koordinat di atas
+        };
+
+        // ==========================================
+        // 2. STATE INTERN UTAMA APLIKASI
+        // ==========================================
         let currentUser = null;
         let localStream = null;
         let base64Photo = null;
         let currentPosition = { lat: null, lng: null };
+        let isWithinGeofence = false;
 
-        // Inisialisasi Aplikasi Saat Berhasil Dimuat
         window.addEventListener('DOMContentLoaded', () => {
             initClock();
             checkSession();
             initTheme();
         });
 
-        // Loop Jam Real-time 
         function initClock() {
             const clockEl = document.getElementById('liveClock');
             setInterval(() => {
@@ -545,9 +574,20 @@
             }, 1000);
         }
 
-        // Memeriksa status sesi di LocalStorage
+        // Pembantu konversi tanggal lokal ke format pencocokan JSON (YYYY-MM-DD)
+        function getTodayISOString() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // ==========================================
+        // 3. SECURE AUTHENTICATION FETCH ENGINE
+        // ==========================================
         function checkSession() {
-            const session = localStorage.getItem('hris_session');
+            const session = localStorage.getItem('hris_secure_session');
             if (session) {
                 currentUser = JSON.parse(session);
                 document.getElementById('authSection').style.display = 'none';
@@ -562,80 +602,180 @@
             }
         }
 
-        function handleLogin(e) {
+        async function handleSecureLogin(e) {
             e.preventDefault();
-            const id = sanitizeInput(document.getElementById('empId').value);
-            const name = sanitizeInput(document.getElementById('empName').value);
+            const userIn = document.getElementById('username').value.trim();
+            const passIn = document.getElementById('password').value.trim();
 
-            if(!id || !name) {
-                showToast("ID dan Nama wajib diisi secara valid!", "danger");
-                return;
+            try {
+                // 1. Ambil data login kolektif dari file JSON eksternal
+                const responseAuth = await fetch('./datalogin.json');
+                if (!responseAuth.ok) throw new Error("Gagal memuat database login (/datalogin.json).");
+                
+                const databaseKaryawan = await responseAuth.json();
+                const accountFound = databaseKaryawan.find(u => u.username === userIn && u.password === passIn);
+
+                if (accountFound) {
+                    // 2. Sukses login, langsung panggil berkas roster shift spesifik milik username tersebut
+                    const responseShift = await fetch(`./shift/${userIn}.json`);
+                    if (!responseShift.ok) throw new Error(`Berkas roster shift (/shift/${userIn}.json) tidak ditemukan.`);
+                    
+                    const dataJadwal = await responseShift.json();
+
+                    // 3. Bundling profil dan kalender shift ke session data
+                    currentUser = {
+                        employeeId: accountFound.employeeId,
+                        employeeName: accountFound.employeeName,
+                        username: accountFound.username,
+                        jadwal: dataJadwal
+                    };
+
+                    localStorage.setItem('hris_secure_session', JSON.stringify(currentUser));
+                    showToast(`Autentikasi Berhasil, Halo ${currentUser.employeeName}`, "success");
+                    checkSession();
+                } else {
+                    showToast("Username atau Password salah!", "danger");
+                }
+            } catch (err) {
+                showToast(`Sistem Error: ${err.message}`, "danger");
+                console.error(err);
             }
-
-            currentUser = { employeeId: id, employeeName: name };
-            localStorage.setItem('hris_session', JSON.stringify(currentUser));
-            showToast("Autentikasi berhasil, selamat datang!", "success");
-            checkSession();
         }
 
         function handleLogout() {
-            localStorage.removeItem('hris_session');
+            localStorage.removeItem('hris_secure_session');
             currentUser = null;
-            showToast("Anda telah keluar dengan aman.", "success");
+            showToast("Sesi ditutup dengan aman.", "success");
             checkSession();
         }
 
         function setupDashboardUI() {
-            document.getElementById('welcomeText').innerText = `Selamat Bekerja, ${currentUser.employeeName}!`;
+            document.getElementById('welcomeText').innerText = `Kanal Presensi: ${currentUser.employeeName}`;
             document.getElementById('profileName').innerText = currentUser.employeeName;
             document.getElementById('profileId').innerText = currentUser.employeeId;
             document.getElementById('userAvatar').innerText = currentUser.employeeName.charAt(0).toUpperCase();
             
-            // Mengatur status tombol berdasarkan presensi harian local cache jika diperlukan
+            const todayISO = getTodayISOString();
+            const jadwals = currentUser.jadwal;
+
+            // Cari kecocokan tanggal hari ini di dalam berkas kalender shift JSON
+            if (jadwals && jadwals[todayISO]) {
+                const jadwalHariIni = jadwals[todayISO];
+                
+                if (jadwalHariIni.jamMasukMulai === "OFF") {
+                    document.getElementById('statJadwal').innerText = "LIBUR (OFF)";
+                    document.getElementById('statStatus').innerText = "Hari Libur Kerja";
+                    document.getElementById('btnCheckIn').disabled = true;
+                    document.getElementById('btnCheckOut').disabled = true;
+                    showToast("Hari ini Anda dijadwalkan libur (OFF).", "warning");
+                    return;
+                } else {
+                    document.getElementById('statJadwal').innerText = `${jadwalHariIni.jamMasukMulai} - ${jadwalHariIni.jamPulang}`;
+                }
+            } else {
+                document.getElementById('statJadwal').innerText = "Tidak Ada Jadwal";
+                document.getElementById('statStatus').innerText = "Jadwal Belum Diatur";
+                document.getElementById('btnCheckIn').disabled = true;
+                document.getElementById('btnCheckOut').disabled = true;
+                return;
+            }
+            
             const todayStr = new Date().toLocaleDateString('id-ID');
             const savedLog = localStorage.getItem(`absensi_${currentUser.employeeId}_${todayStr}`);
+            document.getElementById('statStatus').innerText = "Belum Hadir";
+            
             if(savedLog) {
                 const data = JSON.parse(savedLog);
                 if(data.checkInTime) {
                     document.getElementById('statCheckIn').innerText = data.checkInTime;
-                    document.getElementById('statStatus').innerText = "Sudah Absen Masuk";
-                    document.getElementById('btnCheckIn').disabled = true;
-                    document.getElementById('btnCheckOut').disabled = false;
-                }
-                if(data.checkOutTime) {
-                    document.getElementById('statCheckOut').innerText = data.checkOutTime;
-                    document.getElementById('statStatus').innerText = "Selesai Kerja (Check Out)";
-                    document.getElementById('btnCheckOut').disabled = true;
+                    document.getElementById('statStatus').innerText = "Sudah Masuk";
                 }
             }
+            
+            updateAttendanceButtonsState();
         }
 
-        // Mengganti Sub-halaman (SPA Navigation)
         function switchPage(pageId) {
             document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            
             document.getElementById(`page-${pageId}`).classList.add('active');
             document.getElementById(`nav-${pageId}`).classList.add('active');
+            if(pageId === 'history') loadAttendanceHistory();
+        }
 
-            if(pageId === 'history') {
-                loadAttendanceHistory();
+        // ==========================================
+        // 4. GEOLOCATION & MATHEMATICAL GEOFENCING
+        // ==========================================
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Radius bumi dalam satuan meter
+            const phi1 = lat1 * Math.PI / 180;
+            const phi2 = lat2 * Math.PI / 180;
+            const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+            const deltaLambda = (lon2 - lon1) * Math.PI / 180;
+
+            const a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
+                      Math.cos(phi1) * Math.cos(phi2) *
+                      Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function verifyGeofenceLocation(lat, lng) {
+            const distance = calculateDistance(lat, lng, KANTOR_CONFIG.latitude, KANTOR_CONFIG.longitude);
+            const distanceEl = document.getElementById('geoDistance');
+            const alertZone = document.getElementById('geofenceZoneStatus');
+            
+            distanceEl.value = `${distance.toFixed(1)} Meter dari Kantor`;
+
+            if (distance <= KANTOR_CONFIG.maxRadiusMeter) {
+                isWithinGeofence = true;
+                alertZone.className = "geofence-alert success";
+                alertZone.innerHTML = `<i class="fa-solid fa-circle-check"></i> Radius Terbuka! Anda berada di dalam area kantor untuk melakukan absensi.`;
+                updateAttendanceButtonsState();
+            } else {
+                isWithinGeofence = false;
+                alertZone.className = "geofence-alert danger";
+                alertZone.innerHTML = `<i class="fa-solid fa-ban"></i> Radius Terkunci! Anda berada di luar batas area absensi kantor.`;
+                document.getElementById('btnCheckIn').disabled = true;
+                document.getElementById('btnCheckOut').disabled = true;
             }
         }
 
-        // --- HARDWARE INTEGRATION (CAMERA & GEOLOCATION) ---
-        async function initHardware() {
-            // Jalankan Geolocation API
-            getLocation();
+        function updateAttendanceButtonsState() {
+            if (!isWithinGeofence || !currentUser) return;
             
-            // Jalankan Kamera API Media Device
+            const todayISO = getTodayISOString();
+            if (currentUser.jadwal && currentUser.jadwal[todayISO] && currentUser.jadwal[todayISO].jamMasukMulai === "OFF") return;
+
+            const todayStr = new Date().toLocaleDateString('id-ID');
+            const savedLog = localStorage.getItem(`absensi_${currentUser.employeeId}_${todayStr}`);
+            
+            if (!savedLog) {
+                document.getElementById('btnCheckIn').disabled = false;
+                document.getElementById('btnCheckOut').disabled = true;
+            } else {
+                const data = JSON.parse(savedLog);
+                if (data.checkInTime && !data.checkOutTime) {
+                    document.getElementById('btnCheckIn').disabled = true;
+                    document.getElementById('btnCheckOut').disabled = false;
+                } else if (data.checkInTime && data.checkOutTime) {
+                    document.getElementById('btnCheckIn').disabled = true;
+                    document.getElementById('btnCheckOut').disabled = true;
+                    document.getElementById('statStatus').innerText = "Selesai Kerja";
+                }
+            }
+        }
+
+        // ==========================================
+        // 5. INTEGRASI PERANGKAT KERAS (HARDWARE)
+        // ==========================================
+        async function initHardware() {
+            startTrackingLocation();
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-                const video = document.getElementById('webcam');
-                video.srcObject = localStream;
+                document.getElementById('webcam').srcObject = localStream;
             } catch (err) {
-                showToast("Akses kamera ditolak atau tidak ditemukan!", "danger");
-                console.error(err);
+                showToast("Akses kamera ditolak atau tidak terpasang!", "danger");
             }
         }
 
@@ -646,31 +786,31 @@
             }
         }
 
-        function getLocation() {
-            const statusEl = document.getElementById('geoStatus');
+        function startTrackingLocation() {
             if (!navigator.geolocation) {
-                statusEl.innerHTML = "<i class='fa-solid fa-circle-xmark' style='color:var(--danger);'></i> GPS tidak didukung browser.";
+                showToast("Browser tidak mendukung sensor GPS.", "danger");
                 return;
             }
 
-            navigator.geolocation.getCurrentPosition(
+            navigator.geolocation.watchPosition(
                 (position) => {
                     currentPosition.lat = position.coords.latitude;
                     currentPosition.lng = position.coords.longitude;
                     
                     document.getElementById('geoLat').value = currentPosition.lat;
                     document.getElementById('geoLng').value = currentPosition.lng;
-                    statusEl.innerHTML = "<i class='fa-solid fa-circle-check' style='color:var(--success);'></i> Lokasi Terkunci (Akurat)";
                     
                     const mapLink = document.getElementById('geoMapLink');
-                    mapLink.href = `https://www.google.com/maps?q=${currentPosition.lat},${currentPosition.lng}`;
+                    mapLink.href = `https://maps.google.com/?q=${currentPosition.lat},${currentPosition.lng}`;
                     mapLink.style.display = "inline-flex";
+
+                    verifyGeofenceLocation(currentPosition.lat, currentPosition.lng);
                 },
-                (error) => {
-                    statusEl.innerHTML = "<i class='fa-solid fa-triangle-exclamation' style='color:var(--warning);'></i> Gagal mengunci GPS. Pastikan izin aktif.";
-                    showToast("Gagal memperoleh koordinat GPS.", "danger");
+                (err) => {
+                    document.getElementById('geofenceZoneStatus').innerText = "Gagal memuat GPS. Harap hidupkan lokasi perangkat Anda.";
+                    showToast("Sinyal GPS lemah atau diblokir.", "danger");
                 },
-                { enableHighAccuracy: true, timeout: 10000 }
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
             );
         }
 
@@ -680,26 +820,16 @@
             const preview = document.getElementById('photoPreview');
             const btnCapture = document.getElementById('btnCapture');
 
-            if (!localStream) {
-                showToast("Kamera tidak aktif atau terganggu.", "danger");
-                return;
-            }
-
             if (video.style.display !== 'none') {
-                // Proses Ambil Snapshot Foto
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                base64Photo = canvas.toDataURL('image/jpeg', 0.7); // Kompresi Kualitas 70%
+                base64Photo = canvas.toDataURL('image/jpeg', 0.6);
                 preview.src = base64Photo;
-                
                 video.style.display = 'none';
                 preview.style.display = 'block';
-                btnCapture.innerHTML = "<i class='fa-solid fa-camera-rotate'></i> Ambil Gambar Ulang";
-                showToast("Snapshot tersimpan dalam cache sementara.", "success");
+                btnCapture.innerHTML = "<i class='fa-solid fa-camera-rotate'></i> Foto Ulang";
             } else {
-                // Mengembalikan Tampilan Kamera Hidup
                 video.style.display = 'block';
                 preview.style.display = 'none';
                 base64Photo = null;
@@ -707,41 +837,59 @@
             }
         }
 
-        // --- SUBMIT CORE BUSINESS LOGIC TO SERVER ---
+        // ==========================================
+        // 6. CORE LOGIC EVALUASI ROSTER SHIFT & CLOUD POST
+        // ==========================================
         async function handleAttendance(type) {
             const targetBtn = type === 'Masuk' ? document.getElementById('btnCheckIn') : document.getElementById('btnCheckOut');
             
-            // Validasi kelengkapan data pre-submit
-            if(!base64Photo) {
-                showToast("Anda wajib melakukan pengambilan foto verifikasi wajah!", "warning");
+            if (!isWithinGeofence) {
+                showToast("Anda berada di luar jangkauan validasi koordinat kantor!", "danger");
                 return;
             }
-            if(!currentPosition.lat || !currentPosition.lng) {
-                showToast("Menunggu sinyal koordinat GPS akurat.", "warning");
+            if (!base64Photo) {
+                showToast("Wajib mengambil foto verifikasi wajah.", "warning");
                 return;
             }
 
-            // Mencegah Double Submit / Lock UI
             targetBtn.disabled = true;
             const originalText = targetBtn.innerHTML;
-            targetBtn.innerHTML = `<span class="spinner"></span> Sinkronisasi...`;
+            targetBtn.innerHTML = `<span class="spinner"></span> Memproses...`;
 
             const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+            const todayISO = getTodayISOString();
+            const jadwalHariIni = currentUser.jadwal[todayISO];
+
+            // Algoritma Evaluasi Jadwal Roster Berdasarkan data JSON Tanggal Hari Ini
+            let statusKehadiran = "Hadir Tepat Waktu";
+            
+            if (type === 'Masuk') {
+                if (timeString > jadwalHariIni.jamMasukSelesai) {
+                    statusKehadiran = `Terlambat (Jadwal: ${jadwalHariIni.jamMasukMulai})`;
+                } else {
+                    statusKehadiran = `Tepat Waktu (Jadwal: ${jadwalHariIni.jamMasukMulai})`;
+                }
+            } else {
+                if (timeString < jadwalHariIni.jamPulang) {
+                    statusKehadiran = `Pulang Cepat (Jadwal Pulang: ${jadwalHariIni.jamPulang})`;
+                } else {
+                    statusKehadiran = `Pulang Sesuai Jadwal (${jadwalHariIni.jamPulang})`;
+                }
+            }
+
             const payload = {
                 action: type === 'Masuk' ? 'checkIn' : 'checkOut',
                 employeeId: currentUser.employeeId,
                 employeeName: currentUser.employeeName,
                 date: now.toLocaleDateString('id-ID'),
-                time: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                time: timeString,
                 latitude: currentPosition.lat,
                 longitude: currentPosition.lng,
-                mapsLink: `https://www.google.com/maps?q=${currentPosition.lat},${currentPosition.lng}`,
-                photoBase64: base64Photo
+                mapsLink: `https://maps.google.com/?q=${currentPosition.lat},${currentPosition.lng}`,
+                photoBase64: base64Photo,
+                status: statusKehadiran
             };
-
-            // Melakukan Request Melalui Fetch API Menggunakan Timeout Controller
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 25000); // Timeout 25 Detik
 
             try {
                 const response = await fetch(SCRIPT_URL, {
@@ -752,42 +900,31 @@
                 });
 
                 const result = await response.json();
-                clearTimeout(timeoutId);
 
-                if(result.status === 'success') {
-                    showToast(`Presensi ${type} berhasil dikirim ke Cloud Server HRIS!`, "success");
+                if (result.status === 'success') {
+                    showToast(`Presensi Sukses: ${statusKehadiran}`, "success");
                     
-                    // Update Cache Lokal
                     const todayStr = now.toLocaleDateString('id-ID');
                     let dayLog = JSON.parse(localStorage.getItem(`absensi_${currentUser.employeeId}_${todayStr}`)) || {};
                     if(type === 'Masuk') dayLog.checkInTime = payload.time;
                     else dayLog.checkOutTime = payload.time;
+                    
                     localStorage.setItem(`absensi_${currentUser.employeeId}_${todayStr}`, JSON.stringify(dayLog));
-
                     setupDashboardUI();
                 } else {
-                    throw new Error(result.message || "Penolakan internal dari sistem cloud.");
+                    throw new Error(result.message);
                 }
-
             } catch (err) {
-                clearTimeout(timeoutId);
                 targetBtn.disabled = false;
                 targetBtn.innerHTML = originalText;
-                
-                if (err.name === 'AbortError') {
-                    showToast("Koneksi Timeout! Sinyal internet tidak stabil.", "danger");
-                } else {
-                    showToast(`Kritikal Error: ${err.message}`, "danger");
-                }
-                console.error(err);
+                showToast(`Koneksi Gagal: ${err.message}`, "danger");
             }
         }
 
-        // Mengambil Riwayat Absen Kolektif Dari Cloud Spreadsheet
         async function loadAttendanceHistory() {
             const tableBody = document.getElementById('historyTableBody');
             if(SCRIPT_URL === "PASTE_GOOGLE_APPS_SCRIPT_URL_HERE") {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--warning);">Harap selesaikan konfigurasi URL Web App script terlebih dahulu!</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--warning);">Tautkan URL Apps Script Anda terlebih dahulu!</td></tr>`;
                 return;
             }
 
@@ -797,8 +934,11 @@
 
                 if(resData.status === 'success' && resData.data.length > 0) {
                     tableBody.innerHTML = "";
-                    // Memetakan seluruh baris data ke tabel
                     resData.data.forEach(row => {
+                        let badgeClass = "in";
+                        if(row.status && (row.status.includes("Terlambat") || row.status.includes("Pulang Cepat"))) badgeClass = "warning";
+                        if(row.status && row.status.includes("Pulang Sesuai")) badgeClass = "out";
+
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td><b>${row.date}</b></td>
@@ -806,42 +946,33 @@
                             <td>${row.name}</td>
                             <td><i class="fa-solid fa-right-to-bracket" style="color:var(--success)"></i> ${row.checkIn || '--:--'}</td>
                             <td><i class="fa-solid fa-right-from-bracket" style="color:var(--danger)"></i> ${row.checkOut || '--:--'}</td>
-                            <td><a href="${row.mapsLink}" target="_blank" style="color:var(--primary); text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i> Buka Peta</a></td>
-                            <td><span class="status-badge ${row.checkOut ? 'out' : 'in'}">${row.checkOut ? 'Selesai' : 'Aktif'}</span></td>
+                            <td><a href="${row.mapsLink}" target="_blank" style="color:var(--primary); text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i> Peta</a></td>
+                            <td><span class="status-badge ${badgeClass}">${row.status || 'Hadir'}</span></td>
                         `;
                         tableBody.appendChild(tr);
                     });
                 } else {
-                    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted);">Belum ada rekam riwayat di Cloud Server untuk Anda.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted);">Belum ada riwayat terekam.</td></tr>`;
                 }
             } catch (err) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--danger);">Gagal sinkronisasi data riwayat dari Google Sheets.</td></tr>`;
-                console.error(err);
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--danger);">Gagal mengambil riwayat.</td></tr>`;
             }
         }
 
-        // --- UTILITY SCRIPT (UI TOAST, SANITATION, DARK MODE) ---
+        // ==========================================
+        // 7. UI UTILITIES (TOAST & DARK MODE)
+        // ==========================================
         function showToast(message, type = "primary") {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast`;
-            
             let icon = '<i class="fa-solid fa-circle-info" style="color:var(--primary)"></i>';
             if(type === 'success') { toast.style.borderLeftColor = 'var(--success)'; icon = '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>'; }
             if(type === 'danger') { toast.style.borderLeftColor = 'var(--danger)'; icon = '<i class="fa-solid fa-circle-exclamation" style="color:var(--danger)"></i>'; }
             if(type === 'warning') { toast.style.borderLeftColor = 'var(--warning)'; icon = '<i class="fa-solid fa-triangle-exclamation" style="color:var(--warning)"></i>'; }
-
             toast.innerHTML = `${icon} <span>${message}</span>`;
             container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.animation = "fadeIn 0.3s ease reverse";
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        function sanitizeInput(str) {
-            return str.replace(/[^a-zA-Z0-9 ]/g, "").trim();
+            setTimeout(() => { toast.style.animation = "fadeIn 0.3s ease reverse"; setTimeout(() => toast.remove(), 300); }, 4000);
         }
 
         function initTheme() {
@@ -860,13 +991,8 @@
 
         function updateThemeIcon(theme) {
             const btn = document.getElementById('themeBtn');
-            if(theme === 'dark') {
-                btn.className = "fa-solid fa-sun theme-toggle";
-                btn.style.color = "var(--warning)";
-            } else {
-                btn.className = "fa-solid fa-moon theme-toggle";
-                btn.style.color = "var(--text-muted)";
-            }
+            if(theme === 'dark') { btn.className = "fa-solid fa-sun theme-toggle"; btn.style.color = "var(--warning)"; }
+            else { btn.className = "fa-solid fa-moon theme-toggle"; btn.style.color = "var(--text-muted)"; }
         }
     </script>
 </body>
