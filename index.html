@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HRIS Presensi Enterprise - Geofencing & Roster Shift System</title>
+    
+    <!-- HUBUNGKAN KE MANIFEST PWA -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    
     <!-- Google Fonts & Font Awesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -218,6 +223,10 @@
         .btn-danger { background: var(--danger); color: white; }
         .btn-danger:hover { opacity: 0.9; }
         .btn-danger:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
+        
+        /* Gaya Khusus Tombol Install */
+        .btn-success { background: var(--success); color: white; margin-top: 1rem; }
+        .btn-success:hover { opacity: 0.9; }
 
         .grid-stats {
             display: grid;
@@ -302,7 +311,7 @@
         }
 
         th {
-            background: var(--bg-main);
+            background: var(--main);
             color: var(--text-muted);
             font-weight: 600;
         }
@@ -405,6 +414,11 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Masuk Sistem</button>
             </form>
+            
+            <!-- TOMBOL INSTAL APLIKASI (Sembunyi otomatis jika sudah terinstal) -->
+            <button id="btnInstallPWA" class="btn btn-success" style="display: none;">
+                <i class="fa-solid fa-download"></i> INSTAL APLIKASI
+            </button>
         </div>
     </div>
 
@@ -479,7 +493,7 @@
                             <img id="photoPreview" style="display:none;" alt="Preview Foto">
                         </div>
                         <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
-                            <button id="btnCapture" onclick="capturePhoto()" class="btn btn-primary" style="background:#64748b;"><i class="fa-solid fa-camera-retro"></i> Ambil Foto</button>
+                            <button id="btnCapture" onclick="capturePhoto()" class="btn btn-primary" style="background:#64748b;"><i class="fa-solid fa-camera-rotate"></i> Ambil Foto</button>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                             <button id="btnCheckIn" onclick="handleAttendance('Masuk')" class="btn btn-primary" style="background: var(--success);" disabled><i class="fa-solid fa-sign-in-alt"></i> Check In</button>
@@ -538,21 +552,14 @@
     <div id="toast-container"></div>
 
     <script>
-        // ==========================================
-        // 1. KONFIGURASI BACKEND CLOUD & GEOFENCING
-        // ==========================================
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw41uzQ2xCkdImxhCPtqbtPgM3KvFxBel8viwqywcoqBtWvTLLb4llmbeKXYWsY1pEl/exec";
 
-        // Konfigurasi Target Koordinat Pusat Kantor & Jarak Toleransi Radius Maksimal
         const KANTOR_CONFIG = {
-            latitude: -7.3098335, 
-            longitude: 112.7772155,
-            maxRadiusMeter: 100 // Karyawan harus berada < 100 meter dari koordinat di atas
+            latitude: -7.3079867, 
+            longitude: 112.7851821,
+            maxRadiusMeter: 1500 
         };
 
-        // ==========================================
-        // 2. STATE INTERN UTAMA APLIKASI
-        // ==========================================
         let currentUser = null;
         let localStream = null;
         let base64Photo = null;
@@ -574,7 +581,6 @@
             }, 1000);
         }
 
-        // Pembantu konversi tanggal lokal ke format pencocokan JSON (YYYY-MM-DD)
         function getTodayISOString() {
             const d = new Date();
             const year = d.getFullYear();
@@ -583,9 +589,6 @@
             return `${year}-${month}-${day}`;
         }
 
-        // ==========================================
-        // 3. SECURE AUTHENTICATION FETCH ENGINE
-        // ==========================================
         function checkSession() {
             const session = localStorage.getItem('hris_secure_session');
             if (session) {
@@ -608,21 +611,18 @@
             const passIn = document.getElementById('password').value.trim();
 
             try {
-                // 1. Ambil data login kolektif dari file JSON eksternal
                 const responseAuth = await fetch('./datalogin.json');
-                if (!responseAuth.ok) throw new Error("Gagal memuat database login (/datalogin.json).");
+                if (!responseAuth.ok) throw new Error("Gagal memuat database login.");
                 
                 const databaseKaryawan = await responseAuth.json();
                 const accountFound = databaseKaryawan.find(u => u.username === userIn && u.password === passIn);
 
                 if (accountFound) {
-                    // 2. Sukses login, langsung panggil berkas roster shift spesifik milik username tersebut
                     const responseShift = await fetch(`./shift/${userIn}.json`);
-                    if (!responseShift.ok) throw new Error(`Berkas roster shift (/shift/${userIn}.json) tidak ditemukan.`);
+                    if (!responseShift.ok) throw new Error(`Berkas roster shift tidak ditemukan.`);
                     
                     const dataJadwal = await responseShift.json();
 
-                    // 3. Bundling profil dan kalender shift ke session data
                     currentUser = {
                         employeeId: accountFound.employeeId,
                         employeeName: accountFound.employeeName,
@@ -658,10 +658,8 @@
             const todayISO = getTodayISOString();
             const jadwals = currentUser.jadwal;
 
-            // Cari kecocokan tanggal hari ini di dalam berkas kalender shift JSON
             if (jadwals && jadwals[todayISO]) {
                 const jadwalHariIni = jadwals[todayISO];
-                
                 if (jadwalHariIni.jamMasukMulai === "OFF") {
                     document.getElementById('statJadwal').innerText = "LIBUR (OFF)";
                     document.getElementById('statStatus').innerText = "Hari Libur Kerja";
@@ -691,7 +689,6 @@
                     document.getElementById('statStatus').innerText = "Sudah Masuk";
                 }
             }
-            
             updateAttendanceButtonsState();
         }
 
@@ -703,39 +700,32 @@
             if(pageId === 'history') loadAttendanceHistory();
         }
 
-        // ==========================================
-        // 4. GEOLOCATION & MATHEMATICAL GEOFENCING
-        // ==========================================
         function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; // Radius bumi dalam satuan meter
+            const R = 6371e3; 
             const phi1 = lat1 * Math.PI / 180;
             const phi2 = lat2 * Math.PI / 180;
             const deltaPhi = (lat2 - lat1) * Math.PI / 180;
             const deltaLambda = (lon2 - lon1) * Math.PI / 180;
-
             const a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
-                      Math.cos(phi1) * Math.cos(phi2) *
-                      Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
+                      Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
         function verifyGeofenceLocation(lat, lng) {
             const distance = calculateDistance(lat, lng, KANTOR_CONFIG.latitude, KANTOR_CONFIG.longitude);
             const distanceEl = document.getElementById('geoDistance');
             const alertZone = document.getElementById('geofenceZoneStatus');
-            
             distanceEl.value = `${distance.toFixed(1)} Meter dari Kantor`;
 
             if (distance <= KANTOR_CONFIG.maxRadiusMeter) {
                 isWithinGeofence = true;
                 alertZone.className = "geofence-alert success";
-                alertZone.innerHTML = `<i class="fa-solid fa-circle-check"></i> Radius Terbuka! Anda berada di dalam area kantor untuk melakukan absensi.`;
+                alertZone.innerHTML = `<i class="fa-solid fa-circle-check"></i> Radius Terbuka! Anda berada di dalam area kantor.`;
                 updateAttendanceButtonsState();
             } else {
                 isWithinGeofence = false;
                 alertZone.className = "geofence-alert danger";
-                alertZone.innerHTML = `<i class="fa-solid fa-ban"></i> Radius Terkunci! Anda berada di luar batas area absensi kantor.`;
+                alertZone.innerHTML = `<i class="fa-solid fa-ban"></i> Radius Terkunci! Anda berada di luar batas area absensi.`;
                 document.getElementById('btnCheckIn').disabled = true;
                 document.getElementById('btnCheckOut').disabled = true;
             }
@@ -743,7 +733,6 @@
 
         function updateAttendanceButtonsState() {
             if (!isWithinGeofence || !currentUser) return;
-            
             const todayISO = getTodayISOString();
             if (currentUser.jadwal && currentUser.jadwal[todayISO] && currentUser.jadwal[todayISO].jamMasukMulai === "OFF") return;
 
@@ -766,16 +755,13 @@
             }
         }
 
-        // ==========================================
-        // 5. INTEGRASI PERANGKAT KERAS (HARDWARE)
-        // ==========================================
         async function initHardware() {
             startTrackingLocation();
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
                 document.getElementById('webcam').srcObject = localStream;
             } catch (err) {
-                showToast("Akses kamera ditolak atau tidak terpasang!", "danger");
+                showToast("Akses kamera ditolak!", "danger");
             }
         }
 
@@ -787,29 +773,18 @@
         }
 
         function startTrackingLocation() {
-            if (!navigator.geolocation) {
-                showToast("Browser tidak mendukung sensor GPS.", "danger");
-                return;
-            }
-
+            if (!navigator.geolocation) return;
             navigator.geolocation.watchPosition(
                 (position) => {
                     currentPosition.lat = position.coords.latitude;
                     currentPosition.lng = position.coords.longitude;
-                    
                     document.getElementById('geoLat').value = currentPosition.lat;
                     document.getElementById('geoLng').value = currentPosition.lng;
-                    
-                    const mapLink = document.getElementById('geoMapLink');
-                    mapLink.href = `https://maps.google.com/?q=${currentPosition.lat},${currentPosition.lng}`;
-                    mapLink.style.display = "inline-flex";
-
+                    document.getElementById('geoMapLink').href = `https://maps.google.com/?q=${currentPosition.lat},${currentPosition.lng}`;
+                    document.getElementById('geoMapLink').style.display = "inline-flex";
                     verifyGeofenceLocation(currentPosition.lat, currentPosition.lng);
                 },
-                (err) => {
-                    document.getElementById('geofenceZoneStatus').innerText = "Gagal memuat GPS. Harap hidupkan lokasi perangkat Anda.";
-                    showToast("Sinyal GPS lemah atau diblokir.", "danger");
-                },
+                (err) => { showToast("Sinyal GPS lemah.", "danger"); },
                 { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
             );
         }
@@ -837,20 +812,9 @@
             }
         }
 
-        // ==========================================
-        // 6. CORE LOGIC EVALUASI ROSTER SHIFT & CLOUD POST
-        // ==========================================
         async function handleAttendance(type) {
             const targetBtn = type === 'Masuk' ? document.getElementById('btnCheckIn') : document.getElementById('btnCheckOut');
-            
-            if (!isWithinGeofence) {
-                showToast("Anda berada di luar jangkauan validasi koordinat kantor!", "danger");
-                return;
-            }
-            if (!base64Photo) {
-                showToast("Wajib mengambil foto verifikasi wajah.", "warning");
-                return;
-            }
+            if (!isWithinGeofence || !base64Photo) return;
 
             targetBtn.disabled = true;
             const originalText = targetBtn.innerHTML;
@@ -861,21 +825,11 @@
             const todayISO = getTodayISOString();
             const jadwalHariIni = currentUser.jadwal[todayISO];
 
-            // Algoritma Evaluasi Jadwal Roster Berdasarkan data JSON Tanggal Hari Ini
             let statusKehadiran = "Hadir Tepat Waktu";
-            
             if (type === 'Masuk') {
-                if (timeString > jadwalHariIni.jamMasukSelesai) {
-                    statusKehadiran = `Terlambat (Jadwal: ${jadwalHariIni.jamMasukMulai})`;
-                } else {
-                    statusKehadiran = `Tepat Waktu (Jadwal: ${jadwalHariIni.jamMasukMulai})`;
-                }
+                statusKehadiran = timeString > jadwalHariIni.jamMasukSelesai ? `Terlambat (Jadwal: ${jadwalHariIni.jamMasukMulai})` : `Tepat Waktu (Jadwal: ${jadwalHariIni.jamMasukMulai})`;
             } else {
-                if (timeString < jadwalHariIni.jamPulang) {
-                    statusKehadiran = `Pulang Cepat (Jadwal Pulang: ${jadwalHariIni.jamPulang})`;
-                } else {
-                    statusKehadiran = `Pulang Sesuai Jadwal (${jadwalHariIni.jamPulang})`;
-                }
+                statusKehadiran = timeString < jadwalHariIni.jamPulang ? `Pulang Cepat (Jadwal: ${jadwalHariIni.jamPulang})` : `Pulang Sesuai Jadwal (${jadwalHariIni.jamPulang})`;
             }
 
             const payload = {
@@ -898,22 +852,15 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
-
                 const result = await response.json();
-
                 if (result.status === 'success') {
-                    showToast(`Presensi Sukses: ${statusKehadiran}`, "success");
-                    
+                    showToast(`Presensi Sukses`, "success");
                     const todayStr = now.toLocaleDateString('id-ID');
                     let dayLog = JSON.parse(localStorage.getItem(`absensi_${currentUser.employeeId}_${todayStr}`)) || {};
-                    if(type === 'Masuk') dayLog.checkInTime = payload.time;
-                    else dayLog.checkOutTime = payload.time;
-                    
+                    if(type === 'Masuk') dayLog.checkInTime = payload.time; else dayLog.checkOutTime = payload.time;
                     localStorage.setItem(`absensi_${currentUser.employeeId}_${todayStr}`, JSON.stringify(dayLog));
                     setupDashboardUI();
-                } else {
-                    throw new Error(result.message);
-                }
+                } else { throw new Error(result.message); }
             } catch (err) {
                 targetBtn.disabled = false;
                 targetBtn.innerHTML = originalText;
@@ -923,62 +870,36 @@
 
         async function loadAttendanceHistory() {
             const tableBody = document.getElementById('historyTableBody');
-            if(SCRIPT_URL === "PASTE_GOOGLE_APPS_SCRIPT_URL_HERE") {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--warning);">Tautkan URL Apps Script Anda terlebih dahulu!</td></tr>`;
-                return;
-            }
-
+            if(SCRIPT_URL === "PASTE_GOOGLE_APPS_SCRIPT_URL_HERE") return;
             try {
                 const response = await fetch(`${SCRIPT_URL}?employeeId=${currentUser.employeeId}`);
                 const resData = await response.json();
-
                 if(resData.status === 'success' && resData.data.length > 0) {
                     tableBody.innerHTML = "";
                     resData.data.forEach(row => {
-                        let badgeClass = "in";
-                        if(row.status && (row.status.includes("Terlambat") || row.status.includes("Pulang Cepat"))) badgeClass = "warning";
-                        if(row.status && row.status.includes("Pulang Sesuai")) badgeClass = "out";
-
+                        let badgeClass = row.status && (row.status.includes("Terlambat") || row.status.includes("Pulang Cepat")) ? "warning" : "in";
                         const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td><b>${row.date}</b></td>
-                            <td>${row.id}</td>
-                            <td>${row.name}</td>
-                            <td><i class="fa-solid fa-right-to-bracket" style="color:var(--success)"></i> ${row.checkIn || '--:--'}</td>
-                            <td><i class="fa-solid fa-right-from-bracket" style="color:var(--danger)"></i> ${row.checkOut || '--:--'}</td>
-                            <td><a href="${row.mapsLink}" target="_blank" style="color:var(--primary); text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i> Peta</a></td>
-                            <td><span class="status-badge ${badgeClass}">${row.status || 'Hadir'}</span></td>
-                        `;
+                        tr.innerHTML = `<td><b>${row.date}</b></td><td>${row.id}</td><td>${row.name}</td><td>${row.checkIn || '--:--'}</td><td>${row.checkOut || '--:--'}</td><td><a href="${row.mapsLink}" target="_blank">Peta</a></td><td><span class="status-badge ${badgeClass}">${row.status || 'Hadir'}</span></td>`;
                         tableBody.appendChild(tr);
                     });
-                } else {
-                    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted);">Belum ada riwayat terekam.</td></tr>`;
-                }
-            } catch (err) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--danger);">Gagal mengambil riwayat.</td></tr>`;
-            }
+                } else { tableBody.innerHTML = `<tr><td colspan="7">Belum ada riwayat.</td></tr>`; }
+            } catch (err) { tableBody.innerHTML = `<tr><td colspan="7">Gagal mengambil riwayat.</td></tr>`; }
         }
 
-        // ==========================================
-        // 7. UI UTILITIES (TOAST & DARK MODE)
-        // ==========================================
         function showToast(message, type = "primary") {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast`;
-            let icon = '<i class="fa-solid fa-circle-info" style="color:var(--primary)"></i>';
-            if(type === 'success') { toast.style.borderLeftColor = 'var(--success)'; icon = '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>'; }
-            if(type === 'danger') { toast.style.borderLeftColor = 'var(--danger)'; icon = '<i class="fa-solid fa-circle-exclamation" style="color:var(--danger)"></i>'; }
-            if(type === 'warning') { toast.style.borderLeftColor = 'var(--warning)'; icon = '<i class="fa-solid fa-triangle-exclamation" style="color:var(--warning)"></i>'; }
-            toast.innerHTML = `${icon} <span>${message}</span>`;
+            if(type === 'success') toast.style.borderLeftColor = 'var(--success)';
+            if(type === 'danger') toast.style.borderLeftColor = 'var(--danger)';
+            toast.innerHTML = `<span>${message}</span>`;
             container.appendChild(toast);
-            setTimeout(() => { toast.style.animation = "fadeIn 0.3s ease reverse"; setTimeout(() => toast.remove(), 300); }, 4000);
+            setTimeout(() => { toast.remove(); }, 4000);
         }
 
         function initTheme() {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
-            updateThemeIcon(savedTheme);
         }
 
         function toggleTheme() {
@@ -986,14 +907,48 @@
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
         }
 
-        function updateThemeIcon(theme) {
-            const btn = document.getElementById('themeBtn');
-            if(theme === 'dark') { btn.className = "fa-solid fa-sun theme-toggle"; btn.style.color = "var(--warning)"; }
-            else { btn.className = "fa-solid fa-moon theme-toggle"; btn.style.color = "var(--text-muted)"; }
+        // ============================================================
+        // LOGIKA DRIVER PWA: DOWNLOAD & TOMBOL INSTALASI APLIKASI
+        // ============================================================
+        let deferredPrompt;
+        const btnInstall = document.getElementById('btnInstallPWA');
+
+        // 1. Daftarkan Service Worker ke Browser
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log("PWA Service Worker Aktif."))
+                .catch(err => console.log("Gagal mendaftarkan SW:", err));
         }
+
+        // 2. Dengarkan sinyal dari browser jika website siap di-instal
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); // Cegah pop-up default bawaan browser agar tidak bentrok
+            deferredPrompt = e; // Simpan event sinyal
+            btnInstall.style.display = 'inline-flex'; // Tampilkan tombol instal buatan kita di halaman login
+        });
+
+        // 3. Eksekusi proses instalasi saat tombol INSTAL APLIKASI diklik
+        btnInstall.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            
+            btnInstall.disabled = true;
+            deferredPrompt.prompt(); // Munculkan jendela persetujuan instalasi resmi browser
+            
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`Pilihan instalasi user: ${outcome}`);
+            
+            deferredPrompt = null; // Hapus penampung sinyal
+            btnInstall.style.display = 'none'; // Sembunyikan tombol kembali
+        });
+
+        // 4. Sembunyikan tombol jika aplikasi sudah sukses terinstal di perangkat
+        window.addEventListener('appinstalled', () => {
+            console.log('Aplikasi HRIS Berhasil Terinstal di Perangkat!');
+            btnInstall.style.display = 'none';
+            deferredPrompt = null;
+        });
     </script>
 </body>
 </html>
