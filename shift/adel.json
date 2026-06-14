@@ -1,0 +1,30 @@
+{
+  "2026-06-14": {
+    "hari": "Minggu",
+    "jamMasukMulai": "12:30",
+    "jamMasukSelesai": "15:00",
+    "jamPulang": "22:00",
+    "keterangan": "Shift Reguler Siang"
+  },
+  "2026-06-16": {
+    "hari": "Selasa",
+    "jamMasukMulai": "08:00",
+    "jamMasukSelesai": "09:00",
+    "jamPulang": "17:00",
+    "keterangan": "Shift Reguler Pagi"
+  },
+  "2026-06-17": {
+    "hari": "Rabu",
+    "jamMasukMulai": "13:00",
+    "jamMasukSelesai": "13:30",
+    "jamPulang": "21:00",
+    "keterangan": "Shift Siang"
+  },
+  "2026-06-21": {
+    "hari": "Minggu",
+    "jamMasukMulai": "OFF",
+    "jamMasukSelesai": "OFF",
+    "jamPulang": "OFF",
+    "keterangan": "Libur Pekanan"
+  }
+}
