@@ -1,10 +1,10 @@
 {
   "2026-06-15": {
     "hari": "Senin",
-    "jamMasukMulai": "08:00",
-    "jamMasukSelesai": "09:00",
-    "jamPulang": "17:00",
-    "keterangan": "Shift Reguler Pagi"
+    "jamMasukMulai": "12.30",
+    "jamMasukSelesai": "14.30",
+    "jamPulang": "22:00",
+    "keterangan": "Shift Reguler Siang"
   },
   "2026-06-16": {
     "hari": "Selasa",
