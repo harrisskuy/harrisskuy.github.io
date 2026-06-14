@@ -224,7 +224,6 @@
         .btn-danger:hover { opacity: 0.9; }
         .btn-danger:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
         
-        /* Gaya Khusus Tombol Install */
         .btn-success { background: var(--success); color: white; margin-top: 1rem; }
         .btn-success:hover { opacity: 0.9; }
 
@@ -415,7 +414,7 @@
                 <button type="submit" class="btn btn-primary">Masuk Sistem</button>
             </form>
             
-            <!-- TOMBOL INSTAL APLIKASI (Sembunyi otomatis jika sudah terinstal) -->
+            <!-- TOMBOL INSTAL APLIKASI (PWA) -->
             <button id="btnInstallPWA" class="btn btn-success" style="display: none;">
                 <i class="fa-solid fa-download"></i> INSTAL APLIKASI
             </button>
@@ -433,6 +432,7 @@
                 </div>
                 <ul class="nav-menu">
                     <li><a onclick="switchPage('dashboard')" id="nav-dashboard" class="nav-item active"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a></li>
+                    <li><a onclick="switchPage('roster')" id="nav-roster" class="nav-item"><i class="fa-solid fa-calendar-days"></i><span>Jadwal Shift</span></a></li>
                     <li><a onclick="switchPage('history')" id="nav-history" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Riwayat Absen</span></a></li>
                 </ul>
             </div>
@@ -461,7 +461,7 @@
                 </div>
             </header>
 
-            <!-- SUB-PAGE: DASHBOARD UTAMA -->
+            <!-- SUB-PAGE 1: DASHBOARD KANAL PRESENSI -->
             <section id="page-dashboard" class="page-section active">
                 <div class="grid-stats">
                     <div class="card">
@@ -521,9 +521,33 @@
                 </div>
             </section>
 
-            <!-- SUB-PAGE: RIWAYAT LOG -->
+            <!-- SUB-PAGE 2: DAFTAR ROSTER JADWAL SHIFT -->
+            <section id="page-roster" class="page-section">
+                <h2 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-calendar-days"></i> Roster Jadwal Shift Anda</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Hari</th>
+                                <th>Jam Masuk Mulai</th>
+                                <th>Jam Masuk Selesai</th>
+                                <th>Jam Pulang</th>
+                                <th>Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rosterTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align:center; color: var(--text-muted);">Memuat jadwal...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SUB-PAGE 3: RIWAYAT LOG ABSENSI -->
             <section id="page-history" class="page-section">
-                <h2 style="margin-bottom: 1.5rem;">Log Riwayat Absensi Anda</h2>
+                <h2 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-clock-rotate-left"></i> Log Riwayat Absensi Anda</h2>
                 <div class="table-container">
                     <table>
                         <thead>
@@ -552,12 +576,14 @@
     <div id="toast-container"></div>
 
     <script>
+        // ISI URL GOOGLE APPS SCRIPT ANDA DIBAWAH INI
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw41uzQ2xCkdImxhCPtqbtPgM3KvFxBel8viwqywcoqBtWvTLLb4llmbeKXYWsY1pEl/exec";
 
+        // BEACON KANTOR PUSAT GEOFENCING
         const KANTOR_CONFIG = {
             latitude: -7.3079867, 
             longitude: 112.7851821,
-            maxRadiusMeter: 1500 
+            maxRadiusMeter: 1000 
         };
 
         let currentUser = null;
@@ -697,7 +723,54 @@
             document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
             document.getElementById(`page-${pageId}`).classList.add('active');
             document.getElementById(`nav-${pageId}`).classList.add('active');
-            if(pageId === 'history') loadAttendanceHistory();
+            
+            if(pageId === 'history') {
+                loadAttendanceHistory();
+            } else if(pageId === 'roster') {
+                renderRosterShiftTable();
+            }
+        }
+
+        // FUNGSI UTAMA MEMBEDAH DATA shift/[username].json KE BENTUK TABEL HTML ROSTER
+        function renderRosterShiftTable() {
+            const rosterBody = document.getElementById('rosterTableBody');
+            
+            if (!currentUser || !currentUser.jadwal) {
+                rosterBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--danger);">Data jadwal gagal dimuat.</td></tr>`;
+                return;
+            }
+
+            rosterBody.innerHTML = "";
+            const jadwals = currentUser.jadwal;
+            const sortedDates = Object.keys(jadwals).sort((a, b) => new Date(a) - new Date(b));
+
+            if (sortedDates.length === 0) {
+                rosterBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Tidak ada daftar jadwal shift yang diatur.</td></tr>`;
+                return;
+            }
+
+            sortedDates.forEach(date => {
+                const detail = jadwals[date];
+                const tr = document.createElement('tr');
+                
+                const isOff = detail.jamMasukMulai === "OFF";
+                const badgeClass = isOff ? "status-badge out" : "status-badge in";
+                const jamMasukMulai = isOff ? "-" : detail.jamMasukMulai;
+                const jamMasukSelesai = isOff ? "-" : detail.jamMasukSelesai;
+                const jamPulang = isOff ? "-" : detail.jamPulang;
+
+                const localDateFormatted = new Date(date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+
+                tr.innerHTML = `
+                    <td><b>${localDateFormatted}</b></td>
+                    <td>${detail.hari}</td>
+                    <td>${jamMasukMulai}</td>
+                    <td>${jamMasukSelesai}</td>
+                    <td>${jamPulang}</td>
+                    <td><span class="${badgeClass}">${detail.keterangan}</span></td>
+                `;
+                rosterBody.appendChild(tr);
+            });
         }
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -814,7 +887,10 @@
 
         async function handleAttendance(type) {
             const targetBtn = type === 'Masuk' ? document.getElementById('btnCheckIn') : document.getElementById('btnCheckOut');
-            if (!isWithinGeofence || !base64Photo) return;
+            if (!isWithinGeofence || !base64Photo) {
+                showToast("Gagal: Ambil foto biometrik terlebih dahulu!", "warning");
+                return;
+            }
 
             targetBtn.disabled = true;
             const originalText = targetBtn.innerHTML;
@@ -910,40 +986,35 @@
         }
 
         // ============================================================
-        // LOGIKA DRIVER PWA: DOWNLOAD & TOMBOL INSTALASI APLIKASI
+        // LOGIKA DRIVER INTERAL ENGINE PWA (PROGRESSIVE WEB APP)
         // ============================================================
         let deferredPrompt;
         const btnInstall = document.getElementById('btnInstallPWA');
 
-        // 1. Daftarkan Service Worker ke Browser
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
                 .then(() => console.log("PWA Service Worker Aktif."))
                 .catch(err => console.log("Gagal mendaftarkan SW:", err));
         }
 
-        // 2. Dengarkan sinyal dari browser jika website siap di-instal
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); // Cegah pop-up default bawaan browser agar tidak bentrok
-            deferredPrompt = e; // Simpan event sinyal
-            btnInstall.style.display = 'inline-flex'; // Tampilkan tombol instal buatan kita di halaman login
+            e.preventDefault(); 
+            deferredPrompt = e; 
+            btnInstall.style.display = 'inline-flex'; 
         });
 
-        // 3. Eksekusi proses instalasi saat tombol INSTAL APLIKASI diklik
         btnInstall.addEventListener('click', async () => {
             if (!deferredPrompt) return;
-            
             btnInstall.disabled = true;
-            deferredPrompt.prompt(); // Munculkan jendela persetujuan instalasi resmi browser
+            deferredPrompt.prompt(); 
             
             const { outcome } = await deferredPrompt.userChoice;
             console.log(`Pilihan instalasi user: ${outcome}`);
             
-            deferredPrompt = null; // Hapus penampung sinyal
-            btnInstall.style.display = 'none'; // Sembunyikan tombol kembali
+            deferredPrompt = null; 
+            btnInstall.style.display = 'none'; 
         });
 
-        // 4. Sembunyikan tombol jika aplikasi sudah sukses terinstal di perangkat
         window.addEventListener('appinstalled', () => {
             console.log('Aplikasi HRIS Berhasil Terinstal di Perangkat!');
             btnInstall.style.display = 'none';
