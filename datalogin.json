@@ -1,14 +1,15 @@
 [
   {
-    "username": "alkham",
-    "password": "1213",
-    "employeeId": "EMP-001",
-    "employeeName": "Alkham Rizky Fauzan"
-  },
-  {
     "username": "adel",
     "password": "123",
     "employeeId": "EMP-002",
     "employeeName": "Adel Febram Safitri"
+  },
+  
+  {
+    "username": "alkham",
+    "password": "1213",
+    "employeeId": "EMP-001",
+    "employeeName": "Alkham Rizky Fauzan"
   }
 ]
