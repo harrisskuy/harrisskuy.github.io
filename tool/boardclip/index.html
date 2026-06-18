@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Alphabet Clipboard & Phonetic Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- CSS VARIABLES (THEMING) --- */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-hover: rgba(255, 255, 255, 0.12);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --success-color: #10b981;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        [data-theme="light"] {
+            --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            --panel-bg: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(0, 0, 0, 0.03);
+            --card-hover: rgba(0, 0, 0, 0.07);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent-color: #4f46e5;
+            --accent-hover: #4338ca;
+            --success-color: #059669;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+
+        /* --- BASE STYLES --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        /* --- MAIN CONTAINER (GLASSMORPHISM) --- */
+        .app-container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 2.5rem;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                padding: 1.5rem;
+            }
+        }
+
+        /* --- HEADER SECTION --- */
+        header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+        }
+
+        .brand h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #a5b4fc, var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        [data-theme="light"] .brand h1 {
+            background: linear-gradient(to right, #4f46e5, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .global-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        /* --- CONTROLS & TOOLBAR --- */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--card-bg);
+            padding: 0.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.6rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn.active, .btn:hover {
+            color: var(--text-main);
+            background: var(--accent-color);
+        }
+
+        .btn-utility {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+
+        .btn-utility:hover {
+            background: var(--card-hover);
+            border-color: var(--text-muted);
+        }
+
+        /* --- ALPHABET GRID --- */
+        .workspace {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        .char-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.25rem;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .char-card:hover {
+            background: var(--card-hover);
+            transform: translateY(-2px);
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .char-card:active {
+            transform: scale(0.98);
+        }
+
+        .char-glyph {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .char-phonetic {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.2s ease;
+        }
+
+        .char-card:hover .card-actions {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .action-icon {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            padding: 0.4rem;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .action-icon:hover {
+            color: var(--accent-color);
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* --- SIDEBAR (HISTORY & STATS) --- */
+        .sidebar {
+            border-left: 1px solid var(--border-color);
+            padding-left: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                border-left: none;
+                padding-left: 0;
+                border-top: 1px solid var(--border-color);
+                padding-top: 1.5rem;
+            }
+        }
+
+        .sidebar-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-section h3 span {
+            font-size: 0.75rem;
+            background: var(--card-bg);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            color: var(--accent-color);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .history-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .history-char {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        .history-meta {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .btn-clear-history {
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .btn-clear-history:hover {
+            text-decoration: underline;
+        }
+
+        /* --- STATS PANEL --- */
+        .stats-panel {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(165, 180, 252, 0.05) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .stat-box data {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .stat-box label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* --- NOTIFICATION SYSTEM (TOAST) --- */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transform: translateY(100px);
+            opacity: 0;
+            animation: slideUp 0.3s forwards, fadeOut 0.3s ease 2.5s forwards;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes slideUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(-20px); pointer-events: none; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Empty state styling */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="app-container">
+        <header>
+            <div class="brand">
+                <h1>AlphaBoard Pro</h1>
+                <p>Sistem Manajemen Alfabet & Fonetik Clipboard Profesional</p>
+            </div>
+            <div class="global-controls">
+                <button class="btn-utility" id="themeToggle" title="Ubah Tema">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <section class="toolbar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchBar" placeholder="Cari Huruf atau Fonetik (cth: A / Alpha)...">
+                </div>
+                
+                <div style="display: flex; gap: 0.75rem;">
+                    <div class="btn-group">
+                        <button class="btn active" id="caseUpperBtn">UPPERCASE</button>
+                        <button class="btn" id="caseLowerBtn">lowercase</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="grid-container" id="alphabetGrid">
+                </section>
+        </main>
+
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>
+                    Histori Salinan 
+                    <button class="btn-clear-history" id="clearHistoryBtn">Hapus Semua</button>
+                </h3>
+                <div class="history-list" id="historyLog">
+                    </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Statistik Sesi</h3>
+                <div class="stats-panel">
+                    <div class="stat-box">
+                        <data id="statTotalCopies">0</data>
+                        <label>Total Disalin</label>
+                    </div>
+                    <div class="stat-box">
+                        <data id="statFavChar">-</data>
+                        <label>Paling Sering</label>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        /**
+         * Kumpulan data Alphabet dengan data standard internasional NATO Phonetic.
+         */
+        const alphabetDataset = [
+            { upper: 'A', lower: 'a', phonetic: 'Alpha' },
+            { upper: 'B', lower: 'b', phonetic: 'Bravo' },
+            { upper: 'C', lower: 'c', phonetic: 'Charlie' },
+            { upper: 'D', lower: 'd', phonetic: 'Delta' },
+            { upper: 'E', lower: 'e', phonetic: 'Echo' },
+            { upper: 'F', lower: 'f', phonetic: 'Foxtrot' },
+            { upper: 'G', lower: 'g', phonetic: 'Golf' },
+            { upper: 'H', lower: 'h', phonetic: 'Hotel' },
+            { upper: 'I', lower: 'i', phonetic: 'India' },
+            { upper: 'J', lower: 'j', phonetic: 'Juliett' },
+            { upper: 'K', lower: 'k', phonetic: 'Kilo' },
+            { upper: 'L', lower: 'l', phonetic: 'Lima' },
+            { upper: 'M', lower: 'm', phonetic: 'Mike' },
+            { upper: 'N', lower: 'n', phonetic: 'November' },
+            { upper: 'O', lower: 'o', phonetic: 'Oscar' },
+            { upper: 'P', lower: 'p', phonetic: 'Papa' },
+            { upper: 'Q', lower: 'q', phonetic: 'Quebec' },
+            { upper: 'R', lower: 'r', phonetic: 'Romeo' },
+            { upper: 'S', lower: 's', phonetic: 'Sierra' },
+            { upper: 'T', lower: 't', phonetic: 'Tango' },
+            { upper: 'U', lower: 'u', phonetic: 'Uniform' },
+            { upper: 'V', lower: 'v', phonetic: 'Victor' },
+            { upper: 'W', lower: 'w', phonetic: 'Whiskey' },
+            { upper: 'X', lower: 'x', phonetic: 'X-ray' },
+            { upper: 'Y', lower: 'y', phonetic: 'Yankee' },
+            { upper: 'Z', lower: 'z', phonetic: 'Zulu' }
+        ];
+
+        // State Aplikasi
+        let currentCase = 'upper'; // Pilihan: 'upper' atau 'lower'
+        let copyHistory = JSON.parse(localStorage.getItem('alpha_board_history')) || [];
+        let statsCounter = JSON.parse(localStorage.getItem('alpha_board_stats')) || {};
+
+        // DOM Elements
+        const alphabetGrid = document.getElementById('alphabetGrid');
+        const searchBar = document.getElementById('searchBar');
+        const caseUpperBtn = document.getElementById('caseUpperBtn');
+        const caseLowerBtn = document.getElementById('caseLowerBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        const historyLog = document.getElementById('historyLog');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const toastContainer = document.getElementById('toastContainer');
+        const statTotalCopies = document.getElementById('statTotalCopies');
+        const statFavChar = document.getElementById('statFavChar');
+
+        /**
+         * Inisialisasi Aplikasi
+         */
+        function initApp() {
+            renderGrid(alphabetDataset);
+            renderHistory();
+            updateStatsDOM();
+            setupEventListeners();
+            initTheme();
+        }
+
+        /**
+         * Render Grid Huruf utama berdasarkan dataset dan filter kata kunci
+         */
+        function renderGrid(dataset, filter = '') {
+            alphabetGrid.innerHTML = '';
+            
+            const filteredData = dataset.filter(item => {
+                const searchLower = filter.toLowerCase();
+                return item.upper.toLowerCase().includes(searchLower) || 
+                       item.phonetic.toLowerCase().includes(searchLower);
+            });
+
+            if (filteredData.length === 0) {
+                alphabetGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search-minus"></i>
+                        <p>Tidak ada huruf atau fonetik yang cocok dengan "${filter}"</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filteredData.forEach(data => {
+                const displayChar = currentCase === 'upper' ? data.upper : data.lower;
+                
+                const card = document.createElement('div');
+                card.className = 'char-card';
+                card.setAttribute('data-char', displayChar);
+                
+                card.innerHTML = `
+                    <div class="char-glyph">${displayChar}</div>
+                    <div class="char-phonetic">${data.phonetic}</div>
+                    <div class="card-actions">
+                        <span class="action-icon speak-btn" title="Dengarkan Suara">
+                            <i class="fas fa-volume-up"></i>
+                        </span>
+                        <span class="action-icon" title="Klik untuk menyalin">
+                            <i class="fas fa-copy"></i>
+                        </span>
+                    </div>
+                `;
+
+                // Event listener klik kartu utama untuk Copy
+                card.addEventListener('click', (e) => {
+                    // Mencegah trigger ganda jika tombol suara yang diklik
+                    if (e.target.closest('.speak-btn')) {
+                        e.stopPropagation();
+                        speakCharacter(data.phonetic);
+                        return;
+                    }
+                    copyToClipboard(displayChar);
+                });
+
+                alphabetGrid.appendChild(card);
+            });
+        }
+
+        /**
+         * Fitur Copy to Clipboard Menggunakan Clipboard API Modern
+         */
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                triggerToast(`Berhasil menyalin huruf "${text}" ke Clipboard!`);
+                updateHistoryAndStats(text);
+            }).catch(err => {
+                console.error('Gagal menyalin teks: ', err);
+            });
+        }
+
+        /**
+         * Fitur Text To Speech untuk pelalafan fonetik
+         */
+        function speakCharacter(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Menghentikan suara sebelumnya jika ada
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        /**
+         * Manajemen Histori dan Statistik Penyimpanan LocalStorage
+         */
+        function updateHistoryAndStats(char) {
+            // Pembaruan Log Histori
+            const timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            copyHistory.unshift({ char, time: timestamp });
+            
+            if (copyHistory.length > 50) copyHistory.pop(); // Batasi maksimal 50 log saja
+            localStorage.setItem('alpha_board_history', JSON.stringify(copyHistory));
+
+            // Pembaruan Statistik Frekuensi
+            statsCounter[char] = (statsCounter[char] || 0) + 1;
+            localStorage.setItem('alpha_board_stats', JSON.stringify(statsCounter));
+
+            renderHistory();
+            updateStatsDOM();
+        }
+
+        /**
+         * Render Data Histori dari Array State ke DOM
+         */
+        function renderHistory() {
+            historyLog.innerHTML = '';
+            if (copyHistory.length === 0) {
+                historyLog.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1rem;">Belum ada riwayat.</p>';
+                return;
+            }
+
+            copyHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <div class="history-left">
+                        <span class="history-char">${item.char}</span>
+                        <div class="history-meta">
+                            <span style="font-weight: 500;">Disalin</span>
+                            <span class="history-time">${item.time}</span>
+                        </div>
+                    </div>
+                    <button class="btn-utility" style="width: 32px; height: 32px; font-size: 0.8rem;" onclick="copyToClipboard('${item.char}')" title="Salin Ulang">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                `;
+                historyLog.appendChild(historyItem);
+            });
+        }
+
+        /**
+         * Kalkulasi dan Tampilkan Statistik ke Layar
+         */
+        function updateStatsDOM() {
+            // Hitung total copy keseluruhan
+            const total = Object.values(statsCounter).reduce((acc, curr) => acc + curr, 0);
+            statTotalCopies.innerText = total;
+
+            // Cari huruf favorit/terbanyak disalin
+            let favChar = '-';
+            let maxCount = 0;
+            for (const [char, count] of Object.entries(statsCounter)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    favChar = char;
+                }
+            }
+            statFavChar.innerText = favChar !== '-' ? `${favChar} (${maxCount}x)` : '-';
+        }
+
+        /**
+         * Sistem Pop up Notifikasi Toast Ringan
+         */
+        function triggerToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<i class="fas fa-check-circle"></i> <span>${message}</span>`;
+            toastContainer.appendChild(toast);
+
+            // Bersihkan DOM setelah animasi selesai
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        /**
+         * Manajemen Pergantian Tema (Dark / Light Mode)
+         */
+        function initTheme() {
+            const savedTheme = localStorage.getItem('alpha_board_theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = themeToggle.querySelector('i');
+            if (theme === 'light') {
+                icon.className = 'fas fa-moon';
+            } else {
+                icon.className = 'fas fa-sun';
+            }
+        }
+
+        /**
+         * Mengikat Semua Event Listener Komponen UI
+         */
+        function setupEventListeners() {
+            // Logika Pencarian
+            searchBar.addEventListener('input', (e) => {
+                renderGrid(alphabetDataset, e.target.value);
+            });
+
+            // Pengubah Kapitalisasi (Uppercase / Lowercase)
+            caseUpperBtn.addEventListener('click', () => {
+                if (currentCase === 'upper') return;
+                currentCase = 'upper';
+                caseUpperBtn.classList.add('active');
+                caseLowerBtn.classList.remove('active');
+                renderGrid(alphabetDataset, searchBar.value);
+            });
+
+            caseLowerBtn.addEventListener('click', () => {
+                if (currentCase === 'lower') return;
+                currentCase = 'lower';
+                caseLowerBtn.classList.add('active');
+                caseUpperBtn.classList.remove('active');
+                renderGrid(alphabetDataset, searchBar.value);
+            });
+
+            // Toggle Dark Mode
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('alpha_board_theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+
+            // Hapus Log Histori
+            clearHistoryBtn.addEventListener('click', () => {
+                if(confirm('Apakah Anda yakin ingin menghapus seluruh riwayat penyalinan?')) {
+                    copyHistory = [];
+                    statsCounter = {};
+                    localStorage.removeItem('alpha_board_history');
+                    localStorage.removeItem('alpha_board_stats');
+                    renderHistory();
+                    updateStatsDOM();
+                    triggerToast('Seluruh data histori & statistik direset.');
+                }
+            });
+        }
+
+        // Menjalankan aplikasi setelah dokumen HTML selesai dimuat secara penuh
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
