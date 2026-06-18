@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant Auto-Collage Pro v2.1</title>
+    <style>
+        :root {
+            --bg-primary: #121214;
+            --bg-surface: #1e1e24;
+            --accent: #4f46e5;
+            --accent-hover: #6366f1;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #374151;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #a5b4fc, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .upload-zone {
+            background-color: var(--bg-surface);
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--accent);
+            background-color: #25252e;
+        }
+
+        .upload-zone p {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-zone span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: block;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .preview-wrapper {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .preview-item {
+            position: relative;
+            aspect-ratio: 4/3;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item .remove-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(0,0,0,0.7);
+            color: #ff4d4d;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            flex: 1;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn:disabled {
+            background-color: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            max-width: 150px;
+        }
+        .btn-secondary:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        .result-container {
+            margin-top: 1rem;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #collageCanvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: #121214;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Instant Auto-Collage Pro</h1>
+        <p>Salin gambar, lalu tekan <strong>Ctrl + V</strong> di mana saja. Rasio foto otomatis terjaga proporsional tanpa ceper.</p>
+    </header>
+
+    <div class="main-container">
+        <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <p>📄 Klik di sini, Drop foto, atau langsung <strong>Tekan Ctrl + V</strong></p>
+            <span>Foto otomatis tersusun rapi sesuai rasio aslinya</span>
+            <input type="file" id="fileInput" multiple accept="image/*">
+        </div>
+
+        <div class="preview-wrapper" id="previewWrapper" style="display: none;">
+            <div class="preview-header">
+                <span id="photoCount">0 Foto Terkumpul</span>
+                <button class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="clearAll()">Hapus Semua</button>
+            </div>
+            <div class="preview-grid" id="previewGrid"></div>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn" id="generateBtn" disabled onclick="generateCollage()">
+                ✨ Generate Kolase Proporsional
+            </button>
+        </div>
+
+        <div class="result-container" id="resultContainer">
+            <canvas id="collageCanvas"></canvas>
+            <button class="btn btn-secondary" style="max-width: 250px;" id="downloadBtn" onclick="downloadCollage()">
+                📥 Unduh Hasil Kolase (.png)
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let uploadedImages = [];
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const previewWrapper = document.getElementById('previewWrapper');
+        const previewGrid = document.getElementById('previewGrid');
+        const photoCount = document.getElementById('photoCount');
+        const generateBtn = document.getElementById('generateBtn');
+        const resultContainer = document.getElementById('resultContainer');
+        const canvas = document.getElementById('collageCanvas');
+
+        // AMAN: Listener Paste Global sudah diperbaiki total
+        document.addEventListener('paste', (e) => {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let item of items) {
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    processFile(item.getAsFile());
+                }
+            }
+        });
+
+        // Drag & Drop
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files) handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        function handleFiles(files) {
+            for (let file of files) {
+                if (file.type.startsWith('image/')) processFile(file);
+            }
+        }
+
+        function processFile(file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    uploadedImages.push(img);
+                    updateUI();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // PERBAIKAN BUG: Syntax display yang double style sudah dihapus
+        function updateUI() {
+            previewGrid.innerHTML = '';
+            if (uploadedImages.length > 0) {
+                previewWrapper.style.display = 'block';
+                generateBtn.disabled = false;
+                photoCount.textContent = `${uploadedImages.length} Foto Terkumpul`;
+
+                uploadedImages.forEach((img, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'preview-item';
+                    const displayImg = document.createElement('img');
+                    displayImg.src = img.src;
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-btn';
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        uploadedImages.splice(index, 1);
+                        updateUI();
+                    };
+                    item.appendChild(displayImg);
+                    item.appendChild(removeBtn);
+                    previewGrid.appendChild(item);
+                });
+            } else {
+                previewWrapper.style.display = 'none';
+                generateBtn.disabled = true;
+                resultContainer.style.display = 'none';
+            }
+        }
+
+        function clearAll() {
+            uploadedImages = [];
+            updateUI();
+        }
+
+        function generateCollage() {
+            const ctx = canvas.getContext('2d');
+            const count = uploadedImages.length;
+            if (count === 0) return;
+
+            // Atur jumlah kolom (3 kolom agar pas seperti contoh gambar Anda)
+            let cols = 3; 
+            if (count <= 2) cols = count;
+            else if (count === 4) cols = 2; // Biar 2x2 rapi kalau cuma 4 gambar
+
+            const rows = Math.ceil(count / cols);
+
+            // Ambil rasio gambar pertama untuk acuan grid
+            let avgRatio = 4 / 3; 
+            if (uploadedImages[0]) {
+                avgRatio = uploadedImages[0].width / uploadedImages[0].height;
+            }
+
+            const targetWidth = 1800;
+            const gap = 15; // Jarak border hitam antar foto
+
+            const cellWidth = (targetWidth - (gap * (cols + 1))) / cols;
+            const cellHeight = cellWidth / avgRatio; 
+
+            // Tinggi kanvas otomatis bertambah ke bawah (Dinamis, tidak bikin ceper)
+            const targetHeight = (cellHeight * rows) + (gap * (rows + 1));
+            
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+
+            ctx.fillStyle = '#0f0f11'; 
+            ctx.fillRect(0, 0, targetWidth, targetHeight);
+
+            uploadedImages.forEach((img, index) => {
+                const r = Math.floor(index / cols);
+                const c = index % cols;
+
+                const x = gap + c * (cellWidth + gap);
+                const y = gap + r * (cellHeight + gap);
+
+                const imgRatio = img.width / img.height;
+                const cellRatio = cellWidth / cellHeight;
+                let sx, sy, sw, sh;
+
+                if (imgRatio > cellRatio) {
+                    sh = img.height;
+                    sw = img.height * cellRatio;
+                    sx = (img.width - sw) / 2;
+                    sy = 0;
+                } else {
+                    sw = img.width;
+                    sh = img.width / imgRatio;
+                    sx = 0;
+                    sy = (img.height - sh) / 2;
+                }
+
+                ctx.drawImage(img, sx, sy, sw, sh, x, y, cellWidth, cellHeight);
+            });
+
+            resultContainer.style.display = 'flex';
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function downloadCollage() {
+            const link = document.createElement('a');
+            link.download = `Report_Collage_${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
