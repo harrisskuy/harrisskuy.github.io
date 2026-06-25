@@ -1,565 +1,406 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-950 text-slate-100">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instant Auto-Collage — Premium SaaS Collage Generator</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
+    <title>Instant Auto-Collage</title>
     <style>
+        /* --- UI/UX & TAMPILAN (Dark Mode Minimalis) --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
         }
-        /* Custom Scrollbar for Premium Feel */
-        ::-webkit-scrollbar {
-            width: 6px;
+
+        /* Kanvas Utama Tempat Kolase */
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px;
+            padding-bottom: 100px; /* Jarak agar tidak tertutup panel kontrol */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Wrapper internal untuk kalkulasi area layouting */
+        #collage-wrapper {
+            width: 100%;
+            max-width: 1200px; /* Batas lebar maksimal puzzle agar estetis */
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Diatur dinamis via JS */
+            transition: gap 0.2s ease;
+        }
+
+        .collage-row {
+            display: flex;
+            width: 100%;
+            gap: inherit;
+        }
+
+        .collage-item {
+            display: block;
+            object-fit: contain; /* Memastikan NO-CROP */
+            height: 100%;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Instruksi Melayang di Tengah */
+        #instruction {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+
+        #instruction h1 {
+            font-size: 2rem;
+            font-weight: 400;
+            margin-bottom: 10px;
+            color: #e0e0e0;
+        }
+
+        #instruction p {
+            font-size: 1rem;
+            color: #888888;
+            background: rgba(255,255,255,0.05);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* Floating Control Panel */
+        #control-panel {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 24px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+
+        .slider-group input[type="range"] {
+            appearance: none;
+            background: #444;
             height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
             border-radius: 3px;
+            outline: none;
+            width: 100px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
+
+        .slider-group input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #00adb5;
+            cursor: pointer;
         }
-        /* Ghost element placeholder during drag and drop */
-        .dragging {
-            opacity: 0.5;
-            transform: scale(0.95);
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            background: #252525;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: #333;
+            border-color: #666;
+        }
+
+        button#btn-download {
+            background: #00adb5;
+            color: #fff;
+            border: none;
+        }
+
+        button#btn-download:hover {
+            background: #00f5ff;
+            box-shadow: 0 0 10px rgba(0, 173, 181, 0.5);
         }
     </style>
 </head>
-<body class="h-full flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+<body>
 
-    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-            <div class="bg-gradient-to-tr from-indigo-500 to-violet-500 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
-                <i class="fa-solid from-indigo-500 to-violet-500 fa-images text-xl text-white"></i>
-            </div>
-            <div>
-                <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Instant Auto-Collage</span>
-                <span class="ml-2 px-2 py-0.5 text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">Pro SaaS</span>
-            </div>
+    <div id="canvas-container">
+        <div id="collage-wrapper"></div>
+    </div>
+
+    <div id="instruction">
+        <h1>Instant Auto-Collage</h1>
+        <p>Tekan <strong>Ctrl + V</strong> untuk menempelkan gambar (Paste)</p>
+    </div>
+
+    <div id="control-panel">
+        <div class="slider-group">
+            <label for="gap-slider">Jarak (Gap):</label>
+            <input type="range" id="gap-slider" min="0" max="20" value="10">
+            <span id="gap-value">10px</span>
         </div>
-        <div class="text-sm text-slate-400 hidden sm:block">
-            <span class="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700/50">
-                <i class="fa-solid fa-keyboard mr-1.5 text-slate-500"></i> Tip: Tekan <kbd class="bg-slate-700 text-slate-200 px-1 rounded text-xs">Ctrl + V</kbd> di mana saja untuk menempel gambar
-            </span>
+        <div class="btn-group">
+            <button id="btn-shuffle">🔀 Shuffle</button>
+            <button id="btn-reset">🗑️ Reset</button>
+            <button id="btn-download">📥 Unduh (.PNG)</button>
         </div>
-    </header>
-
-    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        
-        <aside class="w-full lg:w-[420px] bg-slate-900 border-r border-slate-800 flex flex-col overflow-y-auto p-6 space-y-6 shrink-0">
-            
-            <div>
-                <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center justify-between">
-                    <span>1. Media Pool</span>
-                    <span id="pool-counter" class="text-indigo-400 bg-indigo-400/10 px-2 py-0.5 rounded-full text-[10px]">0 Gambar</span>
-                </h2>
-                
-                <div id="dropzone" class="border-2 border-dashed border-slate-700 hover:border-indigo-500/50 bg-slate-950/40 hover:bg-slate-950/80 rounded-2xl p-6 text-center cursor-pointer transition-all duration-300 group relative overflow-hidden">
-                    <input type="file" id="file-input" multiple accept="image/*" class="hidden">
-                    <div class="space-y-3">
-                        <div class="mx-auto w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-500/10 group-hover:text-indigo-400 transition-all duration-300">
-                            <i class="fa-solid fa-cloud-arrow-up text-lg text-slate-400 group-hover:text-indigo-400"></i>
-                        </div>
-                        <div class="text-sm">
-                            <span class="font-medium text-slate-200 group-hover:text-indigo-300 transition-colors">Klik untuk upload</span> atau drag & drop
-                        </div>
-                        <p class="text-xs text-slate-500">Mendukung file PNG, JPG, WebP</p>
-                    </div>
-                </div>
-
-                <div id="thumbnail-queue-container" class="mt-4 hidden">
-                    <p class="text-xs text-slate-500 mb-2">Antrean Gambar (Urutan masukan):</p>
-                    <div id="thumbnail-queue" class="flex space-x-3 overflow-x-auto pb-2">
-                        </div>
-                </div>
-            </div>
-
-            <hr class="border-slate-800/80">
-
-            <div class="space-y-5">
-                <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center">
-                    <i class="fa-solid fa-sliders mr-2 text-indigo-400"></i>2. Pengaturan Kolase
-                </h2>
-
-                <div class="space-y-2">
-                    <label class="text-xs font-medium text-slate-400">Rasio Kanvas (Aspect Ratio)</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button data-ratio="1:1" class="ratio-btn active bg-indigo-600 text-white border border-indigo-500 px-3 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center space-y-1.5 transition-all duration-200 cursor-pointer shadow-md shadow-indigo-600/10">
-                            <span class="w-4 h-4 border-2 border-current rounded-sm"></span>
-                            <span>1:1 Square</span>
-                        </button>
-                        <button data-ratio="16:9" class="ratio-btn bg-slate-800 text-slate-300 border border-slate-700/50 hover:bg-slate-700/50 px-3 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center space-y-1.5 transition-all duration-200 cursor-pointer">
-                            <span class="w-6 h-3.5 border-2 border-current rounded-sm"></span>
-                            <span>16:9 Movie</span>
-                        </button>
-                        <button data-ratio="9:16" class="ratio-btn bg-slate-800 text-slate-300 border border-slate-700/50 hover:bg-slate-700/50 px-3 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center space-y-1.5 transition-all duration-200 cursor-pointer">
-                            <span class="w-3.5 h-6 border-2 border-current rounded-sm"></span>
-                            <span>9:16 Story</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="space-y-2">
-                    <div class="flex justify-between text-xs font-medium">
-                        <label class="text-slate-400">Jarak Antar Foto (Grid Gap)</label>
-                        <span id="gap-val" class="text-indigo-400 font-mono">12px</span>
-                    </div>
-                    <input type="range" id="input-gap" min="0" max="40" value="12" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-                </div>
-
-                <div class="space-y-2">
-                    <div class="flex justify-between text-xs font-medium">
-                        <label class="text-slate-400">Kelengkungan Sudut (Border Radius)</label>
-                        <span id="radius-val" class="text-indigo-400 font-mono">8px</span>
-                    </div>
-                    <input type="range" id="input-radius" min="0" max="30" value="8" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-xs font-medium text-slate-400">Latar Belakang Kanvas</label>
-                    <div class="flex flex-wrap gap-2 items-center">
-                        <div class="relative w-8 h-8 rounded-full border border-slate-700 bg-slate-800 flex items-center justify-center cursor-pointer overflow-hidden group">
-                            <i class="fa-solid fa-eye-dropper text-xs text-slate-400 group-hover:text-white transition-colors z-10 pointer-events-none"></i>
-                            <input type="color" id="input-bg-color" value="#ffffff" class="absolute inset-0 w-full h-full opacity-0 scale-150 cursor-pointer">
-                        </div>
-                        <button data-bg="#ffffff" class="bg-preset w-8 h-8 rounded-full bg-white border border-slate-300 cursor-pointer ring-2 ring-indigo-500 transition-all"></button>
-                        <button data-bg="#0f172a" class="bg-preset w-8 h-8 rounded-full bg-slate-900 border border-slate-700 cursor-pointer transition-all"></button>
-                        <button data-bg="linear-gradient(135deg, #6366f1, #a855f7)" class="bg-preset w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 cursor-pointer transition-all"></button>
-                        <button data-bg="linear-gradient(135deg, #ec4899, #f43f5e)" class="bg-preset w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 cursor-pointer transition-all"></button>
-                        <button data-bg="linear-gradient(135deg, #111827, #312e81)" class="bg-preset w-8 h-8 rounded-full bg-gradient-to-br from-gray-900 to-indigo-950 border border-slate-800 cursor-pointer transition-all"></button>
-                    </div>
-                </div>
-            </div>
-
-            <hr class="border-slate-800/80">
-
-            <div class="space-y-3 mt-auto">
-                <button id="btn-generate" class="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-medium py-3 px-4 rounded-xl shadow-lg shadow-indigo-600/20 transition-all duration-300 flex items-center justify-center space-x-2 active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span>Generate Layout Kolase</span>
-                </button>
-
-                <button id="btn-export" disabled class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:text-slate-500 disabled:bg-slate-900 border border-slate-700/60 font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
-                    <i class="fa-solid fa-download"></i>
-                    <span>Export High-Quality Image</span>
-                </button>
-            </div>
-        </aside>
-
-        <section class="flex-1 bg-slate-950 p-6 lg:p-12 flex flex-col items-center justify-center overflow-auto relative">
-            
-            <div id="canvas-loader" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-                <div class="relative flex items-center justify-center mb-4">
-                    <div class="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
-                </div>
-                <p class="text-sm font-medium text-slate-300">Menyusun Smart-Grid Layout...</p>
-            </div>
-
-            <div id="empty-state" class="text-center max-w-sm space-y-4 z-10 transition-all duration-300">
-                <div class="w-16 h-16 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center mx-auto shadow-xl">
-                    <i class="fa-solid fa-photo-film text-2xl text-slate-600"></i>
-                </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-slate-200">Workspace Kolase Kosong</h3>
-                    <p class="text-xs text-slate-500 mt-1">Tambahkan beberapa gambar dari panel kiri atau langsung paste di halaman ini, lalu klik tombol Generate.</p>
-                </div>
-            </div>
-
-            <div id="canvas-wrapper" class="w-full max-w-4xl hidden flex items-center justify-center transition-all duration-300">
-                <div id="collage-canvas" class="w-full shadow-2xl transition-all duration-300 grid relative overflow-hidden" style="background: #ffffff;">
-                    </div>
-            </div>
-            
-            <p id="drag-tip" class="text-[11px] text-slate-500 mt-4 hidden"><i class="fa-solid fa-circle-info mr-1 text-indigo-500/70"></i> Seret (Drag) gambar di dalam kanvas untuk menukar susunan posisi!</p>
-        </section>
-    </main>
+    </div>
 
     <script>
-        // --- Core Application State Management ---
-        const state = {
-            mediaPool: [], // Array objects tracking unique ID and object base64 URLs
-            currentRatio: '1:1',
-            gap: 12,
-            radius: 8,
-            bgStyle: '#ffffff'
-        };
+        // --- LOGIKA UTAMA & ALGORITMA PUZZLE PACKING ---
 
-        // --- DOM Elements Definition ---
-        const dropzone = document.getElementById('dropzone');
-        const fileInput = document.getElementById('file-input');
-        const thumbnailQueue = document.getElementById('thumbnail-queue');
-        const queueContainer = document.getElementById('thumbnail-queue-container');
-        const poolCounter = document.getElementById('pool-counter');
-        const btnGenerate = document.getElementById('btn-generate');
-        const btnExport = document.getElementById('btn-export');
-        const emptyState = document.getElementById('empty-state');
-        const canvasWrapper = document.getElementById('canvas-wrapper');
-        const collageCanvas = document.getElementById('collage-canvas');
-        const canvasLoader = document.getElementById('canvas-loader');
-        const dragTip = document.getElementById('drag-tip');
+        const wrapper = document.getElementById('collage-wrapper');
+        const instruction = document.getElementById('instruction');
+        const gapSlider = document.getElementById('gap-slider');
+        const gapValue = document.getElementById('gap-value');
+        const btnShuffle = document.getElementById('btn-shuffle');
+        const btnReset = document.getElementById('btn-reset');
+        const btnDownload = document.getElementById('btn-download');
 
-        // Inputs
-        const inputGap = document.getElementById('input-gap');
-        const inputRadius = document.getElementById('input-radius');
-        const inputBgColor = document.getElementById('input-bg-color');
-        const gapVal = document.getElementById('gap-val');
-        const radiusVal = document.getElementById('radius-val');
-        const ratioBtns = document.querySelectorAll('.ratio-btn');
-        const bgPresets = document.querySelectorAll('.bg-preset');
+        // Array global untuk menyimpan objek gambar asli (supaya bisa di-shuffle/re-layout)
+        let uploadedImages = []; 
+        // Tinggi baris target (ideal) dalam pixel untuk algoritma linear partition
+        const TARGET_ROW_HEIGHT = 220; 
 
-        // --- Event Listeners Init ---
-        window.addEventListener('paste', handleClipboardPaste);
-        dropzone.addEventListener('click', () => fileInput.click());
-        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('border-indigo-500', 'bg-slate-950'); });
-        dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('border-indigo-500', 'bg-slate-950'); });
-        dropzone.addEventListener('drop', handleFileDrop);
-        fileInput.addEventListener('change', handleFileSelect);
-
-        inputGap.addEventListener('input', (e) => { state.gap = e.target.value; gapVal.textContent = `${state.gap}px`; updateLiveCanvasStyles(); });
-        inputRadius.addEventListener('input', (e) => { state.radius = e.target.value; radiusVal.textContent = `${state.radius}px`; updateLiveCanvasStyles(); });
-        inputBgColor.addEventListener('input', (e) => { state.bgStyle = e.target.value; removeActivePresetRing(); updateLiveCanvasStyles(); });
-        
-        btnGenerate.addEventListener('click', generateCollageLayout);
-        btnExport.addEventListener('click', exportHighQualityCollage);
-
-        // Ratio Buttons Handlers
-        ratioBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                ratioBtns.forEach(b => b.classList.remove('active', 'bg-indigo-600', 'text-white', 'border-indigo-500', 'shadow-md', 'shadow-indigo-600/10'));
-                ratioBtns.forEach(b => b.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700/50'));
-                
-                btn.classList.remove('bg-slate-800', 'text-slate-300', 'border-slate-700/50');
-                btn.classList.add('active', 'bg-indigo-600', 'text-white', 'border-indigo-500', 'shadow-md', 'shadow-indigo-600/10');
-                
-                state.currentRatio = btn.getAttribute('data-ratio');
-                applyAspectRatioClass();
-            });
-        });
-
-        // Background Preset Click Handlers
-        bgPresets.forEach(preset => {
-            preset.addEventListener('click', (e) => {
-                removeActivePresetRing();
-                preset.classList.add('ring-2', 'ring-indigo-500');
-                state.bgStyle = preset.getAttribute('data-bg');
-                updateLiveCanvasStyles();
-            });
-        });
-
-        function removeActivePresetRing() {
-            bgPresets.forEach(p => p.classList.remove('ring-2', 'ring-indigo-500'));
-        }
-
-        // --- File & Clipboard Processing Logics ---
-        function handleClipboardPaste(e) {
+        // 1. Event Listener Global untuk Paste (Ctrl + V)
+        document.addEventListener('paste', function(e) {
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let item of items) {
-                if (item.type.indexOf('image') !== -1) {
-                    const blob = item.getAsFile();
-                    processFileIntoPool(blob);
+            let imageFound = false;
+
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const blob = items[i].getAsFile();
+                    const reader = new FileReader();
+
+                    reader.onload = function(event) {
+                        const img = new Image();
+                        img.onload = function() {
+                            // Simpan referensi dan dimensi asli gambar
+                            uploadedImages.push(img);
+                            // Hilangkan instruksi tengah saat gambar pertama masuk
+                            if (uploadedImages.length === 1) {
+                                instruction.style.opacity = '0';
+                            }
+                            // Susun ulang kolase
+                            renderCollage();
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(blob);
+                    imageFound = true;
                 }
             }
-        }
+        });
 
-        function handleFileDrop(e) {
-            e.preventDefault();
-            dropzone.classList.remove('border-indigo-500', 'bg-slate-950');
-            if (e.dataTransfer.files.length > 0) {
-                Array.from(e.dataTransfer.files).forEach(processFileIntoPool);
-            }
-        }
+        /**
+         * 2. ALGORITMA PENYUSUNAN GAMBAR (Puzzle Packing / No-Crop)
+         * * Menggunakan pendekatan "Row-Oriented Linear Partition".
+         * Langkah-langkah:
+         * A. Hitung rasio aspek (W/H) masing-masing gambar.
+         * B. Masukkan gambar ke dalam baris saat ini demi baris.
+         * C. Jika total rasio baris tersebut membuat gambar terlalu kecil/terlalu panjang,
+         * maka baris ditutup dan tinggi baris dihitung ulang secara proporsional agar 
+         * lebar total baris pas 100% mengikuti lebar kontainer (`wrapper`).
+         * D. Semua gambar ter-render PENUH tanpa crop (aspek rasio abadi).
+         */
+        function renderCollage() {
+            wrapper.innerHTML = '';
+            if (uploadedImages.length === 0) return;
 
-        function handleFileSelect(e) {
-            Array.from(e.target.files).forEach(processFileIntoPool);
-            fileInput.value = ''; // Reset input
-        }
-
-        function processFileIntoPool(file) {
-            if (!file.type.startsWith('image/')) return;
+            const containerWidth = wrapper.clientWidth;
+            const currentGap = parseInt(gapSlider.value);
             
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const mediaItem = {
-                    id: 'img_' + Math.random().toString(36).substr(2, 9),
-                    src: event.target.result
-                };
-                state.mediaPool.push(mediaItem);
-                renderMediaQueueThumbnails();
-            };
-            reader.readAsDataURL(file);
-        }
+            let currentRow = [];
+            let currentRowWidthRatio = 0;
 
-        // --- Render UI Components ---
-        function renderMediaQueueThumbnails() {
-            thumbnailQueue.innerHTML = '';
-            poolCounter.textContent = `${state.mediaPool.length} Gambar`;
+            uploadedImages.forEach((img, index) => {
+                const imgRatio = img.width / img.height;
+                // Estimasi lebar gambar jika tingginya disamakan dengan TARGET_ROW_HEIGHT
+                const estimatedWidth = TARGET_ROW_HEIGHT * imgRatio;
 
-            if (state.mediaPool.length === 0) {
-                queueContainer.classList.add('hidden');
-                return;
-            }
+                currentRow.push({ img, ratio: imgRatio });
+                // Menambahkan rasio beserta kompensasi gap antar gambar dalam satu baris
+                currentRowWidthRatio += imgRatio;
 
-            queueContainer.classList.remove('hidden');
+                // Hitung estimasi lebar total baris termasuk gap
+                const totalEstimatedRowWidth = (currentRowWidthRatio * TARGET_ROW_HEIGHT) + ((currentRow.length - 1) * currentGap);
 
-            state.mediaPool.forEach((item, index) => {
-                const thumbWrapper = document.createElement('div');
-                thumbWrapper.className = 'relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-slate-700/60 bg-slate-950 group';
-                
-                const img = document.createElement('img');
-                img.src = item.src;
-                img.className = 'w-full h-full object-cover';
-                
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'absolute inset-0 bg-rose-600/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer';
-                deleteBtn.innerHTML = '<i class="fa-solid fa-trash-can text-xs"></i>';
-                deleteBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    removeMediaItem(item.id);
-                };
+                // Jika baris mendekati atau melebihi batas kontainer, atau ini gambar terakhir
+                if (totalEstimatedRowWidth >= containerWidth || index === uploadedImages.length - 1) {
+                    
+                    // Hitung tinggi ideal untuk baris ini agar pas memenuhi lebar kontainer (100% width)
+                    const availableWidthForImages = containerWidth - ((currentRow.length - 1) * currentGap);
+                    let rowHeight = availableWidthForImages / currentRowWidthRatio;
 
-                thumbWrapper.appendChild(img);
-                thumbWrapper.appendChild(deleteBtn);
-                thumbnailQueue.appendChild(thumbWrapper);
+                    // Batasi agar baris terakhir yang gambarnya sedikit tidak menjadi terlalu raksasa
+                    if (index === uploadedImages.length - 1 && totalEstimatedRowWidth < containerWidth * 0.65) {
+                        rowHeight = Math.min(TARGET_ROW_HEIGHT, rowHeight);
+                    }
+
+                    // Buat elemen DOM baris baru
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'collage-row';
+                    rowDiv.style.height = `${rowHeight}px`;
+
+                    // Masukkan seluruh gambar dalam baris ini ke DOM
+                    currentRow.forEach(item => {
+                        const imgElement = document.createElement('img');
+                        imgElement.src = item.img.src;
+                        imgElement.className = 'collage-item';
+                        // Kalkulasi lebar berbasis tinggi baris yang sudah dinormalisasi (No-Crop!)
+                        imgElement.style.width = `${rowHeight * item.ratio}px`;
+                        rowDiv.appendChild(imgElement);
+                    });
+
+                    wrapper.appendChild(rowDiv);
+
+                    // Reset penampung baris untuk iterasi berikutnya
+                    currentRow = [];
+                    currentRowWidthRatio = 0;
+                }
             });
         }
 
-        function removeMediaItem(id) {
-            state.mediaPool = state.mediaPool.filter(item => item.id !== id);
-            renderMediaQueueThumbnails();
-            
-            // If item deleted from pool, reflect changes in workspace if live
-            if(document.getElementById(id)) {
-                generateCollageLayout();
+        // 3. Fitur Ganti Jarak (Gap Slider)
+        gapSlider.addEventListener('input', function() {
+            const val = gapSlider.value;
+            gapValue.innerText = val + 'px';
+            wrapper.style.gap = val + 'px';
+            // Panggil render ulang untuk menghitung dimensi baris baru akibat perubahan gap
+            renderCollage(); 
+        });
+
+        // 4. Fitur Shuffle (Acak Susunan)
+        btnShuffle.addEventListener('click', function() {
+            if (uploadedImages.length <= 1) return;
+            // Algoritma Fisher-Yates Shuffle
+            for (let i = uploadedImages.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [uploadedImages[i], uploadedImages[j]] = [uploadedImages[j], uploadedImages[i]];
             }
-        }
+            renderCollage();
+        });
 
-        function applyAspectRatioClass() {
-            // Apply standard Tailwind aspect classes safely via inline element styling metrics
-            switch(state.currentRatio) {
-                case '1:1':
-                    collageCanvas.style.aspectRatio = '1 / 1';
-                    break;
-                case '16:9':
-                    collageCanvas.style.aspectRatio = '16 / 9';
-                    break;
-                case '9:16':
-                    collageCanvas.style.aspectRatio = '9 / 16';
-                    break;
+        // 5. Fitur Reset (Hapus Semua)
+        btnReset.addEventListener('click', function() {
+            if (confirm('Apakah Anda yakin ingin menghapus semua gambar?')) {
+                uploadedImages = [];
+                wrapper.innerHTML = '';
+                instruction.style.opacity = '1';
             }
-        }
+        });
 
-        function updateLiveCanvasStyles() {
-            // Apply Gap & Background Style
-            collageCanvas.style.gap = `${state.gap}px`;
-            collageCanvas.style.padding = `${state.gap}px`;
-            
-            if (state.bgStyle.startsWith('linear-gradient')) {
-                collageCanvas.style.background = state.bgStyle;
-            } else {
-                collageCanvas.style.backgroundColor = state.bgStyle;
-                collageCanvas.style.backgroundImage = 'none';
-            }
-
-            // Apply Image Border Radii elements inside canvas
-            const gridItems = collageCanvas.querySelectorAll('.collage-item');
-            gridItems.forEach(item => {
-                item.style.borderRadius = `${state.radius}px`;
-            });
-        }
-
-        // --- Smart Grid Auto-Layout Engine Algorithm ---
-        function generateCollageLayout() {
-            if (state.mediaPool.length === 0) {
-                alert('Silakan tambahkan gambar ke Media Pool terlebih dahulu.');
+        // 6. FITUR EKSPOR (Download Hasil High-Res PNG)
+        btnDownload.addEventListener('click', function() {
+            if (uploadedImages.length === 0) {
+                alert('Belum ada gambar yang dimasukkan. Silakan paste gambar terlebih dahulu.');
                 return;
             }
 
-            // Micro-interaction Loading Simulation Trigger
-            canvasLoader.classList.remove('opacity-0', 'pointer-events-none');
+            // Dapatkan seluruh baris yang sedang ter-render di layar
+            const rows = document.querySelectorAll('.collage-row');
+            const currentGap = parseInt(gapSlider.value);
             
-            setTimeout(() => {
-                emptyState.classList.add('hidden');
-                canvasWrapper.classList.remove('hidden');
-                dragTip.classList.remove('hidden');
-                btnExport.removeAttribute('disabled');
-                
-                collageCanvas.innerHTML = '';
-                applyAspectRatioClass();
+            // Hitung dimensi total canvas resolusi tinggi berdasarkan ukuran asli elemen saat ini
+            const totalWidth = wrapper.clientWidth;
+            let totalHeight = 0;
+            rows.forEach((row, idx) => {
+                totalHeight += row.clientHeight;
+                if (idx < rows.length - 1) totalHeight += currentGap; 
+            });
 
-                const count = state.mediaPool.length;
-                let gridCols = '1fr';
-                let gridRows = '1fr';
+            // Inisialisasi Canvas Virtual untuk menggambar gabungan citra
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = totalWidth;
+            exportCanvas.height = totalHeight;
+            const ctx = exportCanvas.getContext('2d');
 
-                // Adaptive Smart Grid Configuration Definition rules
-                if (count === 2) {
-                    if (state.currentRatio === '9:16') {
-                        gridCols = '1fr'; gridRows = '1fr 1fr';
-                    } else {
-                        gridCols = '1fr 1fr'; gridRows = '1fr';
-                    }
-                } else if (count === 3) {
-                    if (state.currentRatio === '9:16') {
-                        gridCols = '1fr'; gridRows = '1fr 1fr 1fr';
-                    } else {
-                        gridCols = '2fr 1fr'; gridRows = '1fr 1fr';
-                    }
-                } else if (count === 4) {
-                    gridCols = '1fr 1fr'; gridRows = '1fr 1fr';
-                } else if (count >= 5 && count <= 6) {
-                    gridCols = '1fr 1fr 1fr'; gridRows = '1fr 1fr';
-                } else {
-                    gridCols = '1fr 1fr 1fr'; gridRows = 'auto';
-                }
+            // Set background canvas hasil unduhan menjadi gelap/transparan (mengikuti tema)
+            ctx.fillStyle = '#121212';
+            ctx.fillRect(0, 0, totalWidth, totalHeight);
 
-                collageCanvas.style.gridTemplateColumns = gridCols;
-                collageCanvas.style.gridTemplateRows = gridRows;
+            let currentY = 0;
 
-                state.mediaPool.forEach((item, index) => {
-                    const gridCell = document.createElement('div');
-                    gridCell.id = item.id;
-                    gridCell.className = 'collage-item relative overflow-hidden bg-slate-900 group cursor-grab active:cursor-grabbing transition-shadow duration-200 select-none shadow-sm';
-                    gridCell.setAttribute('draggable', 'true');
+            // Gambar ulang komponen DOM satu-persatu secara presisi ke dalam kanvas 2D ekspor
+            rows.forEach((row) => {
+                const rowHeight = row.clientHeight;
+                let currentX = 0;
+                const items = row.querySelectorAll('.collage-item');
+
+                items.forEach((imgEl) => {
+                    const imgWidth = imgEl.clientWidth;
                     
-                    // Complex specific asymmetric spans configurations for beautiful templates
-                    if (count === 3 && index === 0 && state.currentRatio !== '9:16') {
-                        gridCell.style.gridRow = 'span 2';
-                    }
-                    if (count === 5 && index === 0) {
-                        gridCell.style.gridColumn = 'span 2';
-                    }
-
-                    const img = document.createElement('img');
-                    img.src = item.src;
-                    img.className = 'w-full h-full object-cover pointer-events-none absolute inset-0';
+                    // Cari object Image asli yang cocok berdasarkan src
+                    const originalImg = uploadedImages.find(i => i.src === imgEl.src);
                     
-                    gridCell.appendChild(img);
+                    if (originalImg) {
+                        // Gambar ke canvas dengan dimensi skala saat ini (No-Crop)
+                        ctx.drawImage(originalImg, currentX, currentY, imgWidth, rowHeight);
+                    }
                     
-                    // Setup Drag and Drop Swap Logic
-                    initDragAndDropEvents(gridCell);
-
-                    collageCanvas.appendChild(gridCell);
+                    currentX += imgWidth + currentGap;
                 });
 
-                updateLiveCanvasStyles();
-                
-                // Hide Loader Animation Complete
-                canvasLoader.classList.add('opacity-0', 'pointer-events-none');
-            }, 400);
-        }
-
-        // --- Interactive Canvas Drag & Drop Re-ordering Mechanics ---
-        let draggedElement = null;
-
-        function initDragAndDropEvents(element) {
-            element.addEventListener('dragstart', (e) => {
-                draggedElement = element;
-                element.classList.add('dragging');
-                e.dataTransfer.effectAllowed = 'move';
+                currentY += rowHeight + currentGap;
             });
 
-            element.addEventListener('dragend', () => {
-                element.classList.remove('dragging');
-                draggedElement = null;
-            });
+            // Trigger download file .png dari data URL canvas
+            const link = document.createElement('a');
+            link.download = `Instant-Auto-Collage-${Date.now()}.png`;
+            link.href = exportCanvas.toDataURL('image/png');
+            link.click();
+        });
 
-            element.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                return false;
-            });
-
-            element.addEventListener('dragenter', (e) => {
-                if (element !== draggedElement) {
-                    element.classList.add('ring-2', 'ring-indigo-500', 'z-20');
-                }
-            });
-
-            element.addEventListener('dragleave', () => {
-                element.classList.remove('ring-2', 'ring-indigo-500', 'z-20');
-            });
-
-            element.addEventListener('drop', (e) => {
-                e.preventDefault();
-                element.classList.remove('ring-2', 'ring-indigo-500', 'z-20');
-                
-                if (draggedElement && element !== draggedElement) {
-                    // Swapping source addresses innerHTML contents natively safely
-                    const targetHTML = element.innerHTML;
-                    const sourceHTML = draggedElement.innerHTML;
-                    
-                    const targetId = element.id;
-                    const sourceId = draggedElement.id;
-
-                    element.innerHTML = sourceHTML;
-                    draggedElement.innerHTML = targetHTML;
-                    
-                    element.id = sourceId;
-                    draggedElement.id = targetId;
-                    
-                    // Remap states sorting array internally to match exact new generated matrix layouts
-                    const sourceIdx = state.mediaPool.findIndex(p => p.id === sourceId);
-                    const targetIdx = state.mediaPool.findIndex(p => p.id === targetId);
-                    
-                    const temp = state.mediaPool[sourceIdx];
-                    state.mediaPool[sourceIdx] = state.mediaPool[targetIdx];
-                    state.mediaPool[targetIdx] = temp;
-                    
-                    // Re-render thumbnail queue to keep structure identical
-                    renderMediaQueueThumbnails();
-                }
-            });
-        }
-
-        // --- High-Definition Client-Side Export Infrastructure ---
-        function exportHighQualityCollage() {
-            if (!collageCanvas.hasChildNodes()) return;
-
-            // Display Processing UX Interface toast/overlay
-            btnExport.disabled = true;
-            btnExport.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> <span>Mengekspor HD Image...</span>';
-
-            // Parameters optimizing scaling bounds to achieve crisp structural quality outputs
-            const options = {
-                scale: 3, // Upscales element boundaries x3 times for 4K / Crisp High Definition output resolution
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: null,
-                logging: false
-            };
-
-            // Execute client compilation rendering via Promise
-            html2canvas(collageCanvas, options).then(canvas => {
-                const dataUrl = canvas.toDataURL('image/png', 1.0);
-                
-                // Programmatic anchor instantiation technique triggering safe downloads
-                const downloadLink = document.createElement('a');
-                downloadLink.download = `Instant_Auto_Collage_${Date.now()}.png`;
-                downloadLink.href = dataUrl;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-
-                // Revert button interface state back to normal
-                btnExport.removeAttribute('disabled');
-                btnExport.innerHTML = '<i class="fa-solid fa-download"></i> <span>Export High-Quality Image</span>';
-            }).catch(err => {
-                console.error("Export Failed Error: ", err);
-                alert("Gagal mengekspor gambar. Pastikan aset aman.");
-                btnExport.removeAttribute('disabled');
-                btnExport.innerHTML = '<i class="fa-solid fa-download"></i> <span>Export High-Quality Image</span>';
-            });
-        }
+        // Deteksi resize layar otomatis agar susunan kolase tetap responsif
+        window.addEventListener('resize', renderCollage);
     </script>
 </body>
 </html>
