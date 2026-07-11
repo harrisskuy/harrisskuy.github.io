@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EON MMORPG - The Ultimate Minecraft Experience</title>
+    <!-- Tailwind CSS v4 -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #070A13;
+        }
+        .font-mono {
+            font-family: 'Fira Code', monospace;
+        }
+        .glow-indigo {
+            box-shadow: 0 0 50px -12px rgba(99, 102, 241, 0.15);
+        }
+        .glow-purple {
+            box-shadow: 0 0 50px -12px rgba(168, 85, 247, 0.15);
+        }
+        .glow-pink {
+            box-shadow: 0 0 50px -12px rgba(236, 72, 153, 0.15);
+        }
+        .class-content { display: none; }
+        .class-content.active { display: block; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #070A13;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1E293B;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
+</head>
+<body class="text-slate-200 antialiased selection:bg-indigo-500 selection:text-white overflow-x-hidden">
+
+    <!-- TOP ANNOUNCEMENT BAR -->
+    <div class="w-full bg-gradient-to-r from-indigo-900/40 via-purple-950/40 to-indigo-900/40 border-b border-indigo-500/20 py-2 px-4 text-center text-xs font-mono tracking-wider text-indigo-300 relative z-50">
+        🚀 <span class="text-white font-bold">UPDATE v2.4:</span> DUNGEON "RITUAL OF THE VOID" KINI TELAH DIBUKA! <a href="#dungeons" class="underline hover:text-white ml-2">LIHAT DETAILS &rarr;</a>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="fixed top-8 left-0 w-full z-50 px-4 md:px-8">
+        <div class="max-w-7xl mx-auto bg-[#070A13]/70 backdrop-blur-xl border border-slate-800/80 rounded-2xl px-6 h-20 flex items-center justify-between shadow-2xl">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">
+                    E
+                </div>
+                <span class="text-xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">EON<span class="text-indigo-500">.</span></span>
+            </div>
+            
+            <!-- Desktop Links -->
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+                <a href="#features" class="hover:text-white transition-colors">Fitur</a>
+                <a href="#classes" class="hover:text-white transition-colors">Class & Job</a>
+                <a href="#dungeons" class="hover:text-white transition-colors">Dungeons</a>
+                <a href="#store" class="hover:text-white transition-colors">Webstore</a>
+                <a href="#lore" class="hover:text-white transition-colors">Lore</a>
+                <a href="#faq" class="hover:text-white transition-colors">FAQ</a>
+                <a href="https://wiki.eon-mc.net" target="_blank" class="text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1">
+                    Wiki 
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="hidden md:flex items-center gap-4">
+                <a href="#store" class="text-xs font-mono font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-lg hover:bg-amber-500/20 transition-all">
+                    💎 DUKUNG SERVER
+                </a>
+                <button onclick="copyIP()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg shadow-indigo-600/20 hover:shadow-indigo-500/30 active:scale-95 cursor-pointer">
+                    Main Sekarang
+                </button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button onclick="toggleMobileMenu()" class="md:hidden text-slate-400 hover:text-white cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Panel -->
+        <div id="mobileMenu" class="hidden md:hidden mt-2 w-full bg-[#070A13] border border-slate-800 rounded-2xl p-6 flex flex-col gap-4 shadow-2xl">
+            <a href="#features" onclick="toggleMobileMenu()" class="text-slate-400 hover:text-white py-2 border-b border-slate-900">Fitur</a>
+            <a href="#classes" onclick="toggleMobileMenu()" class="text-slate-400 hover:text-white py-2 border-b border-slate-900">Class & Job</a>
+            <a href="#dungeons" onclick="toggleMobileMenu()" class="text-slate-400 hover:text-white py-2 border-b border-slate-900">Dungeons</a>
+            <a href="#store" onclick="toggleMobileMenu()" class="text-slate-400 hover:text-white py-2 border-b border-slate-900">Webstore</a>
+            <a href="#lore" onclick="toggleMobileMenu()" class="text-slate-400 hover:text-white py-2 border-b border-slate-900">Lore</a>
+            <a href="#faq" onclick="toggleMobileMenu()" class="text-slate-400 hover:text-white py-2 border-b border-slate-900">FAQ</a>
+            <button onclick="copyIP(); toggleMobileMenu();" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold mt-2">Copy Server IP</button>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="relative pt-52 pb-32 overflow-hidden flex flex-col items-center justify-center min-h-screen text-center px-6">
+        <!-- Ambient Atmospheric Backgrounds -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="absolute top-1/3 left-1/4 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute bottom-10 right-1/4 w-[350px] h-[350px] bg-pink-600/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <!-- Dot Matrix Mesh Pattern Overlay -->
+        <div class="absolute inset-0 opacity-[0.02] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-5xl mx-auto">
+            <!-- Tagline Badge -->
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-8 font-mono shadow-inner">
+                <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                Next-Gen Minecraft MMORPG Experience
+            </div>
+            
+            <!-- Epic Main Headline -->
+            <h1 class="text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-tighter text-white mb-8 leading-[1.05]">
+                Ukir Legendamu <br>di Dunia <span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">EON MMORPG</span>
+            </h1>
+            
+            <!-- Captivating Sub-description -->
+            <p class="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto mb-12 leading-relaxed font-normal">
+                Selamat datang di dunia fantasi masif yang dibangun sepenuhnya di dalam Minecraft vanila. Bertarunglah dengan ribuan pemain lain, taklukkan ruang bawah tanah, dan klaim takhta tertinggimu tanpa membutuhkan instalasi mod eksternal.
+            </p>
+
+            <!-- Interactive Hero CTAs -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+                <button onclick="copyIP()" id="ipButton" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 hover:border-slate-700 px-8 py-4.5 rounded-2xl text-base font-mono font-semibold transition-all duration-300 flex items-center justify-center gap-4 group cursor-pointer shadow-xl">
+                    <span>IP Server: <span class="text-indigo-400 font-bold">play.eon-mc.net</span></span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500 group-hover:text-slate-300 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                </button>
+                <a href="#features" class="w-full sm:w-auto text-base font-semibold text-slate-300 hover:text-white px-8 py-4.5 transition-colors group">
+                    Jelajahi Fitur Kunci <span class="inline-block transition-transform group-hover:translate-x-1 ml-1">&rarr;</span>
+                </a>
+            </div>
+
+            <!-- Server Real-time Live Stats Dashboard Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto border-t border-slate-900 pt-12 text-left">
+                <div class="bg-[#0C101F]/40 border border-slate-900 p-5 rounded-2xl">
+                    <p class="text-xs font-mono text-slate-500 uppercase tracking-wider mb-1">Status Server</p>
+                    <p class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span> ONLINE
+                    </p>
+                </div>
+                <div class="bg-[#0C101F]/40 border border-slate-900 p-5 rounded-2xl">
+                    <p class="text-xs font-mono text-slate-500 uppercase tracking-wider mb-1">Pemain Online</p>
+                    <p class="text-2xl font-black text-white">412 <span class="text-xs font-normal text-slate-400">/ 1000</span></p>
+                </div>
+                <div class="bg-[#0C101F]/40 border border-slate-900 p-5 rounded-2xl">
+                    <p class="text-xs font-mono text-slate-500 uppercase tracking-wider mb-1">Rekor Tertinggi</p>
+                    <p class="text-2xl font-black text-white">894 <span class="text-xs font-normal text-indigo-400 font-mono">Pemain</span></p>
+                </div>
+                <div class="bg-[#0C101F]/40 border border-slate-900 p-5 rounded-2xl">
+                    <p class="text-xs font-mono text-slate-500 uppercase tracking-wider mb-1">Versi Game</p>
+                    <p class="text-xl font-bold text-slate-200 font-mono">1.20.x - 1.21.x</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CORE FEATURES SECTION (Bento Grid Layout) -->
+    <section id="features" class="py-32 max-w-7xl mx-auto px-6 border-t border-slate-900">
+        <div class="text-center max-w-3xl mx-auto mb-20">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">Mengapa Memilih EON?</h2>
+            <p class="text-slate-400 text-lg">Kami mendesain ulang sistem mekanik inti Minecraft untuk menghadirkan sensasi bermain RPG kelas konsol yang seutuhnya.</p>
+        </div>
+
+        <!-- 6-Card Bento Grid System -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Card 1: Skill System -->
+            <div class="bg-[#0E1326] border border-slate-800/60 p-8 rounded-3xl glow-indigo hover:border-indigo-500/40 transition-all duration-300 group md:col-span-2">
+                <div class="flex flex-col md:flex-row gap-6 justify-between h-full">
+                    <div class="flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 text-xl mb-6 group-hover:scale-110 transition-transform">⚔️</div>
+                            <h3 class="text-2xl font-bold text-white mb-3">Custom Action Combat & Skill Tree</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed max-w-md">
+                                Lupakan klik kiri vanila yang membosankan. Di EON, Anda dapat mengeksekusi kombo mekanik, menangkis serangan, hingga menembakkan puluhan mantra magis dengan efek partikel memukau melalui *Skill Tree* kustom Anda.
+                            </p>
+                        </div>
+                        <span class="text-xs font-mono text-indigo-400 mt-6 block">0 PENGGUNAAN MOD &bull; TERINTEGRASI DENGAN MOUSE/KEYBOARD</span>
+                    </div>
+                    <div class="bg-[#070A13] border border-slate-950 p-6 rounded-2xl font-mono text-xs text-slate-500 flex flex-col justify-center min-w-[200px]">
+                        <div class="mb-2 text-indigo-400">// COMBO ACTIVE:</div>
+                        <div class="text-slate-300">&rarr; R-Click + L-Click</div>
+                        <div class="text-emerald-400 font-bold">[SKILL EXECUTED: FIREBALL]</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 2: Bosses -->
+            <div class="bg-[#0E1326] border border-slate-800/60 p-8 rounded-3xl glow-purple hover:border-purple-500/40 transition-all duration-300 group">
+                <div class="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 text-xl mb-6 group-hover:scale-110 transition-transform">🌋</div>
+                <h3 class="text-xl font-bold text-white mb-2">Dungeon & Raid Boss Instansi</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Masuki gerbang dungeon instansiasi bersama tim Anda. Hadapi bos epik yang dibekali kecerdasan buatan (*AI*) khusus, fase pertarungan dinamis, dan jaminan bebas gangguan dari pemain luar.
+                </p>
+                <a href="#dungeons" class="text-xs font-semibold text-purple-400 mt-6 inline-block hover:underline">Lihat daftar bos &rarr;</a>
+            </div>
+
+            <!-- Card 3: Economy -->
+            <div class="bg-[#0E1326] border border-slate-800/60 p-8 rounded-3xl glow-pink hover:border-pink-500/40 transition-all duration-300 group">
+                <div class="w-12 h-12 bg-pink-500/10 rounded-2xl flex items-center justify-center text-pink-400 text-xl mb-6 group-hover:scale-110 transition-transform">⚖️</div>
+                <h3 class="text-xl font-bold text-white mb-2">Player-Driven Economy</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Kendalikan pasar! Seluruh item legendaris, senjata, obat-obatan, dan material berharga dapat diperjualbelikan melalui sistem pasar lelang (*Auction House*) global atau transaksi langsung antar pemain.
+                </p>
+            </div>
+
+            <!-- Card 4: Gear Progression -->
+            <div class="bg-[#0E1326] border border-slate-800/60 p-8 rounded-3xl glow-indigo hover:border-indigo-500/40 transition-all duration-300 group md:col-span-2">
+                <div class="flex flex-col justify-between h-full">
+                    <div>
+                        <div class="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 text-xl mb-6 group-hover:scale-110 transition-transform">🛡️</div>
+                        <h3 class="text-2xl font-bold text-white mb-3">Sistem Progresi Senjata & Tier Gear</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Kumpulkan ribuan variasi senjata dari tingkatan *Common, Rare, Epic, Mythic*, hingga *Celestial*. Tingkatkan kekuatan perlengkapan bertarung Anda dengan menyematkan batu permata magis (*Gemstones*), sistem *Rerolling Stat*, serta sistem tempa tingkat tinggi (*Blacksmithing*).
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mt-6 text-center font-mono text-xs">
+                        <div class="bg-indigo-950/30 text-indigo-400 border border-indigo-900/40 p-2 rounded-xl">Common</div>
+                        <div class="bg-purple-950/30 text-purple-400 border border-purple-900/40 p-2 rounded-xl">Epic</div>
+                        <div class="bg-amber-950/30 text-amber-400 border border-amber-900/50 p-2 rounded-xl">Celestial</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- INTERACTIVE CLASSES SECTION (Enhanced Tab System) -->
+    <section id="classes" class="py-32 bg-[#0A0D1B] border-t border-b border-slate-950 relative">
+        <div class="absolute inset-0 opacity-5 bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:32px_32px] pointer-events-none"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">Pilih Jalur Takdirmu</h2>
+                <p class="text-slate-400 text-lg">Sesuaikan dengan gaya bertarung ideal Anda. EON menawarkan tiga archetype kelas utama yang memiliki pohon spesialisasi unik.</p>
+            </div>
+
+            <!-- Tab Switcher Menu -->
+            <div class="flex flex-wrap justify-center gap-4 mb-16">
+                <button onclick="switchClass('warrior')" id="btn-warrior" class="class-btn px-8 py-4 rounded-2xl font-bold text-sm transition-all border border-indigo-500/30 bg-indigo-600 text-white shadow-xl cursor-pointer">
+                    ⚔️ VANGUARD (Warrior)
+                </button>
+                <button onclick="switchClass('mage')" id="btn-mage" class="class-btn px-8 py-4 rounded-2xl font-bold text-sm transition-all border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 cursor-pointer">
+                    🔮 ARCANIST (Mage)
+                </button>
+                <button onclick="switchClass('assassin')" id="btn-assassin" class="class-btn px-8 py-4 rounded-2xl font-bold text-sm transition-all border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 cursor-pointer">
+                    ⚡ PHANTOM (Assassin)
+                </button>
+            </div>
+
+            <!-- Tab Dynamic Box Display -->
+            <div class="bg-[#0E1326] border border-slate-800/80 rounded-3xl p-8 md:p-12 max-w-5xl mx-auto glow-indigo">
+                
+                <!-- Archetype: Warrior Content Block -->
+                <div id="class-warrior" class="class-content active">
+                    <div class="grid md:grid-cols-5 gap-12 items-center">
+                        <div class="md:col-span-3">
+                            <span class="text-xs font-mono text-indigo-400 uppercase tracking-widest font-bold bg-indigo-500/10 px-3 py-1 rounded-md border border-indigo-500/20">Spesialisasi: Tanker & Crowd Control</span>
+                            <h3 class="text-4xl font-extrabold text-white mt-4 mb-4">The Vanguard</h3>
+                            <p class="text-slate-400 text-base leading-relaxed mb-8">
+                                Berdiri kokoh sebagai garda terdepan pelindung aliansi. Menempa diri dengan zirah pelat baja berat dan perisai agung, Vanguard memiliki kemampuan superior untuk memprovokasi musuh (*Taunt*), menyerap kerusakan masif, serta menghancurkan pertahanan garis musuh secara brutal.
+                            </p>
+                            
+                            <!-- Stat Bars Components -->
+                            <div class="space-y-4 mb-8">
+                                <div>
+                                    <div class="flex justify-between text-xs font-mono text-slate-400 mb-1"><span>DAYA TAHAN (DEFENSE)</span><span class="text-indigo-400 font-bold">100 / 100</span></div>
+                                    <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden"><div class="h-full bg-indigo-500 rounded-full" style="width: 100%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-mono text-slate-400 mb-1"><span>KERUSAKAN (DAMAGE)</span><span class="text-slate-400 font-bold">55 / 100</span></div>
+                                    <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden"><div class="h-full bg-slate-600 rounded-full" style="width: 55%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-mono text-slate-400 mb-1"><span>TINGKAT KESULITAN</span><span class="text-emerald-400 font-bold">MUDAH</span></div>
+                                    <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden"><div class="h-full bg-emerald-500 rounded-full" style="width: 30%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 bg-[#070A13] border border-slate-900 p-8 rounded-2xl text-center flex flex-col justify-center min-h-[300px]">
+                            <span class="text-5xl block mb-4">🛡️</span>
+                            <h4 class="text-white font-bold mb-2">Signature Skill: Aegis Slam</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed font-mono">
+                                Menghantam bumi menggunakan perisai, memicu gelombang kejut yang memberikan efek *Stun* selama 3 detik pada semua musuh di sekitar dan meningkatkan pertahanan diri sebesar 50%.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Archetype: Mage Content Block -->
+                <div id="class-mage" class="class-content">
+                    <div class="grid md:grid-cols-5 gap-12 items-center">
+                        <div class="md:col-span-3">
+                            <span class="text-xs font-mono text-purple-400 uppercase tracking-widest font-bold bg-purple-500/10 px-3 py-1 rounded-md border border-purple-500/20">Spesialisasi: Burst AoE Magic DPS</span>
+                            <h3 class="text-4xl font-extrabold text-white mt-4 mb-4">The Arcanist</h3>
+                            <p class="text-slate-400 text-base leading-relaxed mb-8">
+                                Penguasa mutlak energi astral dan manipulasi elemen alam. Melalui tongkat sihirnya, Arcanist mampu memanggil hujan meteor, mengunci musuh dalam pusaran es, hingga melepaskan sambaran petir berdaya hancur area (*AoE*) masif dari jarak aman.
+                            </p>
+                            
+                            <!-- Stat Bars Components -->
+                            <div class="space-y-4 mb-8">
+                                <div>
+                                    <div class="flex justify-between text-xs font-mono text-slate-400 mb-1"><span>DAYA TAHAN (DEFENSE)</span><span class="text-slate-400 font-bold">35 / 100</span></div>
+                                    <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden"><div class="h-full bg-slate-600 rounded-full" style="width: 35%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-mono text-slate-400 mb-1"><span>KERUSAKAN (DAMAGE)</span><span class="text-purple-400 font-bold">95 / 100</span></div>
+                                    <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden"><div class="h-full bg-purple-500 rounded-full" style="width: 95%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-mono text-slate-400 mb-1"><span>TINGKAT KESULITAN</span><span class="text-amber-400 font-bold">SEDANG</span></div>
+                                    <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden"><div class="h-full bg-amber-500 rounded-full" style="width: 65%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 bg-[#070A13] border border-slate-900 p-8 rounded-2xl text-center flex flex-col justify-center min-h-[300px]">
+                            <span class="text-5xl block mb-4">🔮</span>
+                            <h4 class="text-white font-bold mb-2">Signature Skill: Chrono Blink</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed font-mono">
+                                Berteleportasi secara instan sejauh 8 blok ke depan, meninggalkan replika energi yang akan meledak dan memberikan efek kelambatan (*Slow 40%*) pada pengejar.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Archetype: Assassin Content Block -->
+                <div id="class-assassin" class="class-content">
+                    <div class="grid md:grid-cols-5 gap-12 items-center">
+                        <div class="md:col-span-3">
+                            <span class="text-xs font-mono text-pink-400 uppercase tracking-widest font-bold bg-pink-500/10 px-3 py-1 rounded-md border border-pink-500/20">Spesialisasi: High Burst Single-Target DPS</span>
+                            <h3 class="text-4xl font-extrabold text-white mt-4 mb-4">The Phantom</h3>
+                            <p class="text-slate-400 text-base leading-relaxed mb-8">
+                                Malaikat maut yang bergerak senyap di dalam kepekatan bayangan. Bersenjatakan sepasang belati beracun, Phantom berspesialisasi dalam mobilitas kilat, menyusup ke lini belakang musuh, lalu mengeksekusi target tunggal dengan serangan kritikal mematikan sebelum menghilang kembali.
+                            </p>
+                            
+                            <!-- Stat Bars Components -->
+                            <div class="space-y-4 mb-8">
+                                <div>
+                                    <div class="flex justify-between text-xs font-mono text-slate-400 mb-1"><span>DAYA TAHAN (DEFENSE)</span><span class="text-slate-400 font-bold">45 / 100</span></div>
+                                    <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden"><div class="h-full bg-slate-600 rounded-full" style="width: 45%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-mono text-slate-400 mb-1"><span>KERUSAKAN (DAMAGE)</span><span class="text-pink-400 font-bold">100 / 100</span></div>
+                                    <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden"><div class="h-full bg-pink-500 rounded-full" style="width: 100%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-mono text-slate-400 mb-1"><span>TINGKAT KESULITAN</span><span class="text-red-400 font-bold">SANGAT SULIT</span></div>
+                                    <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden"><div class="h-full bg-red-500 rounded-full" style="width: 90%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 bg-[#070A13] border border-slate-900 p-8 rounded-2xl text-center flex flex-col justify-center min-h-[300px]">
+                            <span class="text-5xl block mb-4">⚡</span>
+                            <h4 class="text-white font-bold mb-2">Signature Skill: Shadow Dance</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed font-mono">
+                                Memasuki mode tidak terlihat (*Invisibility*) selama 5 detik. Serangan pertama yang diluncurkan dari mode ini dijamin memicu *Critical Strike* sebesar 250% damage.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- DUNGEONS & BOSSES SHOWCASE SECTION -->
+    <section id="dungeons" class="py-32 max-w-7xl mx-auto px-6">
+        <div class="text-center max-w-3xl mx-auto mb-20">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">Taklukkan Raid & Dungeon Instansi</h2>
+            <p class="text-slate-400 text-lg">Uji koordinasi strategi bertarung tim Anda di ruang bawah tanah terdalam untuk merebut material persenjataan kelas tertinggi.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Dungeon Card 1 -->
+            <div class="bg-[#0E1326] border border-slate-800/60 rounded-3xl overflow-hidden hover:border-slate-700 transition-all duration-300 group flex flex-col justify-between">
+                <div class="p-8">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <span class="text-xs font-mono text-amber-400 font-bold bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded">RATING TINGKAT KESULITAN: TINGGI</span>
+                            <h3 class="text-2xl font-bold text-white mt-3">The Sunken Crypt</h3>
+                        </div>
+                        <span class="text-xs font-mono text-slate-500">REKOMENDASI LEVEL: 40+</span>
+                    </div>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                        Tersembunyi di bawah reruntuhan gurun pasir, ruang bawah tanah kuno ini menjadi rumah bagi jiwa-jiwa terkutuk prajurit Dinasti Ra-Ghul yang bangkit kembali akibat paparan energi Void.
+                    </p>
+                    <div class="border-t border-slate-900 pt-6">
+                        <h4 class="text-xs font-mono text-indigo-400 uppercase font-bold mb-3">Klaim Item Eksklusif Drop:</h4>
+                        <div class="flex gap-2 text-xs font-mono text-slate-300">
+                            <span class="bg-[#070A13] px-3 py-1.5 rounded-lg border border-slate-900">&bull; Ra-Ghul Greatsword</span>
+                            <span class="bg-[#070A13] px-3 py-1.5 rounded-lg border border-slate-900">&bull; Sunken Relic Core</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-[#0A0D1B] px-8 py-4 border-t border-slate-900 flex justify-between items-center text-xs font-mono text-slate-500">
+                    <span>MAX CAPACITY: 4 PLAYERS</span>
+                    <span class="text-indigo-400">ESTIMASI DURASI: 25 MINS</span>
+                </div>
+            </div>
+
+            <!-- Dungeon Card 2 -->
+            <div class="bg-[#0E1326] border border-slate-800/60 rounded-3xl overflow-hidden hover:border-slate-700 transition-all duration-300 group flex flex-col justify-between">
+                <div class="p-8">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <span class="text-xs font-mono text-red-400 font-bold bg-red-500/10 border border-red-500/20 px-2.5 py-1 rounded">RATING TINGKAT KESULITAN: MITIS</span>
+                            <h3 class="text-2xl font-bold text-white mt-3">Ritual of the Void</h3>
+                        </div>
+                        <span class="text-xs font-mono text-slate-500">REKOMENDASI LEVEL: 75+</span>
+                    </div>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                        Puncak anomali ruang dimensi. Mengharuskan tim Anda menghentikan upacara pemanggilan Dewa Kegelapan Abyss sebelum terlambat. Waspadai mekanik zona area mati instan!
+                    </p>
+                    <div class="border-t border-slate-900 pt-6">
+                        <h4 class="text-xs font-mono text-purple-400 uppercase font-bold mb-3">Klaim Item Eksklusif Drop:</h4>
+                        <div class="flex gap-2 text-xs font-mono text-slate-300">
+                            <span class="bg-[#070A13] px-3 py-1.5 rounded-lg border border-slate-900">&bull; Voidborn Wings</span>
+                            <span class="bg-[#070A13] px-3 py-1.5 rounded-lg border border-slate-900">&bull; Catalyst of Eternity</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-[#0A0D1B] px-8 py-4 border-t border-slate-900 flex justify-between items-center text-xs font-mono text-slate-500">
+                    <span>MAX CAPACITY: 6 PLAYERS (RAID)</span>
+                    <span class="text-red-400">ESTIMASI DURASI: 40 MINS</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WEBSTORE PREMIUM PACKAGES PREVIEW SECTION -->
+    <section id="store" class="py-32 bg-[#0A0D1B] border-t border-b border-slate-950">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-3xl mx-auto mb-25">
+                <h2 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">Dukung Server Kami</h2>
+                <p class="text-slate-400 text-lg">Seluruh kontribusi dana digunakan sepenuhnya untuk biaya perawatan infrastruktur server 24/7 dan mendanai pembaruan konten mingguan.</p>
+            </div>
+
+            <!-- Shop Grid System Layout -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                <!-- Package Card 1 -->
+                <div class="bg-[#0E1326] border border-slate-800/60 p-6 rounded-2xl flex flex-col justify-between hover:border-indigo-500/30 transition-all group">
+                    <div>
+                        <span class="text-[10px] font-mono font-bold tracking-widest text-indigo-400 uppercase block mb-2">TIER RANK PERMANEN</span>
+                        <h3 class="text-xl font-bold text-white mb-2">Iron Knight</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-4">Pilihan esensial untuk memulai petualangan Anda dengan kenyamanan ekstra.</p>
+                        <ul class="text-xs space-y-2 text-slate-400 border-t border-slate-900 pt-4 mb-6">
+                            <li>&bull; Prefix Chat Eksklusif: <span class="text-slate-300 font-bold">[KNIGHT]</span></li>
+                            <li>&bull; Akses perintah dasar <span class="font-mono text-indigo-300">/feed</span> & <span class="font-mono text-indigo-300">/wb</span></li>
+                            <li>&bull; +3 Slot Inventori Vault Tambahan</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-black text-white mb-4">IDR 50.000</div>
+                        <a href="https://store.eon-mc.net" target="_blank" class="w-full block text-center bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold py-3 rounded-xl transition-all text-white">BELI PAKET</a>
+                    </div>
+                </div>
+
+                <!-- Package Card 2 -->
+                <div class="bg-[#0E1326] border border-purple-500/30 p-6 rounded-2xl flex flex-col justify-between hover:border-purple-500/60 transition-all group shadow-xl shadow-purple-950/20 relative">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-[9px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider">PALING POPULER</div>
+                    <div>
+                        <span class="text-[10px] font-mono font-bold tracking-widest text-purple-400 uppercase block mb-2">TIER RANK PERMANEN</span>
+                        <h3 class="text-xl font-bold text-white mb-2">Aethel Mage</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-4">Nikmati kebebasan kustomisasi kosmetik efek partikel penuh di dalam lobi game.</p>
+                        <ul class="text-xs space-y-2 text-slate-400 border-t border-slate-900 pt-4 mb-6">
+                            <li>&bull; Seluruh keuntungan Rank <span class="text-slate-300">Iron Knight</span></li>
+                            <li>&bull; Prefix Chat Eksklusif: <span class="text-purple-400 font-bold">[MAGE]</span></li>
+                            <li>&bull; Akses perintah <span class="font-mono text-purple-300">/fly</span> di area Capital City</li>
+                            <li>&bull; Akses 12x Opsi Partikel Kosmetik Aura</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-black text-white mb-4">IDR 125.000</div>
+                        <a href="https://store.eon-mc.net" target="_blank" class="w-full block text-center bg-purple-600 hover:bg-purple-500 text-xs font-bold py-3 rounded-xl transition-all text-white shadow-lg shadow-purple-600/20">BELI PAKET</a>
+                    </div>
+                </div>
+
+                <!-- Package Card 3 -->
+                <div class="bg-[#0E1326] border border-slate-800/60 p-6 rounded-2xl flex flex-col justify-between hover:border-amber-500/30 transition-all group">
+                    <div>
+                        <span class="text-[10px] font-mono font-bold tracking-widest text-amber-400 uppercase block mb-2">TIER RANK SUPREME</span>
+                        <h3 class="text-xl font-bold text-white mb-2">EON Monarch</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-4">Dapatkan apresiasi tertinggi dari komunitas serta keuntungan utilitas kustom mutlak.</p>
+                        <ul class="text-xs space-y-2 text-slate-400 border-t border-slate-900 pt-4 mb-6">
+                            <li>&bull; Seluruh keuntungan dari tingkatan Rank sebelumnya</li>
+                            <li>&bull; Prefix Chat Berwarna Dinamis: <span class="text-amber-400 font-bold">[MONARCH]</span></li>
+                            <li>&bull; Akses masuk prioritas penuh saat server mengalami lonjakan antrean (*Full Server Slot Bypass*)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-black text-white mb-4">IDR 300.000</div>
+                        <a href="https://store.eon-mc.net" target="_blank" class="w-full block text-center bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold py-3 rounded-xl transition-all text-white">BELI PAKET</a>
+                    </div>
+                </div>
+
+                <!-- Package Card 4 -->
+                <div class="bg-[#0E1326] border border-slate-800/60 p-6 rounded-2xl flex flex-col justify-between hover:border-indigo-500/30 transition-all group">
+                    <div>
+                        <span class="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase block mb-2">CRATE CURRENCY</span>
+                        <h3 class="text-xl font-bold text-white mb-2">5x Mythic Keys</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-4">Gunakan kunci di lobi utama untuk membuka peti pasokan persenjataan berspesifikasi acak.</p>
+                        <ul class="text-xs space-y-2 text-slate-400 border-t border-slate-900 pt-4 mb-6">
+                            <li>&bull; 100% Jaminan mendapatkan item dengan grade minimal *Rare*</li>
+                            <li>&bull; Peluang 2.5% mendapatkan Senjata Mitis Kosmik terlangka</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-black text-white mb-4">IDR 75.000</div>
+                        <a href="https://store.eon-mc.net" target="_blank" class="w-full block text-center bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold py-3 rounded-xl transition-all text-white">BELI PAKET</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <p class="text-xs text-slate-500 max-w-2xl mx-auto">Kami mendukung metode pembayaran otomatis terlengkap se-Indonesia: <strong>QRIS, Gopay, OVO, Dana, ShopeePay, LinkAja, Serta Transfer Bank Virtual Account (BCA, Mandiri, BNI, BRI).</strong> Pembayaran diproses instan ke akun game Anda dalam 60 detik pasca transaksi.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXPANDED LORE SECTION (Minimalist Elegant Vertical Timeline) -->
+    <section id="lore" class="py-32 max-w-5xl mx-auto px-6">
+        <div class="text-center max-w-3xl mx-auto mb-20">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">Kronologi & Garis Waktu EON</h2>
+            <p class="text-slate-400 text-lg">Pahami asal-usul perseteruan faksi dunia sebelum Anda melangkah terlalu jauh.</p>
+        </div>
+
+        <!-- Vertical Linework Design Structure -->
+        <div class="relative border-l border-slate-800 ml-4 md:ml-32 space-y-16">
+            
+            <!-- Timeline Item 1 -->
+            <div class="relative pl-8 group">
+                <!-- Node Marker Dot -->
+                <div class="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-indigo-500 ring-4 ring-[#070A13] transition-transform group-hover:scale-150 duration-300"></div>
+                <span class="text-xs font-mono text-indigo-400 font-bold bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded">Era Penciptaan Awal (Tahun 0 - 300)</span>
+                <h3 class="text-2xl font-bold text-white mt-3 mb-2">Penanaman Inti Aegis</h3>
+                <p class="text-sm text-slate-400 leading-relaxed max-w-3xl">
+                    Para Dewa Luhur mengorbankan fragmen jiwa mereka untuk memadatkan Inti Energi Aegis di jantung benua. Energi murni ini mengangkat jutaan pulau terapung terlepas dari gravitasi bumi, melahirkan sebuah suaka magis terisolasi yang damai dan jauh dari jangkauan dunia luar.
+                </p>
+            </div>
+
+            <!-- Timeline Item 2 -->
+            <div class="relative pl-8 group">
+                <!-- Node Marker Dot -->
+                <div class="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-purple-500 ring-4 ring-[#070A13] transition-transform group-hover:scale-150 duration-300"></div>
+                <span class="text-xs font-mono text-purple-400 font-bold bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded">Era Malapetaka Besar (Tahun 742)</span>
+                <h3 class="text-2xl font-bold text-white mt-3 mb-2">Konsekuensi Eksperimen Void</h3>
+                <p class="text-sm text-slate-400 leading-relaxed max-w-3xl">
+                    Didorong keserakahan tanpa batas untuk memanen energi instan, sekelompok penyihir pembelot mendirikan reaktor terlarang. Eksperimen fatal tersebut meledak, merobek tabir dimensi pelindung benua dan membuka gerbang korosi bagi legiun monster distorsi kegelapan *Abyss Void*.
+                </p>
+            </div>
+
+            <!-- Timeline Item 3 -->
+            <div class="relative pl-8 group">
+                <!-- Node Marker Dot -->
+                <div class="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-pink-500 ring-4 ring-[#070A13] transition-transform group-hover:scale-150 duration-300"></div>
+                <span class="text-xs font-mono text-pink-400 font-bold bg-pink-500/10 border border-pink-500/20 px-2 py-0.5 rounded">Era Kontemporer (Abad Sekarang)</span>
+                <h3 class="text-2xl font-bold text-white mt-3 mb-2">Seruan Mobilisasi Pahlawan</h3>
+                <p class="text-sm text-slate-400 leading-relaxed max-w-3xl">
+                    Inti Aegis semakin melemah dan daratan terapung mulai perlahan runtuh ke bawah. Kerajaan EON membuka gerbang suaka bagi seluruh pejuang dari segala dimensi alternatif. Takdir untuk menutup retakan Void kini sepenuhnya bertumpu di pundak Anda.
+                </p>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- INTERACTIVE FAQ SECTION (Dynamic Accordions) -->
+    <section id="faq" class="py-32 bg-[#0A0D1B] border-t border-b border-slate-950">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">Pertanyaan Umum (FAQ)</h2>
+                <p class="text-slate-400 text-lg">Semua hal mendasar yang perlu Anda ketahui sebelum melangkah masuk ke gerbang petualangan EON.</p>
+            </div>
+
+            <!-- Accordion Items Wrapper Container -->
+            <div class="space-y-4">
+                
+                <!-- FAQ Item 1 -->
+                <div class="bg-[#0E1326] border border-slate-800/60 rounded-2xl overflow-hidden">
+                    <button onclick="toggleFaq(1)" class="w-full text-left px-6 py-5 font-bold text-white flex justify-between items-center hover:bg-slate-800/20 transition-all cursor-pointer">
+                        <span>Apakah saya wajib menginstal Modifikasi (Mod) khusus seperti Forge/Fabric untuk bermain?</span>
+                        <span id="faq-icon-1" class="text-slate-500 transition-transform font-mono font-medium">&plus;</span>
+                    </button>
+                    <div id="faq-ans-1" class="hidden px-6 pb-5 text-sm text-slate-400 leading-relaxed border-t border-slate-900/40 pt-4">
+                        Tidak perlu sama sekali! Anda hanya perlu menggunakan Minecraft versi Vanila resmi (Original). Server EON memanfaatkan optimasi *Server-Side Resource Pack & Data-Driven Architecture* yang akan terunduh dan terpasang secara otomatis saat Anda pertama kali terhubung ke alamat IP kami.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="bg-[#0E1326] border border-slate-800/60 rounded-2xl overflow-hidden">
+                    <button onclick="toggleFaq(2)" class="w-full text-left px-6 py-5 font-bold text-white flex justify-between items-center hover:bg-slate-800/20 transition-all cursor-pointer">
+                        <span>Apakah server EON menganut sistem Pay-to-Win (P2W)?</span>
+                        <span id="faq-icon-2" class="text-slate-500 transition-transform font-mono font-medium">&plus;</span>
+                    </button>
+                    <div id="faq-ans-2" class="hidden px-6 pb-5 text-sm text-slate-400 leading-relaxed border-t border-slate-900/40 pt-4">
+                        Sama sekali tidak. Kami menjamin integritas kompetisi yang sehat. Semua item penunjang stat tertinggi (*End-Game Gears*), senjata mitis, dan peningkatan skill tree eksklusif hanya bisa didapatkan melalui perjuangan berdarah mengalahkan Boss Dungeon, menyelesaikan Quest, serta berpartisipasi aktif dalam siklus ekonomi pasar pemain secara mandiri.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="bg-[#0E1326] border border-slate-800/60 rounded-2xl overflow-hidden">
+                    <button onclick="toggleFaq(3)" class="w-full text-left px-6 py-5 font-bold text-white flex justify-between items-center hover:bg-slate-800/20 transition-all cursor-pointer">
+                        <span>Apakah pengguna Minecraft versi Bedrock (HP/Konsol) bisa ikut bergabung?</span>
+                        <span id="faq-icon-3" class="text-slate-500 transition-transform font-mono font-medium">&plus;</span>
+                    </button>
+                    <div id="faq-ans-3" class="hidden px-6 pb-5 text-sm text-slate-400 leading-relaxed border-t border-slate-900/40 pt-4">
+                        Saat ini server EON dikembangkan secara optimal dan dikhususkan untuk ekosistem **Minecraft Java Edition** guna menjaga stabilitas rendering ribuan partikel kustom skill serta mekanik pergerakan tempur agar tetap presisi 20 TPS (*Ticks Per Second*).
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="bg-[#0E1326] border border-slate-800/60 rounded-2xl overflow-hidden">
+                    <button onclick="toggleFaq(4)" class="w-full text-left px-6 py-5 font-bold text-white flex justify-between items-center hover:bg-slate-800/20 transition-all cursor-pointer">
+                        <span>Bagaimana jika saya mengalami masalah teknis kehilangan item atau kendala akun?</span>
+                        <span id="faq-icon-4" class="text-slate-500 transition-transform font-mono font-medium">&plus;</span>
+                    </button>
+                    <div id="faq-ans-4" class="hidden px-6 pb-5 text-sm text-slate-400 leading-relaxed border-t border-slate-900/40 pt-4">
+                        Tim Dukungan Pelanggan (*Support Staff*) kami bersiaga penuh. Anda hanya perlu masuk ke komunitas Discord resmi kami, lalu membuka tiket bantuan pengaduan (*Support Ticket*). Tim Admin kami akan merespons serta memvalidasi rekam data aktivitas akun Anda secara transparan.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FINAL BRAND CALL TO ACTION (CTA) -->
+    <section class="py-32 relative text-center px-6 overflow-hidden">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+        <div class="relative z-10 max-w-3xl mx-auto">
+            <h2 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">Dunia EON Menanti Aksi Nyatamu</h2>
+            <p class="text-slate-400 text-lg mb-10 max-w-xl mx-auto">Jangan biarkan garis waktu benua terapung hancur terkorosi. Masuk dan klaim takdir kepahlawananmu hari ini.</p>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <button onclick="copyIP()" class="w-full sm:w-auto bg-white text-black font-bold px-8 py-4.5 rounded-2xl shadow-xl hover:bg-gray-200 transition active:scale-95 cursor-pointer text-base">
+                    SALIN IP ADRES SERVER
+                </button>
+                <a href="https://discord.gg/eon-mc" target="_blank" class="w-full sm:w-auto bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 font-bold px-8 py-4.5 rounded-2xl shadow-xl hover:bg-indigo-600/20 transition text-base">
+                    GABUNG DISCORD KOMUNITAS
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ROBUST SYSTEM FOOTER -->
+    <footer class="border-t border-slate-900 bg-[#05070D] py-16 px-6 text-slate-500 text-sm">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+            <div>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center font-bold text-white text-xs">E</div>
+                    <span class="text-lg font-black tracking-wider text-white">EON MMORPG</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">Penyedia layanan server Minecraft MMORPG premium dengan arsitektur data mutakhir bebas lag untuk komunitas gamer Indonesia.</p>
+            </div>
+            <div>
+                <h4 class="text-xs font-mono font-bold tracking-widest text-white uppercase mb-4">Navigasi Peta Situs</h4>
+                <ul class="space-y-2 text-xs">
+                    <li><a href="#features" class="hover:text-slate-300 transition-colors">Daftar Fitur Unggulan</a></li>
+                    <li><a href="#classes" class="hover:text-slate-300 transition-colors">Spesialisasi Class Karakter</a></li>
+                    <li><a href="#dungeons" class="hover:text-slate-300 transition-colors">Info Mekanik Raid Bos</a></li>
+                    <li><a href="#store" class="hover:text-slate-300 transition-colors">Webstore Paket Dukungan</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-xs font-mono font-bold tracking-widest text-white uppercase mb-4">Tautan Eksternal</h4>
+                <ul class="space-y-2 text-xs">
+                    <li><a href="https://wiki.eon-mc.net" target="_blank" class="hover:text-slate-300 transition-colors">Dokumentasi Wikipedia Resmi</a></li>
+                    <li><a href="https://discord.gg/eon-mc" target="_blank" class="hover:text-slate-300 transition-colors">Portal Komunitas Discord</a></li>
+                    <li><a href="#" class="hover:text-slate-300 transition-colors">Aturan & Regulasi Komunitas</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-xs font-mono font-bold tracking-widest text-white uppercase mb-4">Hubungi Hub Informasi</h4>
+                <p class="text-xs text-slate-600 leading-relaxed mb-2">Punya pertanyaan kerja sama bisnis atau pengajuan kemitraan konten kreator?</p>
+                <a href="mailto:support@eon-mc.net" class="text-xs font-mono text-indigo-400 hover:underline">support@eon-mc.net</a>
+            </div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto border-t border-slate-900/60 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-slate-600 gap-4">
+            <p>&copy; 2026 EON MMORPG. Seluruh hak cipta dilindungi undang-undang.</p>
+            <p class="max-w-md md:text-right leading-relaxed text-[11px]">Bukan produk resmi Minecraft. Tidak disetujui oleh atau berafiliasi dengan Mojang Studios selaku pemegang merek dagang komersial Microsoft Corporation.</p>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE JAVASCRIPT ARCHITECTURE -->
+    <script>
+        // Global Server IP Copy Script Handler
+        function copyIP() {
+            const ipAddressText = "play.eon-mc.net";
+            navigator.clipboard.writeText(ipAddressText).then(() => {
+                const actionButtonInstance = document.getElementById('ipButton');
+                const backupOriginalLayoutHtml = actionButtonInstance.innerHTML;
+                
+                actionButtonInstance.innerHTML = `<span class="text-emerald-400 font-bold font-mono text-sm">✓ IP ALAMAT DISALIN!</span>`;
+                setTimeout(() => {
+                    actionButtonInstance.innerHTML = backupOriginalLayoutHtml;
+                }, 2000);
+            }).catch(errorLog => {
+                alert("Sistem gagal menyalin otomatis, silakan ketik manual: " + ipAddressText);
+            });
+        }
+
+        // Tabs Handler untuk Section Pemilihan Class (Warrior, Mage, Assassin)
+        function switchClass(classIdentifier) {
+            // Sembunyikan seluruh container kelas yang sedang aktif
+            document.querySelectorAll('.class-content').forEach(contentBlock => {
+                contentBlock.classList.remove('active');
+            });
+            
+            // Aktifkan blok kontainer sesuai parameter ID yang dipilih pengguna
+            document.getElementById('class-' + classIdentifier).classList.add('active');
+
+            // Setel ulang seluruh gaya visual state tombol filter menu tab
+            document.querySelectorAll('.class-btn').forEach(buttonNode => {
+                buttonNode.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500/30', 'shadow-xl');
+                buttonNode.classList.add('border-slate-800', 'text-slate-400');
+            });
+
+            // Sematkan status visual aktif secara spesifik pada tombol terpilih
+            const targetActiveButton = document.getElementById('btn-' + classIdentifier);
+            targetActiveButton.classList.remove('border-slate-800', 'text-slate-400');
+            targetActiveButton.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500/30', 'shadow-xl');
+        }
+
+        // Accordion Toggle Handler untuk Komponen Dropdown FAQ
+        function toggleFaq(itemIndexNumber) {
+            const answerContainerNode = document.getElementById('faq-ans-' + itemIndexNumber);
+            const iconStateIndicatorNode = document.getElementById('faq-icon-' + itemIndexNumber);
+            
+            if(answerContainerNode.classList.contains('hidden')) {
+                answerContainerNode.classList.remove('hidden');
+                iconStateIndicatorNode.innerHTML = "&minus;";
+                iconStateIndicatorNode.classList.add('rotate-180', 'text-indigo-400');
+            } else {
+                answerContainerNode.classList.add('hidden');
+                iconStateIndicatorNode.innerHTML = "&plus;";
+                iconStateIndicatorNode.classList.remove('rotate-180', 'text-indigo-400');
+            }
+        }
+
+        // Mobile Menu Toggle Button
+        function toggleMobileMenu() {
+            const mobileMenuPanel = document.getElementById('mobileMenu');
+            if(mobileMenuPanel.classList.contains('hidden')) {
+                mobileMenuPanel.classList.remove('hidden');
+            } else {
+                mobileMenuPanel.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
