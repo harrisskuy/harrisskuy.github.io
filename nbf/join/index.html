@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar Musim I — Nusantara Blockfest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1A1410;
+    --sea:#0B3D3A;
+    --sea-2:#0F4B47;
+    --sea-3:#154F49;
+    --terracotta:#C6531D;
+    --terracotta-l:#E06A2E;
+    --turmeric:#E8A93E;
+    --leaf:#4C7A52;
+    --ivory:#F3E9D2;
+    --cream:#FBF6EA;
+    --line: rgba(243,233,210,0.16);
+    --line-strong: rgba(243,233,210,0.32);
+    --display:'Fraunces', serif;
+    --body:'Space Grotesk', sans-serif;
+    --mono:'JetBrains Mono', monospace;
+    --radius:14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--sea); color:var(--ivory); font-family:var(--body);
+    line-height:1.6; min-height:100vh;
+    background:
+      radial-gradient(ellipse 55% 45% at 85% 0%, rgba(232,169,62,0.10), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 5% 100%, rgba(198,83,29,0.12), transparent 60%),
+      var(--sea);
+  }
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;} }
+  a{color:inherit; text-decoration:none;}
+  ::selection{background:var(--terracotta); color:var(--cream);}
+  h1,h2,h3{font-family:var(--display); font-weight:700; letter-spacing:-0.01em;}
+
+  header.top{
+    padding:22px 28px; display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--line); position:sticky; top:0; background:rgba(11,61,58,0.82); backdrop-filter:blur(10px); z-index:20;
+  }
+  .logo{display:flex; align-items:center; gap:10px; font-family:var(--display); font-weight:800; font-size:17px; color:var(--cream);}
+  .logo .cube{width:20px; height:20px; background:var(--terracotta); box-shadow:4px 4px 0 var(--turmeric); border-radius:2px;}
+  .back-link{font-size:13.5px; font-family:var(--mono); opacity:0.75; display:flex; align-items:center; gap:6px;}
+  .back-link:hover{opacity:1;}
+
+  .wrap{max-width:760px; margin:0 auto; padding:56px 24px 100px;}
+
+  .eyebrow{
+    font-family:var(--mono); text-transform:uppercase; letter-spacing:0.14em; font-size:12px;
+    color:var(--turmeric); display:flex; align-items:center; gap:10px; margin-bottom:16px;
+  }
+  .eyebrow::before{content:''; width:22px; height:2px; background:var(--terracotta); display:inline-block;}
+  .intro h1{font-size:clamp(30px,5vw,44px); color:var(--cream); margin-bottom:14px;}
+  .intro p{opacity:0.82; font-size:15.5px; max-width:560px;}
+
+  .deadline-note{
+    margin-top:22px; display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:12.5px;
+    background:rgba(232,169,62,0.14); border:1px solid rgba(232,169,62,0.35); color:var(--turmeric);
+    padding:10px 14px; border-radius:9px; width:fit-content;
+  }
+  .deadline-note .dot{width:7px; height:7px; border-radius:50%; background:var(--turmeric); flex-shrink:0;}
+
+  /* STEPPER */
+  .stepper{display:flex; gap:8px; margin:40px 0 34px;}
+  .step-dot{
+    flex:1; height:4px; border-radius:4px; background:rgba(243,233,210,0.12); position:relative; overflow:hidden;
+  }
+  .step-dot .fill{position:absolute; inset:0; background:var(--terracotta-l); width:0%; transition:width .4s ease;}
+  .step-dot.done .fill{width:100%;}
+  .step-dot.active .fill{width:100%;}
+  .step-labels{display:flex; justify-content:space-between; margin-top:10px; font-family:var(--mono); font-size:11px; opacity:0.6; letter-spacing:0.04em;}
+
+  .panel{
+    background:rgba(243,233,210,0.045); border:1px solid var(--line); border-radius:20px; padding:36px;
+  }
+  .step-title{font-size:22px; color:var(--cream); margin-bottom:6px;}
+  .step-sub{font-size:13.5px; opacity:0.72; margin-bottom:28px;}
+
+  .form-step{display:none;}
+  .form-step.active{display:block; animation:fadein .35s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+  .field{margin-bottom:20px;}
+  .field label{
+    font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase;
+    opacity:0.72; display:flex; justify-content:space-between; margin-bottom:8px;
+  }
+  .field label .opt{opacity:0.5; text-transform:none; letter-spacing:0;}
+  .field input, .field select, .field textarea{
+    width:100%; background:rgba(243,233,210,0.06); border:1px solid var(--line-strong); border-radius:9px;
+    padding:12px 14px; color:var(--cream); font-family:var(--body); font-size:14.5px; outline:none;
+    transition:border-color .2s ease;
+  }
+  .field textarea{resize:vertical; min-height:88px;}
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--turmeric);}
+  .field select option{background:var(--sea);}
+  .field .err{display:none; font-size:12px; color:var(--terracotta-l); margin-top:6px; font-family:var(--mono);}
+  .field.invalid input, .field.invalid select, .field.invalid textarea{border-color:var(--terracotta-l);}
+  .field.invalid .err{display:block;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+
+  .role-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;}
+  .role-card{
+    border:1px solid var(--line-strong); border-radius:12px; padding:16px; cursor:pointer;
+    transition:border-color .2s, background .2s;
+  }
+  .role-card:hover{border-color:var(--turmeric);}
+  .role-card.selected{border-color:var(--turmeric); background:rgba(232,169,62,0.1);}
+  .role-card h4{font-size:14.5px; color:var(--cream); margin-bottom:4px;}
+  .role-card p{font-size:12.5px; opacity:0.68;}
+
+  .team-pref-grid{display:flex; flex-wrap:wrap; gap:9px; margin-bottom:8px;}
+  .team-opt{
+    font-family:var(--mono); font-size:12px; padding:8px 13px; border-radius:20px;
+    border:1px solid var(--line-strong); cursor:pointer; display:flex; align-items:center; gap:7px; opacity:0.82;
+  }
+  .team-opt .dot{width:9px; height:9px; border-radius:50%;}
+  .team-opt:hover{opacity:1; border-color:var(--turmeric);}
+  .team-opt.selected{opacity:1; border-color:var(--turmeric); background:rgba(232,169,62,0.1);}
+
+  .actions{display:flex; justify-content:space-between; align-items:center; margin-top:32px; gap:12px;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; padding:13px 24px; border-radius:9px;
+    font-weight:600; font-size:14px; cursor:pointer; border:1px solid transparent; font-family:var(--body);
+    transition:transform .15s ease, background .2s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--terracotta); color:var(--cream); border-color:var(--terracotta-l);}
+  .btn-primary:hover{background:var(--terracotta-l);}
+  .btn-ghost{background:transparent; border-color:var(--line-strong); color:var(--ivory);}
+  .btn-ghost:hover{border-color:var(--turmeric);}
+  .btn[disabled]{opacity:0.35; cursor:not-allowed;}
+
+  /* REVIEW STEP */
+  .review-list{display:flex; flex-direction:column; gap:0;}
+  .review-row{
+    display:flex; justify-content:space-between; gap:20px; padding:13px 0; border-bottom:1px solid var(--line);
+    font-size:14px;
+  }
+  .review-row:last-child{border-bottom:none;}
+  .review-row .k{opacity:0.62; font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:0.05em; min-width:150px;}
+  .review-row .v{text-align:right; font-weight:500; color:var(--cream);}
+  .agree{display:flex; align-items:flex-start; gap:10px; margin-top:24px; font-size:13.5px; opacity:0.85;}
+  .agree input{margin-top:3px; accent-color:var(--terracotta);}
+
+  /* CONFIRMATION */
+  .confirm-wrap{text-align:center; padding:20px 0;}
+  .confirm-badge{
+    width:64px; height:64px; border-radius:50%; background:rgba(76,122,82,0.22); border:1px solid var(--leaf);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 22px; font-size:28px; color:var(--leaf);
+  }
+  .confirm-id{
+    display:inline-block; margin-top:18px; font-family:var(--mono); background:rgba(232,169,62,0.14);
+    color:var(--turmeric); padding:10px 18px; border-radius:9px; font-size:14px; letter-spacing:0.05em;
+  }
+  .confirm-next{
+    text-align:left; margin-top:32px; background:rgba(0,0,0,0.16); border:1px solid var(--line); border-radius:14px; padding:22px 24px;
+  }
+  .confirm-next h4{font-size:14px; color:var(--cream); margin-bottom:14px; font-family:var(--body); font-weight:600;}
+  .confirm-next ol{padding-left:20px; display:flex; flex-direction:column; gap:8px;}
+  .confirm-next li{font-size:13.5px; opacity:0.82;}
+
+  footer.foot{
+    text-align:center; padding:30px 24px; font-size:12px; opacity:0.55; border-top:1px solid var(--line); font-family:var(--mono);
+  }
+
+  @media (max-width:600px){
+    .wrap{padding:36px 16px 80px;}
+    .panel{padding:24px;}
+    .row2{grid-template-columns:1fr;}
+    .role-grid{grid-template-columns:1fr;}
+    .step-labels{display:none;}
+    .review-row{flex-direction:column; gap:4px;}
+    .review-row .v{text-align:left;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a href="#" class="logo"><span class="cube"></span>Nusantara Blockfest</a>
+  <a href="#" class="back-link">← Kembali ke halaman utama</a>
+</header>
+
+<div class="wrap">
+
+  <div class="intro">
+    <div class="eyebrow">Pendaftaran Musim I</div>
+    <h1>Daftarkan dirimu untuk NBF Musim I.</h1>
+    <p>Ini adalah edisi perdana Nusantara Blockfest — belum ada juara, belum ada riwayat. Isi formulir singkat ini untuk mengamankan slotmu sebelum pertandingan pertama dimulai.</p>
+    <div class="deadline-note"><span class="dot"></span>Pendaftaran ditutup 31 Mei 2027 · Musim I dimulai 7 Juni 2027</div>
+  </div>
+
+  <div class="stepper" id="stepper"></div>
+  <div class="step-labels">
+    <span>Data Diri</span>
+    <span>Profil Minecraft</span>
+    <span>Kontak</span>
+    <span>Konfirmasi</span>
+  </div>
+
+  <div class="panel">
+    <form id="regForm" novalidate>
+
+      <!-- STEP 1 -->
+      <div class="form-step active" data-step="1">
+        <div class="step-title">Data diri</div>
+        <div class="step-sub">Informasi dasar untuk verifikasi pendaftaran.</div>
+
+        <div class="row2">
+          <div class="field" data-field="nama">
+            <label>Nama lengkap</label>
+            <input type="text" placeholder="cth. Rangga Pratama">
+            <div class="err">Nama lengkap wajib diisi.</div>
+          </div>
+          <div class="field" data-field="panggilan">
+            <label>Nama panggilan / IGN <span class="opt">(tampil publik)</span></label>
+            <input type="text" placeholder="cth. Rangga_Craft">
+            <div class="err">Nama panggilan wajib diisi.</div>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field" data-field="usia">
+            <label>Usia</label>
+            <input type="number" min="10" max="99" placeholder="cth. 19">
+            <div class="err">Usia minimal 13 tahun untuk mendaftar.</div>
+          </div>
+          <div class="field" data-field="domisili">
+            <label>Domisili (kota / provinsi)</label>
+            <input type="text" placeholder="cth. Malang, Jawa Timur">
+            <div class="err">Domisili wajib diisi.</div>
+          </div>
+        </div>
+
+        <div class="field" data-field="whatsapp">
+          <label>Nomor WhatsApp aktif</label>
+          <input type="tel" placeholder="cth. 081234567890">
+          <div class="err">Masukkan nomor WhatsApp yang valid.</div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="form-step" data-step="2">
+        <div class="step-title">Profil Minecraft</div>
+        <div class="step-sub">Ceritakan bagaimana kamu ingin ambil bagian di NBF.</div>
+
+        <div class="field" data-field="ign">
+          <label>Username Minecraft (Java / Bedrock)</label>
+          <input type="text" placeholder="cth. RanggaCraft99">
+          <div class="err">Username Minecraft wajib diisi.</div>
+        </div>
+
+        <div class="field" data-field="peran">
+          <label>Peran yang diminati</label>
+          <div class="role-grid" id="roleGrid">
+            <div class="role-card" data-role="Kompetitor">
+              <h4>Kompetitor</h4><p>Bertanding langsung di setiap ronde minigame.</p>
+            </div>
+            <div class="role-card" data-role="Kreator Konten">
+              <h4>Kreator Konten / Caster</h4><p>Meliput, mengulas, atau menyiarkan pertandingan.</p>
+            </div>
+            <div class="role-card" data-role="Builder Arena">
+              <h4>Builder Arena</h4><p>Membangun dan mendesain arena minigame.</p>
+            </div>
+            <div class="role-card" data-role="Kru Produksi">
+              <h4>Kru Produksi Siaran</h4><p>Mendukung teknis siaran langsung NBF.</p>
+            </div>
+          </div>
+          <div class="err">Pilih salah satu peran.</div>
+        </div>
+
+        <div class="field" data-field="preferensiTim">
+          <label>Preferensi tim <span class="opt">(opsional — panitia akan menyeimbangkan roster)</span></label>
+          <div class="team-pref-grid" id="teamPrefGrid"></div>
+        </div>
+
+        <div class="field" data-field="pengalaman">
+          <label>Pengalaman turnamen sebelumnya <span class="opt">(opsional)</span></label>
+          <textarea placeholder="cth. Pernah ikut turnamen server X sebagai kompetitor..."></textarea>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="form-step" data-step="3">
+        <div class="step-title">Kontak & motivasi</div>
+        <div class="step-sub">Panitia akan menghubungimu melalui Discord.</div>
+
+        <div class="field" data-field="discord">
+          <label>Username Discord</label>
+          <input type="text" placeholder="cth. rangga.craft">
+          <div class="err">Username Discord wajib diisi.</div>
+        </div>
+
+        <div class="field" data-field="sosial">
+          <label>Tautan media sosial / kanal konten <span class="opt">(opsional)</span></label>
+          <input type="text" placeholder="cth. youtube.com/@rangga.craft">
+        </div>
+
+        <div class="field" data-field="alasan">
+          <label>Kenapa kamu ingin ikut NBF Musim I?</label>
+          <textarea placeholder="Ceritakan motivasimu secara singkat..."></textarea>
+          <div class="err">Ceritakan sedikit motivasimu (minimal 10 karakter).</div>
+        </div>
+      </div>
+
+      <!-- STEP 4: REVIEW -->
+      <div class="form-step" data-step="4">
+        <div class="step-title">Periksa kembali</div>
+        <div class="step-sub">Pastikan semua data sudah benar sebelum mengirim.</div>
+        <div class="review-list" id="reviewList"></div>
+        <label class="agree">
+          <input type="checkbox" id="agreeCheck">
+          <span>Saya menyatakan data di atas benar dan setuju mengikuti aturan turnamen NBF Musim I.</span>
+        </label>
+      </div>
+
+      <!-- STEP 5: CONFIRMATION -->
+      <div class="form-step" data-step="5">
+        <div class="confirm-wrap">
+          <div class="confirm-badge">✓</div>
+          <h2 style="color:var(--cream); font-size:26px;">Pendaftaran terkirim!</h2>
+          <p style="opacity:0.78; margin-top:10px; max-width:420px; margin-inline:auto;">Terima kasih telah mendaftar untuk edisi perdana Nusantara Blockfest. Nomor pendaftaranmu:</p>
+          <div class="confirm-id" id="confirmId">NBF-2027-0000</div>
+          <div class="confirm-next">
+            <h4>Langkah selanjutnya</h4>
+            <ol>
+              <li>Bergabung ke server Discord resmi NBF dalam 48 jam ke depan.</li>
+              <li>Verifikasi username Minecraft-mu melalui bot pendaftaran di Discord.</li>
+              <li>Tunggu pengumuman pembagian tim sebelum 7 Juni 2027.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions" id="actionsBar">
+        <button type="button" class="btn btn-ghost" id="btnBack">Kembali</button>
+        <button type="button" class="btn btn-primary" id="btnNext">Lanjut</button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<footer class="foot">© 2027 Nusantara Blockfest — Formulir pendaftaran Musim I</footer>
+
+<script>
+const TEAMS = [
+  {id:'garuda', name:'Garuda', color:'#C6531D'},
+  {id:'komodo', name:'Komodo', color:'#4C7A52'},
+  {id:'rafflesia', name:'Rafflesia', color:'#8A2E52'},
+  {id:'cendrawasih', name:'Cendrawasih', color:'#E8A93E'},
+  {id:'anoa', name:'Anoa', color:'#7A5230'},
+  {id:'harimau', name:'Harimau', color:'#B5541E'},
+  {id:'elangjawa', name:'Elang Jawa', color:'#1E5C8C'},
+  {id:'badak', name:'Badak', color:'#5A5A52'}
+];
+
+const teamPrefGrid = document.getElementById('teamPrefGrid');
+teamPrefGrid.innerHTML = `<div class="team-opt selected" data-team="none">Tidak ada preferensi</div>` +
+  TEAMS.map(t => `<div class="team-opt" data-team="${t.id}"><span class="dot" style="background:${t.color}"></span>${t.name}</div>`).join('');
+
+let selectedTeam = 'none';
+teamPrefGrid.addEventListener('click', (e) => {
+  const opt = e.target.closest('.team-opt');
+  if(!opt) return;
+  teamPrefGrid.querySelectorAll('.team-opt').forEach(o => o.classList.remove('selected'));
+  opt.classList.add('selected');
+  selectedTeam = opt.getAttribute('data-team');
+});
+
+let selectedRole = '';
+const roleGrid = document.getElementById('roleGrid');
+roleGrid.addEventListener('click', (e) => {
+  const card = e.target.closest('.role-card');
+  if(!card) return;
+  roleGrid.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedRole = card.getAttribute('data-role');
+  roleGrid.closest('.field').classList.remove('invalid');
+});
+
+const totalSteps = 5;
+let currentStep = 1;
+
+const stepper = document.getElementById('stepper');
+for(let i=1;i<=4;i++){
+  const d = document.createElement('div');
+  d.className = 'step-dot';
+  d.innerHTML = '<div class="fill"></div>';
+  stepper.appendChild(d);
+}
+
+function updateStepper(){
+  const dots = stepper.querySelectorAll('.step-dot');
+  dots.forEach((d, i) => {
+    d.classList.remove('active','done');
+    if(i < currentStep - 1) d.classList.add('done');
+    else if(i === currentStep - 1) d.classList.add('active');
+  });
+}
+
+function showStep(n){
+  document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+  document.querySelector(`.form-step[data-step="${n}"]`).classList.add('active');
+  const actionsBar = document.getElementById('actionsBar');
+  const btnBack = document.getElementById('btnBack');
+  const btnNext = document.getElementById('btnNext');
+  if(n === 5){
+    actionsBar.style.display = 'none';
+  } else {
+    actionsBar.style.display = 'flex';
+    btnBack.style.visibility = n === 1 ? 'hidden' : 'visible';
+    btnNext.textContent = n === 4 ? 'Kirim Pendaftaran' : 'Lanjut';
+  }
+  if(n <= 4) updateStepper();
+  window.scrollTo({top: document.querySelector('.panel').offsetTop - 100, behavior:'smooth'});
+}
+
+function setInvalid(fieldEl, invalid){
+  fieldEl.classList.toggle('invalid', invalid);
+}
+
+function validateStep(n){
+  let ok = true;
+  if(n === 1){
+    const nama = document.querySelector('[data-field="nama"] input');
+    const panggilan = document.querySelector('[data-field="panggilan"] input');
+    const usia = document.querySelector('[data-field="usia"] input');
+    const domisili = document.querySelector('[data-field="domisili"] input');
+    const whatsapp = document.querySelector('[data-field="whatsapp"] input');
+
+    setInvalid(nama.closest('.field'), !nama.value.trim()); if(!nama.value.trim()) ok=false;
+    setInvalid(panggilan.closest('.field'), !panggilan.value.trim()); if(!panggilan.value.trim()) ok=false;
+    const usiaVal = parseInt(usia.value, 10);
+    const usiaInvalid = !usiaVal || usiaVal < 13;
+    setInvalid(usia.closest('.field'), usiaInvalid); if(usiaInvalid) ok=false;
+    setInvalid(domisili.closest('.field'), !domisili.value.trim()); if(!domisili.value.trim()) ok=false;
+    const waInvalid = whatsapp.value.replace(/\D/g,'').length < 9;
+    setInvalid(whatsapp.closest('.field'), waInvalid); if(waInvalid) ok=false;
+  }
+  if(n === 2){
+    const ign = document.querySelector('[data-field="ign"] input');
+    setInvalid(ign.closest('.field'), !ign.value.trim()); if(!ign.value.trim()) ok=false;
+    const roleField = roleGrid.closest('.field');
+    setInvalid(roleField, !selectedRole); if(!selectedRole) ok=false;
+  }
+  if(n === 3){
+    const discord = document.querySelector('[data-field="discord"] input');
+    const alasan = document.querySelector('[data-field="alasan"] textarea');
+    setInvalid(discord.closest('.field'), !discord.value.trim()); if(!discord.value.trim()) ok=false;
+    const alasanInvalid = alasan.value.trim().length < 10;
+    setInvalid(alasan.closest('.field'), alasanInvalid); if(alasanInvalid) ok=false;
+  }
+  if(n === 4){
+    const agree = document.getElementById('agreeCheck');
+    if(!agree.checked){ ok = false; agree.parentElement.style.color = 'var(--terracotta-l)'; }
+    else { agree.parentElement.style.color = ''; }
+  }
+  return ok;
+}
+
+function buildReview(){
+  const val = sel => document.querySelector(sel) ? document.querySelector(sel).value.trim() : '';
+  const teamName = selectedTeam === 'none' ? 'Tidak ada preferensi' : TEAMS.find(t => t.id === selectedTeam).name;
+  const rows = [
+    ['Nama lengkap', val('[data-field="nama"] input')],
+    ['Nama panggilan', val('[data-field="panggilan"] input')],
+    ['Usia', val('[data-field="usia"] input')],
+    ['Domisili', val('[data-field="domisili"] input')],
+    ['WhatsApp', val('[data-field="whatsapp"] input')],
+    ['Username Minecraft', val('[data-field="ign"] input')],
+    ['Peran diminati', selectedRole || '-'],
+    ['Preferensi tim', teamName],
+    ['Username Discord', val('[data-field="discord"] input')]
+  ];
+  document.getElementById('reviewList').innerHTML = rows.map(([k,v]) => `
+    <div class="review-row"><div class="k">${k}</div><div class="v">${v || '-'}</div></div>
+  `).join('');
+}
+
+document.getElementById('btnNext').addEventListener('click', () => {
+  if(currentStep <= 4 && !validateStep(currentStep)) return;
+  if(currentStep === 4){
+    const idNum = Math.floor(1000 + Math.random()*8999);
+    document.getElementById('confirmId').textContent = 'NBF-2027-' + idNum;
+    currentStep = 5;
+    showStep(5);
+    return;
+  }
+  if(currentStep === 3){
+    currentStep = 4;
+    buildReview();
+    showStep(4);
+    return;
+  }
+  currentStep++;
+  showStep(currentStep);
+});
+
+document.getElementById('btnBack').addEventListener('click', () => {
+  if(currentStep === 1) return;
+  currentStep--;
+  showStep(currentStep);
+});
+
+document.getElementById('regForm').addEventListener('submit', (e) => e.preventDefault());
+
+showStep(1);
+updateStepper();
+</script>
+
+</body>
+</html>
