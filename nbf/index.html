@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nusantara Blockfest — NBF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1A1410;
+    --sea:#0B3D3A;
+    --sea-2:#0F4B47;
+    --sea-3:#154F49;
+    --terracotta:#C6531D;
+    --terracotta-l:#E06A2E;
+    --turmeric:#E8A93E;
+    --leaf:#4C7A52;
+    --ivory:#F3E9D2;
+    --cream:#FBF6EA;
+    --line: rgba(243,233,210,0.16);
+    --line-strong: rgba(243,233,210,0.32);
+    --display: 'Fraunces', serif;
+    --body: 'Space Grotesk', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --radius: 14px;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--sea);
+    color:var(--ivory);
+    font-family:var(--body);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+  }
+  a{color:inherit; text-decoration:none;}
+  img{max-width:100%; display:block;}
+  ::selection{background:var(--terracotta); color:var(--cream);}
+
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+  section{position:relative;}
+
+  h1,h2,h3,h4{font-family:var(--display); font-weight:700; letter-spacing:-0.01em;}
+  .eyebrow{
+    font-family:var(--mono); text-transform:uppercase; letter-spacing:0.14em;
+    font-size:12px; color:var(--turmeric); display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{content:''; width:22px; height:2px; background:var(--terracotta); display:inline-block;}
+
+  /* ---------- NAV ---------- */
+  header.site-nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    background:rgba(11,61,58,0.72);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    transition:background .3s ease;
+  }
+  .nav-inner{
+    max-width:1180px; margin:0 auto; padding:16px 28px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-family:var(--display); font-weight:800; font-size:19px; color:var(--cream);
+  }
+  .logo .cube{
+    width:22px; height:22px; background:var(--terracotta);
+    box-shadow: 5px 5px 0 var(--turmeric), -3px -3px 0 rgba(0,0,0,0.15);
+    border-radius:2px;
+  }
+  .logo .sub{font-family:var(--mono); font-size:10px; letter-spacing:0.12em; color:var(--turmeric); font-weight:500; display:block;}
+  nav.links{display:flex; gap:30px; align-items:center;}
+  nav.links a{
+    font-size:14px; font-weight:500; color:var(--ivory); opacity:0.82;
+    position:relative; padding:4px 0;
+  }
+  nav.links a::after{
+    content:''; position:absolute; left:0; bottom:-2px; height:2px; width:0%;
+    background:var(--terracotta-l); transition:width .25s ease;
+  }
+  nav.links a:hover{opacity:1;}
+  nav.links a:hover::after{width:100%;}
+  .nav-cta{
+    background:var(--terracotta); color:var(--cream); padding:9px 18px;
+    border-radius:8px; font-weight:600; font-size:14px; border:1px solid var(--terracotta-l);
+  }
+  .nav-cta:hover{background:var(--terracotta-l);}
+  .burger{
+    display:none; width:38px; height:38px; border:1px solid var(--line-strong); border-radius:8px;
+    background:transparent; cursor:pointer; position:relative;
+  }
+  .burger span{
+    position:absolute; left:9px; right:9px; height:2px; background:var(--ivory);
+    transition:.25s ease;
+  }
+  .burger span:nth-child(1){top:13px;}
+  .burger span:nth-child(2){top:18px;}
+  .burger span:nth-child(3){top:23px;}
+  .burger.open span:nth-child(1){top:18px; transform:rotate(45deg);}
+  .burger.open span:nth-child(2){opacity:0;}
+  .burger.open span:nth-child(3){top:18px; transform:rotate(-45deg);}
+
+  .mobile-menu{
+    display:none; flex-direction:column; gap:2px; padding:10px 28px 20px;
+    background:rgba(11,61,58,0.97); border-bottom:1px solid var(--line);
+  }
+  .mobile-menu.open{display:flex;}
+  .mobile-menu a{padding:12px 4px; font-size:15px; border-bottom:1px solid var(--line);}
+  .mobile-menu a:last-child{border-bottom:none;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:150px 0 90px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 10%, rgba(232,169,62,0.13), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 10% 90%, rgba(198,83,29,0.14), transparent 60%),
+      var(--sea);
+  }
+  .hero-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:50px; align-items:center;}
+  .hero h1{
+    font-size:clamp(40px, 6.4vw, 78px); line-height:0.98; color:var(--cream);
+  }
+  .hero h1 em{
+    font-style:normal; color:var(--turmeric); position:relative;
+  }
+  .hero p.lede{
+    margin-top:22px; font-size:17px; max-width:480px; color:var(--ivory); opacity:0.86;
+  }
+  .hero-actions{display:flex; gap:14px; margin-top:32px; flex-wrap:wrap;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; padding:14px 26px; border-radius:9px;
+    font-weight:600; font-size:14.5px; cursor:pointer; border:1px solid transparent;
+    transition:transform .15s ease, background .2s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--terracotta); color:var(--cream); border-color:var(--terracotta-l);}
+  .btn-primary:hover{background:var(--terracotta-l);}
+  .btn-ghost{background:transparent; border-color:var(--line-strong); color:var(--ivory);}
+  .btn-ghost:hover{background:rgba(243,233,210,0.07); border-color:var(--turmeric);}
+
+  .countdown{
+    margin-top:40px; display:flex; gap:14px; flex-wrap:wrap;
+  }
+  .countdown .box{
+    background:rgba(0,0,0,0.18); border:1px solid var(--line); border-radius:10px;
+    padding:12px 16px; min-width:72px; text-align:center;
+  }
+  .countdown .box .num{font-family:var(--mono); font-size:26px; font-weight:700; color:var(--turmeric);}
+  .countdown .box .lbl{font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; opacity:0.7; margin-top:2px;}
+  .countdown-label{font-family:var(--mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--leaf); margin-bottom:10px; opacity:.85;}
+
+  /* Archipelago SVG scene */
+  .archipelago{
+    position:relative; height:420px;
+  }
+  .archipelago svg{width:100%; height:100%;}
+  .isl{transition:transform .6s ease;}
+  .archipelago:hover .isl{animation-play-state:paused;}
+  @keyframes bob{0%,100%{transform:translateY(0px);} 50%{transform:translateY(-8px);}}
+  .float-a{animation:bob 5s ease-in-out infinite;}
+  .float-b{animation:bob 6.5s ease-in-out infinite; animation-delay:.6s;}
+  .float-c{animation:bob 4.2s ease-in-out infinite; animation-delay:1.1s;}
+
+  /* ---------- SECTION HEADS ---------- */
+  .sec-head{max-width:640px; margin-bottom:50px;}
+  .sec-head h2{font-size:clamp(30px,4vw,44px); color:var(--cream); margin-top:14px;}
+  .sec-head p{margin-top:14px; opacity:0.82; font-size:15.5px;}
+
+  section.band{padding:100px 0;}
+  section.band.alt{background:var(--sea-2); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+
+  /* reveal on scroll */
+  .reveal{opacity:0; transform:translateY(22px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  /* ---------- TENTANG ---------- */
+  .about-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:10px;}
+  .about-card{
+    background:rgba(243,233,210,0.04); border:1px solid var(--line); border-radius:var(--radius);
+    padding:28px 24px;
+  }
+  .about-card .ico{
+    width:44px; height:44px; border-radius:8px; background:var(--terracotta); margin-bottom:18px;
+    display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:700; color:var(--cream);
+  }
+  .about-card h4{font-size:19px; color:var(--cream); margin-bottom:8px;}
+  .about-card p{font-size:14.5px; opacity:0.8;}
+
+  /* ---------- MUSIM ---------- */
+  .season-grid{display:grid; grid-template-columns:1fr 1fr; gap:26px;}
+  .season-card{
+    border-radius:18px; padding:34px; position:relative; overflow:hidden;
+    border:1px solid var(--line-strong);
+  }
+  .season-card.s1{background:linear-gradient(160deg, rgba(76,122,82,0.22), rgba(11,61,58,0.4));}
+  .season-card.s2{background:linear-gradient(160deg, rgba(198,83,29,0.22), rgba(11,61,58,0.4));}
+  .season-tag{font-family:var(--mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; opacity:0.75;}
+  .season-card h3{font-size:32px; color:var(--cream); margin:10px 0 6px;}
+  .season-card .date{font-family:var(--mono); color:var(--turmeric); font-size:14px; margin-bottom:18px; display:block;}
+  .season-card ul{list-style:none; margin-top:16px; display:flex; flex-direction:column; gap:9px;}
+  .season-card li{font-size:14px; opacity:0.85; padding-left:18px; position:relative;}
+  .season-card li::before{content:'▪'; position:absolute; left:0; color:var(--turmeric);}
+  .season-status{
+    display:inline-block; margin-top:22px; font-family:var(--mono); font-size:11px;
+    padding:6px 12px; border-radius:6px; letter-spacing:0.06em;
+  }
+  .status-open{background:rgba(76,122,82,0.35); color:#BFE6C4;}
+  .status-soon{background:rgba(232,169,62,0.25); color:var(--turmeric);}
+
+  /* ---------- TIM / ARCHIPELAGO MAP ---------- */
+  .map-layout{display:grid; grid-template-columns:1.1fr 0.9fr; gap:40px; align-items:start;}
+  .map-svg-holder{
+    background:rgba(0,0,0,0.18); border:1px solid var(--line); border-radius:18px; padding:20px;
+  }
+  .team-info{
+    background:rgba(243,233,210,0.04); border:1px solid var(--line); border-radius:var(--radius);
+    padding:26px; min-height:280px; display:flex; flex-direction:column; justify-content:center;
+  }
+  .team-info .swatch{width:38px; height:38px; border-radius:8px; margin-bottom:16px;}
+  .team-info h4{font-size:24px; color:var(--cream);}
+  .team-info .motto{font-family:var(--display); font-style:italic; font-weight:400; opacity:0.85; margin:10px 0 16px; font-size:16px;}
+  .team-info .meta{display:flex; gap:22px; font-family:var(--mono); font-size:12px; opacity:0.75; flex-wrap:wrap;}
+  .team-info .meta b{display:block; color:var(--turmeric); font-size:16px;}
+  .island-hex{cursor:pointer; transition:transform .2s ease, opacity .2s ease;}
+  .island-hex:hover{transform:translateY(-4px);}
+  .island-hex.active-isl{filter:drop-shadow(0 0 8px rgba(232,169,62,0.7));}
+  .team-chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:20px;}
+  .team-chip{
+    font-family:var(--mono); font-size:11.5px; padding:7px 12px; border-radius:20px;
+    border:1px solid var(--line-strong); cursor:pointer; opacity:0.8; transition:opacity .2s, border-color .2s;
+    display:flex; align-items:center; gap:6px;
+  }
+  .team-chip:hover, .team-chip.active-chip{opacity:1; border-color:var(--turmeric);}
+  .team-chip .dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+
+  /* ---------- MINIGAME / MODE ---------- */
+  .mode-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .mode-card{
+    background:rgba(243,233,210,0.04); border:1px solid var(--line); border-radius:var(--radius);
+    padding:24px; position:relative; overflow:hidden;
+  }
+  .mode-card .num{font-family:var(--mono); font-size:12px; color:var(--terracotta-l); opacity:0.9;}
+  .mode-card h4{font-size:19px; color:var(--cream); margin:10px 0 8px;}
+  .mode-card p{font-size:14px; opacity:0.78;}
+  .mode-card .pts{
+    margin-top:16px; display:inline-block; font-family:var(--mono); font-size:11px;
+    background:rgba(232,169,62,0.16); color:var(--turmeric); padding:5px 10px; border-radius:6px;
+  }
+
+  /* ---------- STANDINGS ---------- */
+  .standings-controls{display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:22px; flex-wrap:wrap;}
+  .seg{display:flex; border:1px solid var(--line-strong); border-radius:9px; overflow:hidden;}
+  .seg button{
+    font-family:var(--mono); font-size:12px; padding:9px 16px; background:transparent; color:var(--ivory);
+    border:none; cursor:pointer; opacity:0.7; letter-spacing:0.04em;
+  }
+  .seg button.active{background:var(--terracotta); opacity:1; color:var(--cream);}
+  table.standings{width:100%; border-collapse:collapse; font-size:14.5px;}
+  table.standings thead th{
+    text-align:left; font-family:var(--mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--turmeric); padding:10px 12px; border-bottom:1px solid var(--line-strong); cursor:pointer; user-select:none;
+  }
+  table.standings thead th:hover{color:var(--cream);}
+  table.standings tbody td{padding:14px 12px; border-bottom:1px solid var(--line);}
+  table.standings tbody tr{transition:background .15s ease;}
+  table.standings tbody tr:hover{background:rgba(243,233,210,0.045);}
+  .rank-badge{
+    font-family:var(--mono); font-weight:700; width:26px; height:26px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center; font-size:12px;
+    background:rgba(243,233,210,0.08);
+  }
+  .rank-badge.gold{background:var(--turmeric); color:var(--ink);}
+  .rank-badge.silver{background:#C9C2AC; color:var(--ink);}
+  .rank-badge.bronze{background:var(--terracotta); color:var(--cream);}
+  .team-cell{display:flex; align-items:center; gap:10px; font-weight:600;}
+  .team-cell .dot{width:11px; height:11px; border-radius:3px; flex-shrink:0;}
+  td.pts-cell{font-family:var(--mono); font-weight:700; color:var(--turmeric);}
+
+  /* ---------- JADWAL ---------- */
+  .timeline{position:relative; padding-left:32px; border-left:2px solid var(--line-strong);}
+  .tl-item{position:relative; padding-bottom:36px;}
+  .tl-item:last-child{padding-bottom:0;}
+  .tl-item::before{
+    content:''; position:absolute; left:-38px; top:2px; width:12px; height:12px; border-radius:50%;
+    background:var(--turmeric); border:3px solid var(--sea);
+  }
+  .tl-date{font-family:var(--mono); font-size:12px; color:var(--turmeric); letter-spacing:0.05em;}
+  .tl-item h4{font-size:19px; color:var(--cream); margin:6px 0 6px;}
+  .tl-item p{font-size:14px; opacity:0.78;}
+
+  /* ---------- GALERI (css block art, no external images) ---------- */
+  .gallery-grid{display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:150px; gap:14px;}
+  .gtile{border-radius:12px; position:relative; overflow:hidden; cursor:pointer;}
+  .gtile span{
+    position:absolute; bottom:10px; left:12px; font-family:var(--mono); font-size:11px;
+    color:rgba(255,255,255,0.9); opacity:0; transition:opacity .2s ease;
+  }
+  .gtile:hover span{opacity:1;}
+  .gtile:hover{transform:scale(1.02);}
+  .gtile{transition:transform .25s ease;}
+  .gtile:nth-child(1){grid-column:span 2; grid-row:span 2; background:linear-gradient(150deg,#4C7A52,#0B3D3A);}
+  .gtile:nth-child(2){background:linear-gradient(150deg,#C6531D,#7a2e0d);}
+  .gtile:nth-child(3){background:linear-gradient(150deg,#E8A93E,#8a5f16);}
+  .gtile:nth-child(4){background:linear-gradient(150deg,#154F49,#062421);}
+  .gtile:nth-child(5){background:linear-gradient(150deg,#7a2e0d,#C6531D); grid-column:span 2;}
+  .gtile:nth-child(6){background:linear-gradient(150deg,#4C7A52,#233d26);}
+
+  /* ---------- DAFTAR / CTA ---------- */
+  .join-wrap{
+    display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:center;
+  }
+  .join-panel{
+    background:rgba(0,0,0,0.2); border:1px solid var(--line-strong); border-radius:18px; padding:34px;
+  }
+  .field{margin-bottom:16px;}
+  .field label{font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; opacity:0.7; display:block; margin-bottom:7px;}
+  .field input, .field select{
+    width:100%; background:rgba(243,233,210,0.06); border:1px solid var(--line-strong); border-radius:8px;
+    padding:11px 14px; color:var(--cream); font-family:var(--body); font-size:14.5px; outline:none;
+  }
+  .field input:focus, .field select:focus{border-color:var(--turmeric);}
+  .field select option{background:var(--sea);}
+  .join-panel .btn{width:100%; justify-content:center; margin-top:6px;}
+  .form-msg{
+    margin-top:14px; font-size:13.5px; font-family:var(--mono); display:none; padding:10px 12px;
+    border-radius:8px;
+  }
+  .form-msg.show{display:block;}
+  .form-msg.ok{background:rgba(76,122,82,0.25); color:#BFE6C4;}
+
+  .stat-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:16px;}
+  .stat-strip .st{text-align:left;}
+  .stat-strip .st b{display:block; font-family:var(--mono); font-size:30px; color:var(--turmeric);}
+  .stat-strip .st span{font-size:12.5px; opacity:0.72;}
+
+  /* ---------- FOOTER ---------- */
+  footer{padding:60px 0 34px; border-top:1px solid var(--line); background:var(--sea-3);}
+  .foot-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:30px; margin-bottom:40px;}
+  .foot-grid h5{font-family:var(--mono); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--turmeric); margin-bottom:14px;}
+  .foot-grid a{display:block; font-size:14px; opacity:0.75; margin-bottom:10px;}
+  .foot-grid a:hover{opacity:1;}
+  .foot-bottom{
+    display:flex; justify-content:space-between; align-items:center; padding-top:24px;
+    border-top:1px solid var(--line); font-size:12.5px; opacity:0.6; flex-wrap:wrap; gap:10px;
+  }
+
+  /* ---------- toast for interactivity ---------- */
+  #toast{
+    position:fixed; bottom:24px; left:50%; transform:translate(-50%, 20px); z-index:200;
+    background:var(--ink); color:var(--cream); padding:13px 22px; border-radius:9px;
+    font-size:13.5px; opacity:0; pointer-events:none; transition:opacity .3s ease, transform .3s ease;
+    border:1px solid var(--turmeric); font-family:var(--mono);
+  }
+  #toast.show{opacity:1; transform:translate(-50%, 0);}
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 980px){
+    .hero-grid{grid-template-columns:1fr;}
+    .archipelago{height:300px; order:-1;}
+    .about-grid{grid-template-columns:1fr 1fr;}
+    .season-grid{grid-template-columns:1fr;}
+    .map-layout{grid-template-columns:1fr;}
+    .mode-grid{grid-template-columns:1fr 1fr;}
+    .join-wrap{grid-template-columns:1fr;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+    .gallery-grid{grid-template-columns:repeat(2,1fr); grid-auto-rows:130px;}
+    .gtile:nth-child(1), .gtile:nth-child(5){grid-column:span 2;}
+  }
+  @media (max-width: 720px){
+    nav.links{display:none;}
+    .nav-cta{display:none;}
+    .burger{display:block;}
+    .about-grid{grid-template-columns:1fr;}
+    .mode-grid{grid-template-columns:1fr;}
+    .stat-strip{grid-template-columns:1fr 1fr;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+    section.band{padding:70px 0;}
+    .hero{padding:130px 0 60px;}
+    .standings-controls{flex-direction:column; align-items:flex-start;}
+    table.standings{font-size:13px;}
+    table.standings thead th:nth-child(4), table.standings tbody td:nth-child(4){display:none;}
+  }
+  @media (max-width: 480px){
+    .gallery-grid{grid-template-columns:1fr 1fr;}
+    .countdown .box{min-width:60px; padding:10px 12px;}
+    .countdown .box .num{font-size:20px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <div class="nav-inner">
+    <a href="#top" class="logo"><span class="cube"></span><span>Nusantara Blockfest<span class="sub">NBF · edisi turnamen komunitas</span></span></a>
+    <nav class="links">
+      <a href="#tentang">Tentang</a>
+      <a href="#musim">Musim</a>
+      <a href="#tim">Tim</a>
+      <a href="#klasemen">Klasemen</a>
+      <a href="#jadwal">Jadwal</a>
+      <a href="#galeri">Galeri</a>
+    </nav>
+    <a href="#daftar" class="nav-cta">Daftar Tim</a>
+    <button class="burger" id="burger" aria-label="Buka menu"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#tentang">Tentang</a>
+    <a href="#musim">Musim</a>
+    <a href="#tim">Tim</a>
+    <a href="#klasemen">Klasemen</a>
+    <a href="#jadwal">Jadwal</a>
+    <a href="#galeri">Galeri</a>
+    <a href="#daftar">Daftar Tim</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow">Turnamen Minecraft Dua Musim / Tahun</div>
+        <h1>Nusantara<br><em>Blockfest</em></h1>
+        <p class="lede">Delapan tim, satu kepulauan blok. NBF mempertemukan kreator dan kompetitor Minecraft terbaik Nusantara dalam rangkaian minigame cepat, penuh strategi, disiarkan langsung dua kali setahun — Musim Kemarau dan Musim Hujan. Ini adalah <strong style="color:var(--turmeric); font-weight:600;">Musim I</strong>, edisi perdana NBF — belum ada juara, belum ada riwayat. Semua dimulai dari sini.</p>
+        <div class="hero-actions">
+          <a href="#daftar" class="btn btn-primary">Daftarkan Timmu</a>
+          <a href="#musim" class="btn btn-ghost">Lihat Format Musim</a>
+        </div>
+        <div class="countdown-label">Hitung mundur — Musim I NBF dimulai (7 Juni 2027)</div>
+        <div class="countdown" id="countdown">
+          <div class="box"><div class="num" id="cd-days">00</div><div class="lbl">Hari</div></div>
+          <div class="box"><div class="num" id="cd-hours">00</div><div class="lbl">Jam</div></div>
+          <div class="box"><div class="num" id="cd-mins">00</div><div class="lbl">Menit</div></div>
+          <div class="box"><div class="num" id="cd-secs">00</div><div class="lbl">Detik</div></div>
+        </div>
+      </div>
+      <div class="archipelago" aria-hidden="true">
+        <svg viewBox="0 0 400 420" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="200" cy="380" rx="180" ry="18" fill="rgba(0,0,0,0.2)"/>
+          <g class="isl float-a">
+            <rect x="90" y="180" width="90" height="34" fill="#4C7A52" rx="3"/>
+            <rect x="100" y="150" width="70" height="34" fill="#5C8E63" rx="3"/>
+            <rect x="112" y="122" width="46" height="32" fill="#6FA377" rx="3"/>
+            <rect x="122" y="98" width="26" height="28" fill="#E8A93E" rx="2"/>
+          </g>
+          <g class="isl float-b">
+            <rect x="230" y="230" width="110" height="30" fill="#C6531D" rx="3"/>
+            <rect x="245" y="200" width="80" height="34" fill="#D4652E" rx="3"/>
+            <rect x="260" y="172" width="50" height="32" fill="#E17840" rx="3"/>
+          </g>
+          <g class="isl float-c">
+            <rect x="40" y="260" width="70" height="26" fill="#154F49" rx="3"/>
+            <rect x="52" y="234" width="46" height="30" fill="#1E635C" rx="3"/>
+          </g>
+          <g class="isl float-b">
+            <rect x="200" y="300" width="130" height="30" fill="#0F4B47" rx="3"/>
+            <rect x="220" y="272" width="90" height="32" fill="#1A5A54" rx="3"/>
+          </g>
+          <circle cx="330" cy="70" r="26" fill="#E8A93E" opacity="0.9"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- TENTANG -->
+  <section class="band" id="tentang">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">Tentang NBF</div>
+        <h2>Format turnamen global, jiwa Nusantara.</h2>
+        <p>NBF menggabungkan format minigame cepat ala kejuaraan Minecraft dunia dengan identitas lokal — nama tim, ikon, dan narasi dari khazanah Nusantara. Dua musim dalam setahun berarti dua kesempatan bagi tim untuk naik tangga klasemen abadi.</p>
+      </div>
+      <div class="about-grid">
+        <div class="about-card reveal"><div class="ico">01</div><h4>8 Tim, 8 Warna</h4><p>Setiap musim, 32 kreator terbagi ke dalam 8 tim beridentitas — dari Garuda hingga Komodo — bertanding demi poin dan gelar.</p></div>
+        <div class="about-card reveal"><div class="ico">02</div><h4>6 Minigame Inti</h4><p>Parkour, perebutan harta, balap blok, hingga duel langit — setiap ronde punya bobot poin berbeda menuju papan skor akhir.</p></div>
+        <div class="about-card reveal"><div class="ico">03</div><h4>Disiarkan Langsung</h4><p>Setiap musim disiarkan penuh di kanal komunitas, lengkap dengan panel komentator dan statistik langsung.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MUSIM -->
+  <section class="band alt" id="musim">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">Kalender Tahunan</div>
+        <h2>Dua musim, satu mahkota kepulauan.</h2>
+        <p>NBF berjalan mengikuti dua iklim besar Nusantara. Ini adalah tahun perdana NBF — Musim I akan menjadi lembar pertama dalam sejarah turnamen ini, dan Klasemen Abadi baru akan mulai tercatat setelahnya.</p>
+      </div>
+      <div class="season-grid">
+        <div class="season-card s1 reveal">
+          <span class="season-tag">Musim I · Edisi Perdana</span>
+          <h3>Musim Kemarau</h3>
+          <span class="date">7–14 Juni 2027</span>
+          <p style="opacity:.85; font-size:14.5px;">Musim pembuka sekaligus edisi pertama NBF sepanjang sejarah — 8 tim akan menulis nama mereka di klasemen untuk pertama kalinya.</p>
+          <ul>
+            <li>Pendaftaran roster terbuka untuk seluruh tim</li>
+            <li>6 minigame inti + 1 final gabungan</li>
+            <li>Disiarkan selama 5 malam berurutan</li>
+          </ul>
+          <span class="season-status status-soon">Pendaftaran dibuka · belum ada riwayat</span>
+        </div>
+        <div class="season-card s2 reveal">
+          <span class="season-tag">Musim II</span>
+          <h3>Musim Hujan</h3>
+          <span class="date">4–11 Desember 2027</span>
+          <p style="opacity:.85; font-size:14.5px;">Musim penutup tahun perdana, penentu siapa yang mengukir nama sebagai Juara Abadi NBF pertama.</p>
+          <ul>
+            <li>8 tim Musim I otomatis bertahan</li>
+            <li>Final malam puncak: Duel Langit Nusantara</li>
+            <li>Penobatan Juara Abadi NBF pertama sepanjang masa</li>
+          </ul>
+          <span class="season-status status-soon">Menyusul setelah Musim I</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIM -->
+  <section class="band" id="tim">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">Kepulauan Tim</div>
+        <h2>Delapan pulau, delapan identitas.</h2>
+        <p>Setiap tim menguasai satu pulau di peta NBF. Klik sebuah pulau atau pilih chip di bawah untuk melihat profil tim.</p>
+      </div>
+      <div class="map-layout">
+        <div class="map-svg-holder">
+          <svg viewBox="0 0 500 380" id="mapSvg" xmlns="http://www.w3.org/2000/svg" style="width:100%;">
+          </svg>
+        </div>
+        <div>
+          <div class="team-info" id="teamInfo"></div>
+          <div class="team-chips" id="teamChips"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODE PERMAINAN -->
+  <section class="band alt" id="mode">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">Format Pertandingan</div>
+        <h2>Enam medan, satu papan skor.</h2>
+        <p>Setiap minigame menyumbang bobot poin berbeda — strategi tim menentukan minigame mana yang digenjot habis-habisan.</p>
+      </div>
+      <div class="mode-grid" id="modeGrid"></div>
+    </div>
+  </section>
+
+  <!-- KLASEMEN -->
+  <section class="band" id="klasemen">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">Papan Skor</div>
+        <h2>Klasemen belum dimulai.</h2>
+        <p>Ini musim pertama NBF — belum ada pertandingan, belum ada poin, belum ada juara. Klasemen resmi akan mulai tercatat begitu Musim I dimulai pada <strong style="color:var(--turmeric); font-weight:600;">7 Juni 2027</strong>. Sementara itu, berikut status pendaftaran roster tiap tim. Klik header tabel untuk mengurutkan.</p>
+      </div>
+      <div class="standings-controls">
+        <span class="season-status status-soon" style="margin:0;">Pra-Musim I · 0 pertandingan dimainkan</span>
+        <div style="font-family:var(--mono); font-size:12px; opacity:.65;">Klik header tabel untuk urutkan ↑↓</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="standings">
+          <thead>
+            <tr>
+              <th data-key="rank">#</th>
+              <th data-key="name">Tim</th>
+              <th data-key="slot">Slot Terisi</th>
+              <th data-key="pts">Poin</th>
+              <th data-key="kapten">Kapten Tim</th>
+            </tr>
+          </thead>
+          <tbody id="standingsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- JADWAL -->
+  <section class="band alt" id="jadwal">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">Rangkaian Acara</div>
+        <h2>Jadwal Musim I — 2027.</h2>
+        <p>Lima malam pertama dalam sejarah NBF, menuju penobatan Juara Musim I yang pertama.</p>
+      </div>
+      <div class="timeline">
+        <div class="tl-item reveal">
+          <span class="tl-date">Senin, 7 Jun 2027 · 19:30 WIB</span>
+          <h4>Malam Pembuka — Parkour Pulau</h4>
+          <p>Pertandingan resmi pertama NBF sepanjang sejarah. Delapan tim memulai perburuan poin di jalur parkour kepulauan yang berubah tiap ronde.</p>
+        </div>
+        <div class="tl-item reveal">
+          <span class="tl-date">Selasa, 8 Jun 2027 · 19:30 WIB</span>
+          <h4>Rebutan Harta Karun</h4>
+          <p>Tim berlomba mengamankan peti harta di tengah pulau netral sambil menahan serangan lawan.</p>
+        </div>
+        <div class="tl-item reveal">
+          <span class="tl-date">Kamis, 10 Jun 2027 · 19:30 WIB</span>
+          <h4>Balap Batu &amp; Tambang Emas</h4>
+          <p>Kombinasi kecepatan membangun dan efisiensi menambang menentukan siapa naik ke papan tengah.</p>
+        </div>
+        <div class="tl-item reveal">
+          <span class="tl-date">Sabtu, 12 Jun 2027 · 19:30 WIB</span>
+          <h4>Spleef Api</h4>
+          <p>Arena runtuh perlahan — tim terakhir yang berdiri di atas blok membawa pulang poin besar.</p>
+        </div>
+        <div class="tl-item reveal">
+          <span class="tl-date">Senin, 14 Jun 2027 · 20:00 WIB</span>
+          <h4>Final — Duel Langit Nusantara</h4>
+          <p>Empat tim teratas bertarung di pulau langit ketiga, disiarkan penuh dengan penobatan Juara Musim I NBF yang pertama.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALERI -->
+  <section class="band" id="galeri">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">Pratinjau Musim I</div>
+        <h2>Kepulauan blok, sedang dibangun.</h2>
+        <p>Belum ada sorotan pertandingan — musim ini baru akan dimulai. Berikut pratinjau arena dan konsep yang sedang disiapkan tim panitia. Klik untuk catatan singkatnya.</p>
+      </div>
+      <div class="gallery-grid">
+        <div class="gtile" onclick="showToast('Konsep arena final: Duel Langit Nusantara, masih dalam pembangunan.')"><span>Konsep Final</span></div>
+        <div class="gtile" onclick="showToast('Sketsa peta pulau untuk Rebutan Harta Karun.')"><span>Peta Rebutan Harta</span></div>
+        <div class="gtile" onclick="showToast('Uji coba panel komentator sebelum siaran perdana.')"><span>Uji Coba Siaran</span></div>
+        <div class="gtile" onclick="showToast('Prototipe arena Spleef Api yang bisa runtuh.')"><span>Prototipe Spleef Api</span></div>
+        <div class="gtile" onclick="showToast('Desain lambang dan warna 8 tim perdana NBF.')"><span>Lambang 8 Tim</span></div>
+        <div class="gtile" onclick="showToast('Peta kepulauan penuh yang akan dipakai Musim I.')"><span>Peta Musim I</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DAFTAR -->
+  <section class="band alt" id="daftar">
+    <div class="wrap">
+      <div class="join-wrap">
+        <div class="reveal">
+          <div class="eyebrow">Gabung NBF</div>
+          <h2 style="font-size:clamp(28px,3.6vw,40px); color:var(--cream); margin-top:14px;">Daftarkan minatmu untuk Musim Hujan 2026.</h2>
+          <p style="opacity:.82; margin-top:16px; font-size:15px; max-width:460px;">Slot pemain baru dibuka terbatas untuk kualifikasi Musim Hujan. Isi formulir ini dan tim kurasi NBF akan menghubungimu lewat Discord.</p>
+          <div class="stat-strip">
+            <div class="st"><b>32</b><span>Target slot kreator</span></div>
+            <div class="st"><b>8</b><span>Tim beridentitas</span></div>
+            <div class="st"><b>2×</b><span>Musim per tahun</span></div>
+            <div class="st"><b>6</b><span>Ronde minigame</span></div>
+          </div>
+        </div>
+        <div class="join-panel">
+          <form id="joinForm">
+            <div class="field">
+              <label for="nama">Nama Panggilan</label>
+              <input type="text" id="nama" placeholder="cth. Rangga_Craft" required>
+            </div>
+            <div class="field">
+              <label for="ign">Username Minecraft</label>
+              <input type="text" id="ign" placeholder="cth. RanggaCraft99" required>
+            </div>
+            <div class="field">
+              <label for="peran">Peran yang Diminati</label>
+              <select id="peran">
+                <option>Kompetitor (in-game)</option>
+                <option>Kreator Konten / Caster</option>
+                <option>Builder Arena</option>
+                <option>Kru Produksi Siaran</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Kirim Pendaftaran</button>
+            <div class="form-msg ok" id="formMsg"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="logo" style="margin-bottom:14px;"><span class="cube"></span><span>Nusantara Blockfest</span></div>
+        <p style="opacity:.7; font-size:13.5px; max-width:280px;">Turnamen Minecraft komunitas yang diselenggarakan dua kali setahun, menyatukan kreator dari seluruh Nusantara di atas satu papan skor.</p>
+      </div>
+      <div>
+        <h5>Turnamen</h5>
+        <a href="#musim">Format Musim</a>
+        <a href="#mode">Minigame</a>
+        <a href="#jadwal">Jadwal Siaran</a>
+      </div>
+      <div>
+        <h5>Komunitas</h5>
+        <a href="#tim">Profil Tim</a>
+        <a href="#klasemen">Klasemen</a>
+        <a href="#galeri">Galeri</a>
+      </div>
+      <div>
+        <h5>Terhubung</h5>
+        <a href="#daftar">Discord Resmi</a>
+        <a href="#daftar">Kanal Siaran</a>
+        <a href="#daftar">Kontak Panitia</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Nusantara Blockfest. Proyek komunitas, tidak berafiliasi dengan Mojang atau Microsoft.</span>
+      <span>Dibuat untuk pencinta Minecraft Nusantara.</span>
+    </div>
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const TEAMS = [
+  {id:'garuda', name:'Tim Garuda', color:'#C6531D', motto:'Terbang tinggi, jatuh terhormat.', cx:120, cy:110, kapten:'Belum ditentukan', slot:2},
+  {id:'komodo', name:'Tim Komodo', color:'#4C7A52', motto:'Lambat melangkah, mematikan menyerang.', cx:230, cy:70, kapten:'Belum ditentukan', slot:3},
+  {id:'rafflesia', name:'Tim Rafflesia', color:'#8A2E52', motto:'Diamnya harum, geraknya mematikan.', cx:340, cy:110, kapten:'Belum ditentukan', slot:1},
+  {id:'cendrawasih', name:'Tim Cendrawasih', color:'#E8A93E', motto:'Setiap ronde, satu tarian kemenangan.', cx:400, cy:200, kapten:'Belum ditentukan', slot:4},
+  {id:'anoa', name:'Tim Anoa', color:'#7A5230', motto:'Kecil, cepat, tak terbendung.', cx:340, cy:290, kapten:'Belum ditentukan', slot:0},
+  {id:'harimau', name:'Tim Harimau', color:'#B5541E', motto:'Sekali menerkam, papan skor berubah.', cx:230, cy:330, kapten:'Belum ditentukan', slot:2},
+  {id:'elangjawa', name:'Tim Elang Jawa', color:'#1E5C8C', motto:'Mengintai dari ketinggian klasemen.', cx:120, cy:290, kapten:'Belum ditentukan', slot:1},
+  {id:'badak', name:'Tim Badak', color:'#5A5A52', motto:'Pelan tapi tak pernah mundur.', cx:60, cy:200, kapten:'Belum ditentukan', slot:0}
+];
+
+const MODES = [
+  {n:'01', name:'Parkour Pulau', desc:'Jalur lompat acak antar pulau kecil — waktu tercepat menentukan poin.', pts:'Bobot ×1'},
+  {n:'02', name:'Rebutan Harta', desc:'Peti poin muncul di pulau netral, direbut sambil menghindar serangan.', pts:'Bobot ×1.5'},
+  {n:'03', name:'Balap Batu', desc:'Membangun jembatan blok tercepat menuju garis akhir di atas jurang.', pts:'Bobot ×1'},
+  {n:'04', name:'Tambang Emas', desc:'Menambang bijih bernilai dalam gua acak sambil menghindari jebakan.', pts:'Bobot ×1.5'},
+  {n:'05', name:'Spleef Api', desc:'Arena blok yang runtuh perlahan — tim terakhir berdiri menang besar.', pts:'Bobot ×2'},
+  {n:'06', name:'Duel Langit Nusantara', desc:'Final musim: empat tim teratas bertarung di pulau langit ketiga.', pts:'Bobot ×3 (final)'}
+];
+
+function teamById(id){ return TEAMS.find(t => t.id === id); }
+
+/* ---------------- NAV / MOBILE MENU ---------------- */
+const burger = document.getElementById('burger');
+const mobileMenu = document.getElementById('mobileMenu');
+burger.addEventListener('click', () => {
+  burger.classList.toggle('open');
+  mobileMenu.classList.toggle('open');
+});
+mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  burger.classList.remove('open');
+  mobileMenu.classList.remove('open');
+}));
+
+/* ---------------- COUNTDOWN ---------------- */
+const target = new Date('2027-06-07T19:30:00+07:00').getTime();
+function tickCountdown(){
+  const now = Date.now();
+  let diff = target - now;
+  if(diff < 0) diff = 0;
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('cd-days').textContent = pad(d);
+  document.getElementById('cd-hours').textContent = pad(h);
+  document.getElementById('cd-mins').textContent = pad(m);
+  document.getElementById('cd-secs').textContent = pad(s);
+}
+tickCountdown();
+setInterval(tickCountdown, 1000);
+
+/* ---------------- SCROLL REVEAL ---------------- */
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+}, {threshold:0.15});
+revealEls.forEach(el => io.observe(el));
+
+/* ---------------- TOAST ---------------- */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ---------------- ARCHIPELAGO MAP (TEAMS) ---------------- */
+const mapSvg = document.getElementById('mapSvg');
+const teamInfo = document.getElementById('teamInfo');
+const teamChips = document.getElementById('teamChips');
+
+function renderMap(){
+  mapSvg.innerHTML = '';
+  TEAMS.forEach(t => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('class','island-hex isl');
+    g.setAttribute('data-id', t.id);
+    g.innerHTML = `
+      <polygon points="${hexPoints(t.cx,t.cy,34)}" fill="${t.color}" opacity="0.9"></polygon>
+      <text x="${t.cx}" y="${t.cy+4}" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#FBF6EA" font-weight="700">${t.name.split(' ')[1].slice(0,4).toUpperCase()}</text>
+    `;
+    g.addEventListener('click', () => selectTeam(t.id));
+    mapSvg.appendChild(g);
+  });
+}
+function hexPoints(cx,cy,r){
+  let pts = [];
+  for(let i=0;i<6;i++){
+    const ang = Math.PI/180 * (60*i - 30);
+    pts.push((cx + r*Math.cos(ang)).toFixed(1) + ',' + (cy + r*Math.sin(ang)).toFixed(1));
+  }
+  return pts.join(' ');
+}
+
+function renderChips(){
+  teamChips.innerHTML = TEAMS.map(t => `
+    <div class="team-chip" data-id="${t.id}">
+      <span class="dot" style="background:${t.color}"></span>${t.name}
+    </div>
+  `).join('');
+  teamChips.querySelectorAll('.team-chip').forEach(chip => {
+    chip.addEventListener('click', () => selectTeam(chip.getAttribute('data-id')));
+  });
+}
+
+function selectTeam(id){
+  const t = teamById(id);
+  document.querySelectorAll('.island-hex').forEach(el => el.classList.toggle('active-isl', el.getAttribute('data-id') === id));
+  document.querySelectorAll('.team-chip').forEach(el => el.classList.toggle('active-chip', el.getAttribute('data-id') === id));
+  teamInfo.innerHTML = `
+    <div class="swatch" style="background:${t.color}"></div>
+    <h4>${t.name}</h4>
+    <div class="motto">"${t.motto}"</div>
+    <div class="meta">
+      <div><b>${t.slot}/4</b>Slot Terisi</div>
+      <div><b>0</b>Poin (Pra-Musim)</div>
+      <div><b>${t.kapten}</b>Kapten Tim</div>
+    </div>
+  `;
+}
+
+renderMap();
+renderChips();
+selectTeam(TEAMS[0].id);
+
+/* ---------------- MODE GRID ---------------- */
+document.getElementById('modeGrid').innerHTML = MODES.map(m => `
+  <div class="mode-card reveal">
+    <div class="num">${m.n}</div>
+    <h4>${m.name}</h4>
+    <p>${m.desc}</p>
+    <span class="pts">${m.pts}</span>
+  </div>
+`).join('');
+document.querySelectorAll('#modeGrid .reveal').forEach(el => io.observe(el));
+
+/* ---------------- STANDINGS TABLE ---------------- */
+let sortKey = 'slot';
+let sortDir = -1;
+
+function buildRows(){
+  return TEAMS.map(t => ({id:t.id, slot:t.slot, pts:0}));
+}
+
+function renderStandings(){
+  let rows = buildRows();
+  rows.sort((a,b) => (a[sortKey] - b[sortKey]) * sortDir);
+  const body = document.getElementById('standingsBody');
+  body.innerHTML = rows.map((r, i) => {
+    const t = teamById(r.id);
+    return `
+      <tr>
+        <td><span class="rank-badge">${i+1}</span></td>
+        <td><div class="team-cell"><span class="dot" style="background:${t.color}"></span>${t.name}</div></td>
+        <td>${r.slot}/4</td>
+        <td class="pts-cell">${r.pts}</td>
+        <td style="font-family:var(--mono); font-size:12.5px; opacity:.8;">${t.kapten}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+document.querySelectorAll('table.standings thead th').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.getAttribute('data-key');
+    if(key === 'rank' || key === 'name' || key === 'kapten') return;
+    if(sortKey === key){ sortDir *= -1; } else { sortKey = key; sortDir = -1; }
+    renderStandings();
+  });
+});
+
+renderStandings();
+
+/* ---------------- JOIN FORM ---------------- */
+document.getElementById('joinForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const nama = document.getElementById('nama').value.trim();
+  const ign = document.getElementById('ign').value.trim();
+  const msg = document.getElementById('formMsg');
+  if(!nama || !ign){
+    msg.textContent = 'Lengkapi nama panggilan dan username Minecraft terlebih dahulu.';
+    msg.classList.remove('ok');
+    msg.classList.add('show');
+    return;
+  }
+  msg.textContent = `Terima kasih, ${nama}! Pendaftaran "${ign}" sudah tercatat. Tim panitia akan menghubungimu lewat Discord.`;
+  msg.classList.add('ok');
+  msg.classList.add('show');
+  this.reset();
+  showToast('Pendaftaran terkirim ✓');
+});
+</script>
+
+</body>
+</html>
