@@ -20,7 +20,7 @@
 const CONFIG = {
   // URL Web App hasil deploy Google Apps Script (langkah deploy ada di panduan)
   // Contoh: "https://script.google.com/macros/s/AKfycb..../exec"
-  GAS_WEB_APP_URL: "https://script.google.com/macros/s/GANTI_DENGAN_DEPLOYMENT_ID_ANDA/exec",
+  GAS_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyN1qndNO4L35eQVi-3-jL1iV1S9HbhdsqLeEIwF-axhK-4KXtUaNN5LMaewRbhXJLUzA/exec",
 
   // Token sederhana untuk memvalidasi request (harus sama persis dengan APP_TOKEN di Code.gs)
   APP_TOKEN: "ganti-dengan-token-rahasia-anda",
