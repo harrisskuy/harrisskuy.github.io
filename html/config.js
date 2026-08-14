@@ -29,10 +29,10 @@ const CONFIG = {
   SHEET_NAME: "Journal",
 
   // Modal awal akun (dipakai untuk menghitung % pertumbuhan equity, opsional)
-  INITIAL_BALANCE: 1000,
+  INITIAL_BALANCE: 17000000,
 
   // Mata uang akun untuk format nominal
-  ACCOUNT_CURRENCY: "USD",
+  ACCOUNT_CURRENCY: "IDR",
 
   // Pair default yang otomatis terpilih saat form dibuka
   DEFAULT_PAIR: "XAUUSD",
@@ -77,7 +77,7 @@ const CONFIG = {
   // Ukuran pip default per pair (dipakai untuk estimasi kalkulator pips)
   // Nilai ini estimasi umum; sesuaikan dengan broker Anda bila perlu.
   PIP_SIZE: {
-    XAUUSD: 0.1,
+    XAUUSD: 0.01,
     BTCUSD: 1,
     DEFAULT_JPY: 0.01,
     DEFAULT: 0.0001,
