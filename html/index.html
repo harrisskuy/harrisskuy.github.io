@@ -1,738 +1,451 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bengkel Kode — Peninjau Multi Bahasa</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trading Journal — Forex &amp; Gold Daily Log</title>
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Ikon -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- Font ala terminal trading: monospace untuk angka, sans untuk UI -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#0B0F17;
-    --surface:#121826;
-    --surface-2:#1A2233;
-    --surface-3:#212B40;
-    --border:#263047;
-    --text:#E7ECF5;
-    --text-muted:#8592A8;
-    --amber:#FFB454;
-    --amber-dim:#4a3a20;
-    --focus:#FFB454;
-    --html:#FFB454;
-    --css:#5EEAD4;
-    --js:#C4B5FD;
-    --gs:#FDA4AF;
-    --json:#7DD3FC;
-    --md:#A3E635;
-    --other:#94A3B8;
-  }
-  *{box-sizing:border-box;}
-  html,body{height:100%;}
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--text);
-    font-family:'Space Grotesk',sans-serif;
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-  }
-  ::selection{background:var(--amber);color:#1a1206;}
-
-  /* ---------- Header ---------- */
-  header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:14px 22px;
-    border-bottom:1px solid var(--border);
-    background:linear-gradient(180deg,var(--surface) 0%, var(--bg) 100%);
-    flex-shrink:0;
-  }
-  .brand{
-    display:flex;
-    align-items:baseline;
-    gap:10px;
-  }
-  .brand-mark{
-    font-family:'JetBrains Mono',monospace;
-    font-size:13px;
-    color:var(--amber);
-    border:1px solid var(--amber-dim);
-    background:rgba(255,180,84,0.08);
-    padding:3px 7px;
-    border-radius:5px;
-    letter-spacing:0.03em;
-  }
-  h1{
-    font-size:17px;
-    font-weight:600;
-    margin:0;
-    letter-spacing:-0.01em;
-  }
-  .subtitle{
-    font-size:12px;
-    color:var(--text-muted);
-    margin-top:2px;
-  }
-  .brand-wrap{display:flex;flex-direction:column;}
-
-  .view-btn{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    background:var(--amber);
-    color:#241a08;
-    border:none;
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:600;
-    font-size:14px;
-    padding:10px 18px;
-    border-radius:8px;
-    cursor:pointer;
-    transition:transform .12s ease, box-shadow .12s ease;
-    box-shadow:0 0 0 0 rgba(255,180,84,0);
-  }
-  .view-btn:hover{
-    transform:translateY(-1px);
-    box-shadow:0 6px 18px rgba(255,180,84,0.25);
-  }
-  .view-btn:active{transform:translateY(0);}
-  .view-btn svg{width:16px;height:16px;}
-
-  /* ---------- Tab strip ---------- */
-  .tabstrip-row{
-    display:flex;
-    align-items:flex-end;
-    gap:2px;
-    padding:10px 22px 0 22px;
-    background:var(--bg);
-    border-bottom:1px solid var(--border);
-    flex-shrink:0;
-    overflow-x:auto;
-  }
-  .tab{
-    position:relative;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    padding:9px 12px 9px 12px;
-    background:var(--surface-2);
-    border:1px solid var(--border);
-    border-bottom:none;
-    border-radius:8px 8px 0 0;
-    font-family:'JetBrains Mono',monospace;
-    font-size:12.5px;
-    color:var(--text-muted);
-    cursor:pointer;
-    white-space:nowrap;
-    border-top:3px solid transparent;
-    transition:background .12s ease, color .12s ease;
-    flex-shrink:0;
-  }
-  .tab:hover{color:var(--text);}
-  .tab.active{
-    background:var(--surface-3);
-    color:var(--text);
-  }
-  .tab .dot{
-    width:7px;height:7px;border-radius:50%;flex-shrink:0;
-  }
-  .tab .close{
-    opacity:0;
-    width:15px;height:15px;
-    display:flex;align-items:center;justify-content:center;
-    border-radius:4px;
-    font-size:13px;
-    color:var(--text-muted);
-    margin-left:2px;
-  }
-  .tab:hover .close{opacity:1;}
-  .tab .close:hover{background:rgba(255,255,255,0.1);color:var(--text);}
-  .tab input.rename{
-    background:transparent;
-    border:none;
-    outline:none;
-    color:var(--text);
-    font-family:'JetBrains Mono',monospace;
-    font-size:12.5px;
-    width:110px;
-  }
-
-  .add-wrap{position:relative;flex-shrink:0;margin-left:4px;margin-bottom:2px;}
-  .add-btn{
-    display:flex;align-items:center;gap:6px;
-    background:transparent;
-    border:1px dashed var(--border);
-    color:var(--text-muted);
-    font-family:'Space Grotesk',sans-serif;
-    font-size:12.5px;
-    padding:8px 12px;
-    border-radius:8px;
-    cursor:pointer;
-    transition:all .12s ease;
-  }
-  .add-btn:hover{
-    border-color:var(--amber);
-    color:var(--amber);
-    background:rgba(255,180,84,0.06);
-  }
-
-  .lang-menu{
-    position:absolute;
-    top:calc(100% + 8px);
-    left:0;
-    background:var(--surface-2);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:6px;
-    width:220px;
-    box-shadow:0 12px 30px rgba(0,0,0,0.45);
-    z-index:50;
-    display:none;
-  }
-  .lang-menu.open{display:block;}
-  .lang-item{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:8px 10px;
-    border-radius:7px;
-    cursor:pointer;
-    font-size:13px;
-    color:var(--text);
-  }
-  .lang-item:hover{background:var(--surface-3);}
-  .lang-item .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
-  .lang-item .ext{
-    margin-left:auto;
-    font-family:'JetBrains Mono',monospace;
-    font-size:10.5px;
-    color:var(--text-muted);
-  }
-  .lang-menu .custom-row{
-    display:none;
-    padding:8px;
-    gap:6px;
-    border-top:1px solid var(--border);
-    margin-top:6px;
-  }
-  .lang-menu .custom-row.open{display:flex;}
-  .lang-menu .custom-row input{
-    flex:1;
-    background:var(--surface-3);
-    border:1px solid var(--border);
-    border-radius:6px;
-    color:var(--text);
-    font-family:'JetBrains Mono',monospace;
-    font-size:12px;
-    padding:6px 8px;
-    outline:none;
-  }
-  .lang-menu .custom-row input:focus{border-color:var(--amber);}
-  .lang-menu .custom-row button{
-    background:var(--amber);
-    border:none;
-    color:#241a08;
-    font-weight:600;
-    font-size:12px;
-    padding:0 10px;
-    border-radius:6px;
-    cursor:pointer;
-  }
-
-  /* ---------- Editor ---------- */
-  main{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    min-height:0;
-    background:var(--surface-3);
-  }
-  .editor-toolbar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:8px 22px;
-    font-family:'JetBrains Mono',monospace;
-    font-size:11.5px;
-    color:var(--text-muted);
-    border-bottom:1px solid var(--border);
-  }
-  .editor-toolbar .file-info{display:flex;align-items:center;gap:8px;}
-  .editor-toolbar .dot{width:7px;height:7px;border-radius:50%;}
-  .icon-btn{
-    background:transparent;
-    border:1px solid var(--border);
-    color:var(--text-muted);
-    font-family:'Space Grotesk',sans-serif;
-    font-size:11.5px;
-    padding:5px 10px;
-    border-radius:6px;
-    cursor:pointer;
-    display:flex;align-items:center;gap:5px;
-  }
-  .icon-btn:hover{color:var(--text);border-color:var(--text-muted);}
-
-  textarea#editor{
-    flex:1;
-    width:100%;
-    resize:none;
-    border:none;
-    outline:none;
-    background:var(--surface-3);
-    color:var(--text);
-    font-family:'JetBrains Mono',monospace;
-    font-size:13.5px;
-    line-height:1.6;
-    padding:18px 22px;
-    tab-size:2;
-  }
-
-  footer{
-    padding:6px 22px;
-    font-family:'JetBrains Mono',monospace;
-    font-size:11px;
-    color:var(--text-muted);
-    border-top:1px solid var(--border);
-    background:var(--bg);
-    flex-shrink:0;
-    display:flex;
-    justify-content:space-between;
-  }
-
-  /* ---------- Preview overlay ---------- */
-  .preview-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(6,8,13,0.86);
-    backdrop-filter:blur(3px);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:100;
-    padding:26px;
-  }
-  .preview-overlay.open{display:flex;}
-  .preview-window{
-    width:100%;
-    max-width:1100px;
-    height:100%;
-    max-height:780px;
-    background:#fff;
-    border-radius:12px;
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-    box-shadow:0 30px 80px rgba(0,0,0,0.6);
-    border:1px solid var(--border);
-  }
-  .browser-bar{
-    background:var(--surface-2);
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:10px 14px;
-    flex-shrink:0;
-    border-bottom:1px solid var(--border);
-  }
-  .browser-dots{display:flex;gap:6px;}
-  .browser-dots span{width:10px;height:10px;border-radius:50%;}
-  .browser-dots span:nth-child(1){background:#FF6159;}
-  .browser-dots span:nth-child(2){background:#FFBD2E;}
-  .browser-dots span:nth-child(3){background:#28C840;}
-  .browser-address{
-    flex:1;
-    background:var(--surface-3);
-    border-radius:7px;
-    padding:6px 12px;
-    font-family:'JetBrains Mono',monospace;
-    font-size:11.5px;
-    color:var(--text-muted);
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-  }
-  .browser-actions{display:flex;gap:8px;}
-  .browser-actions button{
-    background:transparent;
-    border:1px solid var(--border);
-    color:var(--text-muted);
-    font-family:'Space Grotesk',sans-serif;
-    font-size:11.5px;
-    padding:6px 10px;
-    border-radius:6px;
-    cursor:pointer;
-  }
-  .browser-actions button:hover{color:var(--text);}
-  .skip-note{
-    font-family:'JetBrains Mono',monospace;
-    font-size:10.5px;
-    color:#b58a2e;
-    background:#fff7e8;
-    padding:6px 14px;
-    border-bottom:1px solid #f0dcae;
-    flex-shrink:0;
-  }
-  iframe#previewFrame{
-    flex:1;
-    width:100%;
-    border:none;
-    background:#fff;
-  }
-
-  ::-webkit-scrollbar{height:8px;width:8px;}
-  ::-webkit-scrollbar-thumb{background:var(--surface-2);border-radius:4px;}
-  ::-webkit-scrollbar-track{background:transparent;}
-</style>
-</head>
-<body>
-
-<header>
-  <div class="brand">
-    <span class="brand-mark">&lt;/&gt;</span>
-    <div class="brand-wrap">
-      <h1>Bengkel Kode</h1>
-      <div class="subtitle">Tambahkan bahasa, tulis kode, lihat hasilnya</div>
-    </div>
-  </div>
-  <button class="view-btn" id="viewWebBtn">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-    Lihat Web
-  </button>
-</header>
-
-<div class="tabstrip-row" id="tabstripRow">
-  <!-- tabs injected here -->
-  <div class="add-wrap" id="addWrap">
-    <button class="add-btn" id="addBtn">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      Tambah Bahasa
-    </button>
-    <div class="lang-menu" id="langMenu">
-      <!-- lang items injected -->
-      <div class="custom-row" id="customRow">
-        <input type="text" id="customInput" placeholder="nama bahasa, mis. php">
-        <button id="customConfirm">Tambah</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<main>
-  <div class="editor-toolbar">
-    <div class="file-info">
-      <span class="dot" id="toolbarDot"></span>
-      <span id="toolbarFileName">index.html</span>
-    </div>
-    <button class="icon-btn" id="downloadBtn">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-      Unduh file ini
-    </button>
-  </div>
-  <textarea id="editor" spellcheck="false"></textarea>
-</main>
-
-<footer>
-  <span id="footerStatus">1 file · HTML</span>
-  <span>Bengkel Kode — tanpa server, semua tersimpan di browser ini</span>
-</footer>
-
-<div class="preview-overlay" id="previewOverlay">
-  <div class="preview-window">
-    <div class="browser-bar">
-      <div class="browser-dots"><span></span><span></span><span></span></div>
-      <div class="browser-address" id="previewAddress">pratinjau://hasil-gabungan</div>
-      <div class="browser-actions">
-        <button id="newTabBtn">Buka tab baru</button>
-        <button id="closePreviewBtn">Tutup</button>
-      </div>
-    </div>
-    <div class="skip-note" id="skipNote" style="display:none;"></div>
-    <iframe id="previewFrame" sandbox="allow-scripts allow-modals allow-forms allow-popups"></iframe>
-  </div>
-</div>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <script>
-(function(){
-  const langMeta = {
-    html: {label:'HTML', color:'var(--html)', hex:'#FFB454', ext:'html'},
-    css:  {label:'CSS', color:'var(--css)', hex:'#5EEAD4', ext:'css'},
-    js:   {label:'JavaScript', color:'var(--js)', hex:'#C4B5FD', ext:'js'},
-    gs:   {label:'Google Apps Script', color:'var(--gs)', hex:'#FDA4AF', ext:'gs'},
-    json: {label:'JSON', color:'var(--json)', hex:'#7DD3FC', ext:'json'},
-    md:   {label:'Markdown', color:'var(--md)', hex:'#A3E635', ext:'md'},
-    other:{label:'Lainnya...', color:'var(--other)', hex:'#94A3B8', ext:'txt'}
-  };
-
-  const starter = {
-    html: '<!DOCTYPE html>\n<html lang="id">\n<head>\n  <meta charset="UTF-8">\n  <title>Halaman Saya</title>\n</head>\n<body>\n  <h1>Halo, Dunia!</h1>\n  <p>Mulai edit di sini, lalu klik "Lihat Web".</p>\n</body>\n</html>',
-    css: '/* tulis gaya di sini */\nbody{\n  font-family: sans-serif;\n}',
-    js: '// tulis skrip di sini\nconsole.log("halo dari js");',
-    gs: '// Google Apps Script — tidak dijalankan di pratinjau,\n// hanya disimpan sebagai referensi.\nfunction doGet() {\n  return HtmlService.createHtmlOutput("halo");\n}',
-    json: '{\n  "contoh": true\n}',
-    md: '# Judul\n\nTulis catatan di sini.',
-    other: ''
-  };
-
-  let uidCounter = 1;
-  function uid(){ return 'f' + (uidCounter++); }
-
-  let files = [
-    { id: uid(), name: 'index.html', lang: 'html', content: starter.html }
-  ];
-  let activeId = files[0].id;
-  let usedExtCount = {}; // for default naming per lang
-
-  const tabstripRow = document.getElementById('tabstripRow');
-  const addWrap = document.getElementById('addWrap');
-  const langMenu = document.getElementById('langMenu');
-  const customRow = document.getElementById('customRow');
-  const customInput = document.getElementById('customInput');
-  const editor = document.getElementById('editor');
-  const toolbarDot = document.getElementById('toolbarDot');
-  const toolbarFileName = document.getElementById('toolbarFileName');
-  const footerStatus = document.getElementById('footerStatus');
-
-  function buildLangMenu(){
-    const items = Object.keys(langMeta).map(key => {
-      const m = langMeta[key];
-      if(key === 'other'){
-        return `<div class="lang-item" data-lang="other"><span class="dot" style="background:${m.hex}"></span>${m.label}</div>`;
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          base: {
+            950: '#0a0e1a',
+            900: '#0f172a',
+            800: '#141c30',
+            700: '#1c273f',
+            600: '#28354f',
+          },
+          profit: {
+            DEFAULT: '#10b981',
+            soft: 'rgba(16,185,129,0.12)',
+            glow: 'rgba(16,185,129,0.35)',
+          },
+          loss: {
+            DEFAULT: '#ef4444',
+            soft: 'rgba(239,68,68,0.12)',
+            glow: 'rgba(239,68,68,0.35)',
+          },
+          accent: {
+            DEFAULT: '#38bdf8',
+            soft: 'rgba(56,189,248,0.12)',
+          }
+        },
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        }
       }
-      return `<div class="lang-item" data-lang="${key}"><span class="dot" style="background:${m.hex}"></span>${m.label}<span class="ext">.${m.ext}</span></div>`;
-    }).join('');
-    langMenu.insertAdjacentHTML('afterbegin', items);
-    langMenu.querySelectorAll('.lang-item').forEach(el => {
-      el.addEventListener('click', () => {
-        const lang = el.dataset.lang;
-        if(lang === 'other'){
-          customRow.classList.add('open');
-          customInput.focus();
-        } else {
-          addFile(lang);
-          closeLangMenu();
-        }
-      });
-    });
-  }
-  buildLangMenu();
-
-  document.getElementById('addBtn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    langMenu.classList.toggle('open');
-  });
-  document.addEventListener('click', (e) => {
-    if(!addWrap.contains(e.target)) closeLangMenu();
-  });
-  function closeLangMenu(){
-    langMenu.classList.remove('open');
-    customRow.classList.remove('open');
-    customInput.value = '';
-  }
-  document.getElementById('customConfirm').addEventListener('click', confirmCustom);
-  customInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter'){ e.preventDefault(); confirmCustom(); }
-  });
-  function confirmCustom(){
-    let raw = customInput.value.trim();
-    if(!raw) return;
-    let ext = raw.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,8) || 'txt';
-    addFile('other', ext);
-    closeLangMenu();
-  }
-
-  function addFile(lang, customExt){
-    const meta = langMeta[lang];
-    const ext = customExt || meta.ext;
-    usedExtCount[ext] = (usedExtCount[ext] || 0) + 1;
-    const n = usedExtCount[ext];
-    const base = lang === 'html' ? 'halaman' : (lang === 'css' ? 'gaya' : (lang === 'js' ? 'skrip' : ext));
-    const name = n === 1 ? `${base}.${ext}` : `${base}${n}.${ext}`;
-    const file = {
-      id: uid(),
-      name,
-      lang,
-      customExt: customExt || null,
-      content: (starter[lang] !== undefined && customExt === undefined) ? starter[lang] : ''
-    };
-    files.push(file);
-    activeId = file.id;
-    renderTabs();
-    renderEditor();
-  }
-
-  function removeFile(id){
-    if(files.length <= 1) return;
-    const idx = files.findIndex(f => f.id === id);
-    files.splice(idx, 1);
-    if(activeId === id){
-      activeId = files[Math.max(0, idx - 1)].id;
     }
-    renderTabs();
-    renderEditor();
   }
-
-  function colorFor(f){
-    return langMeta[f.lang] ? langMeta[f.lang].hex : langMeta.other.hex;
-  }
-  function labelFor(f){
-    if(f.lang === 'other' && f.customExt) return f.customExt.toUpperCase();
-    return langMeta[f.lang].label;
-  }
-
-  function renderTabs(){
-    tabstripRow.querySelectorAll('.tab').forEach(t => t.remove());
-    files.forEach(f => {
-      const tab = document.createElement('div');
-      tab.className = 'tab' + (f.id === activeId ? ' active' : '');
-      tab.style.borderTopColor = f.id === activeId ? colorFor(f) : 'transparent';
-      tab.dataset.id = f.id;
-      tab.innerHTML = `<span class="dot" style="background:${colorFor(f)}"></span><span class="label">${f.name}</span><span class="close" title="Hapus">✕</span>`;
-      tab.addEventListener('click', (e) => {
-        if(e.target.classList.contains('close')){
-          removeFile(f.id);
-          return;
-        }
-        activeId = f.id;
-        renderTabs();
-        renderEditor();
-      });
-      tab.querySelector('.label').addEventListener('dblclick', (e) => {
-        e.stopPropagation();
-        startRename(f, tab);
-      });
-      tabstripRow.insertBefore(tab, addWrap);
-    });
-  }
-
-  function startRename(f, tabEl){
-    const labelEl = tabEl.querySelector('.label');
-    const input = document.createElement('input');
-    input.className = 'rename';
-    input.value = f.name;
-    labelEl.replaceWith(input);
-    input.focus();
-    input.select();
-    function commit(){
-      const val = input.value.trim();
-      if(val) f.name = val;
-      renderTabs();
-      renderEditor();
-    }
-    input.addEventListener('blur', commit);
-    input.addEventListener('keydown', (e) => {
-      if(e.key === 'Enter'){ e.preventDefault(); commit(); }
-      if(e.key === 'Escape'){ renderTabs(); }
-    });
-    input.addEventListener('click', (e) => e.stopPropagation());
-  }
-
-  function activeFile(){
-    return files.find(f => f.id === activeId);
-  }
-
-  function renderEditor(){
-    const f = activeFile();
-    editor.value = f.content;
-    toolbarDot.style.background = colorFor(f);
-    toolbarFileName.textContent = f.name;
-    footerStatus.textContent = `${files.length} file · ${labelFor(f)} aktif: ${f.name}`;
-  }
-
-  editor.addEventListener('input', () => {
-    activeFile().content = editor.value;
-  });
-  editor.addEventListener('keydown', (e) => {
-    if(e.key === 'Tab'){
-      e.preventDefault();
-      const start = editor.selectionStart, end = editor.selectionEnd;
-      editor.value = editor.value.slice(0,start) + '  ' + editor.value.slice(end);
-      editor.selectionStart = editor.selectionEnd = start + 2;
-      activeFile().content = editor.value;
-    }
-  });
-
-  document.getElementById('downloadBtn').addEventListener('click', () => {
-    const f = activeFile();
-    const blob = new Blob([f.content], {type:'text/plain'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = f.name;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  // ---------- Preview ----------
-  const previewOverlay = document.getElementById('previewOverlay');
-  const previewFrame = document.getElementById('previewFrame');
-  const skipNote = document.getElementById('skipNote');
-  let lastBlobUrl = null;
-
-  function buildDocument(){
-    const htmlParts = files.filter(f => f.lang === 'html').map(f => f.content).join('\n');
-    const cssParts = files.filter(f => f.lang === 'css').map(f => f.content).join('\n\n');
-    const jsParts = files.filter(f => f.lang === 'js').map(f => f.content).join('\n\n');
-    const skipped = files.filter(f => f.lang !== 'html' && f.lang !== 'css' && f.lang !== 'js');
-
-    let doc = htmlParts;
-    const hasHtmlTag = /<html[\s>]/i.test(doc);
-
-    if(!hasHtmlTag){
-      doc = `<!DOCTYPE html>\n<html lang="id">\n<head><meta charset="UTF-8"></head>\n<body>\n${doc}\n</body>\n</html>`;
-    }
-
-    const styleTag = `<style>\n${cssParts}\n</style>`;
-    if(/<\/head>/i.test(doc)){
-      doc = doc.replace(/<\/head>/i, styleTag + '\n</head>');
-    } else if(/<html[^>]*>/i.test(doc)){
-      doc = doc.replace(/<html[^>]*>/i, m => m + '\n<head>' + styleTag + '</head>');
-    } else {
-      doc = styleTag + doc;
-    }
-
-    const scriptTag = `<script>\n${jsParts}\n<\/script>`;
-    if(/<\/body>/i.test(doc)){
-      doc = doc.replace(/<\/body>/i, scriptTag + '\n</body>');
-    } else {
-      doc = doc + scriptTag;
-    }
-
-    return { doc, skipped };
-  }
-
-  function openPreview(){
-    const { doc, skipped } = buildDocument();
-    if(lastBlobUrl){ URL.revokeObjectURL(lastBlobUrl); }
-    const blob = new Blob([doc], {type:'text/html'});
-    lastBlobUrl = URL.createObjectURL(blob);
-    previewFrame.src = lastBlobUrl;
-
-    if(skipped.length){
-      skipNote.style.display = 'block';
-      skipNote.textContent = `${skipped.length} file (${skipped.map(f=>labelFor(f)).join(', ')}) tidak disertakan karena bukan HTML/CSS/JS — tetap tersimpan di tab masing-masing.`;
-    } else {
-      skipNote.style.display = 'none';
-    }
-    previewOverlay.classList.add('open');
-  }
-  document.getElementById('viewWebBtn').addEventListener('click', openPreview);
-  document.getElementById('closePreviewBtn').addEventListener('click', () => {
-    previewOverlay.classList.remove('open');
-  });
-  document.getElementById('newTabBtn').addEventListener('click', () => {
-    if(lastBlobUrl) window.open(lastBlobUrl, '_blank');
-  });
-  previewOverlay.addEventListener('click', (e) => {
-    if(e.target === previewOverlay) previewOverlay.classList.remove('open');
-  });
-  document.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape') previewOverlay.classList.remove('open');
-  });
-
-  renderTabs();
-  renderEditor();
-})();
 </script>
+
+<style>
+  html { scroll-behavior: smooth; }
+  body {
+    background:
+      radial-gradient(circle at 15% 0%, rgba(56,189,248,0.06), transparent 40%),
+      radial-gradient(circle at 85% 20%, rgba(16,185,129,0.05), transparent 40%),
+      #0a0e1a;
+  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #0f172a; }
+  ::-webkit-scrollbar-thumb { background: #28354f; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+  .glass {
+    background: rgba(20, 28, 48, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .num { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  .input-field {
+    background: #0f172a;
+    border: 1px solid #28354f;
+    color: #e2e8f0;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .input-field:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.15);
+  }
+  .input-field.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.15);
+  }
+  .btn-buy {
+    background: rgba(16,185,129,0.1);
+    border: 1px solid #10b981;
+    color: #10b981;
+  }
+  .btn-buy.active {
+    background: #10b981;
+    color: #04120c;
+    box-shadow: 0 0 20px rgba(16,185,129,0.35);
+  }
+  .btn-sell {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid #ef4444;
+    color: #ef4444;
+  }
+  .btn-sell.active {
+    background: #ef4444;
+    color: #1a0505;
+    box-shadow: 0 0 20px rgba(239,68,68,0.35);
+  }
+
+  .metric-card {
+    background: linear-gradient(160deg, rgba(28,39,63,0.9), rgba(15,23,42,0.9));
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .badge-profit { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+  .badge-loss { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+  .badge-buy { background: rgba(56,189,248,0.12); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); }
+  .badge-sell { background: rgba(251,146,60,0.12); color: #fb923c; border: 1px solid rgba(251,146,60,0.3); }
+
+  table thead th { position: sticky; top: 0; background: #0f172a; z-index: 10; }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .4; transform: scale(.7); }
+  }
+  .status-dot { animation: pulse-dot 1.4s ease-in-out infinite; }
+
+  .fade-in { animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 640px) {
+    table { font-size: 0.78rem; }
+  }
+</style>
+</head>
+
+<body class="bg-base-900 text-slate-200 font-sans min-h-screen pb-16">
+
+<!-- ============ TOP BAR ============ -->
+<header class="sticky top-0 z-40 glass border-b border-white/5">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-accent to-profit flex items-center justify-center shadow-lg shadow-accent/20">
+        <i data-lucide="candlestick-chart" class="w-5 h-5 text-base-950"></i>
+      </div>
+      <div>
+        <h1 class="font-extrabold text-sm sm:text-base tracking-tight text-white leading-none">Trading Journal</h1>
+        <p class="text-[11px] text-slate-400 leading-none mt-1">Forex &amp; Gold Daily Log</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Sync status indicator -->
+      <div id="syncStatus" class="hidden sm:flex items-center gap-2 text-xs px-3 py-1.5 rounded-full glass">
+        <span id="syncDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+        <span id="syncText" class="text-slate-400">Belum tersambung</span>
+      </div>
+      <button id="refreshBtn" class="p-2 rounded-lg glass hover:border-accent/50 transition" title="Muat ulang data">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+  <!-- Mobile sync status -->
+  <div id="syncStatusMobile" class="sm:hidden flex items-center gap-2 text-xs px-4 pb-2 -mt-1">
+    <span id="syncDotMobile" class="w-2 h-2 rounded-full bg-slate-500"></span>
+    <span id="syncTextMobile" class="text-slate-400">Belum tersambung</span>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 mt-6 space-y-6">
+
+  <!-- ============ DASHBOARD METRICS ============ -->
+  <section>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+
+      <div class="metric-card rounded-xl p-4 fade-in">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-slate-400 font-medium">Net Profit/Loss</span>
+          <i data-lucide="wallet" class="w-4 h-4 text-slate-500"></i>
+        </div>
+        <p id="metricNetPL" class="num text-xl sm:text-2xl font-bold text-white">$0.00</p>
+        <p id="metricNetPLSub" class="text-[11px] text-slate-500 mt-1">dari modal $0.00</p>
+      </div>
+
+      <div class="metric-card rounded-xl p-4 fade-in">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-slate-400 font-medium">Win Rate</span>
+          <i data-lucide="target" class="w-4 h-4 text-slate-500"></i>
+        </div>
+        <p id="metricWinRate" class="num text-xl sm:text-2xl font-bold text-white">0.0%</p>
+        <p id="metricWinRateSub" class="text-[11px] text-slate-500 mt-1">0 win / 0 loss</p>
+      </div>
+
+      <div class="metric-card rounded-xl p-4 fade-in">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-slate-400 font-medium">Profit Factor</span>
+          <i data-lucide="scale" class="w-4 h-4 text-slate-500"></i>
+        </div>
+        <p id="metricPF" class="num text-xl sm:text-2xl font-bold text-white">0.00</p>
+        <p id="metricPFSub" class="text-[11px] text-slate-500 mt-1">0 total trade</p>
+      </div>
+
+      <div class="metric-card rounded-xl p-4 fade-in">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-slate-400 font-medium">Avg Win vs Avg Loss</span>
+          <i data-lucide="git-compare" class="w-4 h-4 text-slate-500"></i>
+        </div>
+        <p class="num text-lg sm:text-xl font-bold">
+          <span id="metricAvgWin" class="text-profit">$0.00</span>
+          <span class="text-slate-600 mx-1">/</span>
+          <span id="metricAvgLoss" class="text-loss">$0.00</span>
+        </p>
+        <p class="text-[11px] text-slate-500 mt-1">rata-rata per trade</p>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+
+    <!-- ============ FORM INPUT ============ -->
+    <section class="xl:col-span-2">
+      <div class="glass rounded-2xl p-5 sm:p-6">
+        <div class="flex items-center gap-2 mb-5">
+          <i data-lucide="pencil-line" class="w-4.5 h-4.5 text-accent"></i>
+          <h2 class="font-bold text-white text-sm tracking-wide">CATAT TRANSAKSI BARU</h2>
+        </div>
+
+        <form id="journalForm" class="space-y-4" novalidate>
+
+          <!-- Tanggal & Waktu -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Tanggal &amp; Waktu Eksekusi</label>
+            <input type="datetime-local" id="f_datetime" required
+              class="input-field w-full rounded-lg px-3 py-2.5 text-sm" />
+            <p class="err-msg hidden text-loss text-[11px] mt-1">Tanggal &amp; waktu wajib diisi.</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <!-- Pair -->
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Pair</label>
+              <select id="f_pair" class="input-field w-full rounded-lg px-3 py-2.5 text-sm"></select>
+            </div>
+            <!-- Custom pair (muncul jika "Custom" dipilih) -->
+            <div id="customPairWrap" class="hidden">
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Pair Custom</label>
+              <input type="text" id="f_pairCustom" placeholder="cth. USDIDR"
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm uppercase" />
+            </div>
+            <!-- Lot -->
+            <div id="lotWrap">
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Lot Size</label>
+              <input type="number" id="f_lot" step="0.01" min="0.01" placeholder="0.10" required
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num" />
+              <p class="err-msg hidden text-loss text-[11px] mt-1">Isi lot size yang valid (&gt; 0).</p>
+            </div>
+          </div>
+
+          <!-- Tipe Order -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Tipe Order</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" data-type="BUY" class="order-type-btn btn-buy active rounded-lg py-2.5 text-sm font-bold tracking-wide transition">
+                <i data-lucide="trending-up" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i> BUY
+              </button>
+              <button type="button" data-type="SELL" class="order-type-btn btn-sell rounded-lg py-2.5 text-sm font-bold tracking-wide transition">
+                <i data-lucide="trending-down" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i> SELL
+              </button>
+            </div>
+            <input type="hidden" id="f_type" value="BUY" />
+          </div>
+
+          <!-- Entry / Exit -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Harga Entry</label>
+              <input type="number" id="f_entry" step="any" placeholder="0.00000" required
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num" />
+              <p class="err-msg hidden text-loss text-[11px] mt-1">Harga entry wajib diisi.</p>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Harga Keluar (Close)</label>
+              <input type="number" id="f_exit" step="any" placeholder="0.00000" required
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num" />
+              <p class="err-msg hidden text-loss text-[11px] mt-1">Harga keluar wajib diisi.</p>
+            </div>
+          </div>
+
+          <!-- SL / TP -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Stop Loss (SL)</label>
+              <input type="number" id="f_sl" step="any" placeholder="Opsional"
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Take Profit (TP)</label>
+              <input type="number" id="f_tp" step="any" placeholder="Opsional"
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num" />
+            </div>
+          </div>
+
+          <!-- Profit/Loss Nominal (pips dihitung otomatis, nominal wajib diisi manual agar akurat sesuai kontrak) -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">
+                Pips <span class="text-slate-600 font-normal">(auto)</span>
+              </label>
+              <input type="text" id="f_pips" readonly placeholder="0.0"
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num opacity-70 cursor-not-allowed" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Profit / Loss ($)</label>
+              <input type="number" id="f_pnl" step="any" placeholder="cth. 25.50 atau -10.00" required
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num" />
+              <p class="err-msg hidden text-loss text-[11px] mt-1">Nominal profit/loss wajib diisi.</p>
+            </div>
+          </div>
+
+          <!-- Strategi -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Setup Strategi / Kategori</label>
+            <select id="f_strategy" class="input-field w-full rounded-lg px-3 py-2.5 text-sm"></select>
+          </div>
+
+          <!-- Psikologi -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Psikologi / Catatan Emosi</label>
+            <select id="f_psychology" class="input-field w-full rounded-lg px-3 py-2.5 text-sm"></select>
+          </div>
+
+          <!-- Screenshot URL -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Link Screenshot Chart (opsional)</label>
+            <input type="url" id="f_screenshot" placeholder="https://..."
+              class="input-field w-full rounded-lg px-3 py-2.5 text-sm" />
+          </div>
+
+          <!-- Catatan tambahan -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Catatan Tambahan (opsional)</label>
+            <textarea id="f_notes" rows="2" placeholder="Refleksi, pelajaran, alasan entry..."
+              class="input-field w-full rounded-lg px-3 py-2.5 text-sm resize-none"></textarea>
+          </div>
+
+          <button type="submit" id="submitBtn"
+            class="w-full bg-accent hover:bg-sky-400 text-base-950 font-bold text-sm py-3 rounded-lg transition flex items-center justify-center gap-2">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span id="submitBtnText">Simpan ke Spreadsheet</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============ TABEL RIWAYAT ============ -->
+    <section class="xl:col-span-3">
+      <div class="glass rounded-2xl p-5 sm:p-6 flex flex-col h-full">
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="table-2" class="w-4.5 h-4.5 text-accent"></i>
+            <h2 class="font-bold text-white text-sm tracking-wide">RIWAYAT TRANSAKSI</h2>
+            <span id="rowCountBadge" class="text-[11px] px-2 py-0.5 rounded-full bg-white/5 text-slate-400">0 trade</span>
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+          <div class="col-span-2 sm:col-span-1 relative">
+            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+            <input type="text" id="searchInput" placeholder="Cari catatan..."
+              class="input-field w-full rounded-lg pl-8 pr-3 py-2 text-xs" />
+          </div>
+          <select id="filterPair" class="input-field w-full rounded-lg px-2.5 py-2 text-xs">
+            <option value="">Semua Pair</option>
+          </select>
+          <select id="filterType" class="input-field w-full rounded-lg px-2.5 py-2 text-xs">
+            <option value="">Semua Tipe</option>
+            <option value="BUY">BUY</option>
+            <option value="SELL">SELL</option>
+          </select>
+          <input type="date" id="filterDate" class="input-field w-full rounded-lg px-2.5 py-2 text-xs" />
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-auto rounded-xl border border-white/5 flex-1" style="max-height: 620px;">
+          <table class="w-full text-xs sm:text-sm">
+            <thead>
+              <tr class="text-slate-400 border-b border-white/5">
+                <th class="text-left px-3 py-2.5 font-semibold">Tanggal</th>
+                <th class="text-left px-3 py-2.5 font-semibold">Pair</th>
+                <th class="text-left px-3 py-2.5 font-semibold">Tipe</th>
+                <th class="text-right px-3 py-2.5 font-semibold">Lot</th>
+                <th class="text-right px-3 py-2.5 font-semibold">Entry</th>
+                <th class="text-right px-3 py-2.5 font-semibold">Exit</th>
+                <th class="text-right px-3 py-2.5 font-semibold">Pips</th>
+                <th class="text-right px-3 py-2.5 font-semibold">P/L ($)</th>
+                <th class="text-left px-3 py-2.5 font-semibold">Strategi</th>
+                <th class="text-left px-3 py-2.5 font-semibold">Psikologi</th>
+                <th class="text-center px-3 py-2.5 font-semibold">Chart</th>
+                <th class="text-center px-3 py-2.5 font-semibold">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="divide-y divide-white/5">
+              <!-- baris diisi via JS -->
+            </tbody>
+          </table>
+
+          <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center">
+            <i data-lucide="inbox" class="w-10 h-10 text-slate-600 mb-3"></i>
+            <p class="text-slate-500 text-sm">Belum ada transaksi tercatat.</p>
+            <p class="text-slate-600 text-xs mt-1">Isi form di sebelah kiri untuk mulai mencatat.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ============ TOAST NOTIFICATION ============ -->
+<div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2 w-[calc(100%-2rem)] sm:w-auto"></div>
+
+<!-- ============ EDIT MODAL ============ -->
+<div id="editModal" class="hidden fixed inset-0 z-50 items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+  <div class="glass rounded-2xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-white text-sm">EDIT TRANSAKSI</h3>
+      <button id="closeModalBtn" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1">Profit / Loss ($)</label>
+        <input type="number" id="edit_pnl" step="any" class="input-field w-full rounded-lg px-3 py-2 text-sm num" />
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1">Catatan Tambahan</label>
+        <textarea id="edit_notes" rows="3" class="input-field w-full rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+      </div>
+      <button id="saveEditBtn" class="w-full bg-accent hover:bg-sky-400 text-base-950 font-bold text-sm py-2.5 rounded-lg transition">
+        Simpan Perubahan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Config harus dimuat sebelum script.js -->
+<script src="config.js"></script>
+<script src="script.js"></script>
 </body>
   </html>
