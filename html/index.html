@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trading Journal — Forex &amp; Gold Daily Log</title>
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Ikon -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- Font ala terminal trading: monospace untuk angka, sans untuk UI -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          base: {
+            950: '#0a0e1a',
+            900: '#0f172a',
+            800: '#141c30',
+            700: '#1c273f',
+            600: '#28354f',
+          },
+          profit: {
+            DEFAULT: '#10b981',
+            soft: 'rgba(16,185,129,0.12)',
+            glow: 'rgba(16,185,129,0.35)',
+          },
+          loss: {
+            DEFAULT: '#ef4444',
+            soft: 'rgba(239,68,68,0.12)',
+            glow: 'rgba(239,68,68,0.35)',
+          },
+          accent: {
+            DEFAULT: '#38bdf8',
+            soft: 'rgba(56,189,248,0.12)',
+          }
+        },
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  html { scroll-behavior: smooth; }
+  body {
+    background:
+      radial-gradient(circle at 15% 0%, rgba(56,189,248,0.06), transparent 40%),
+      radial-gradient(circle at 85% 20%, rgba(16,185,129,0.05), transparent 40%),
+      #0a0e1a;
+  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #0f172a; }
+  ::-webkit-scrollbar-thumb { background: #28354f; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+  .glass {
+    background: rgba(20, 28, 48, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .num { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  .input-field {
+    background: #0f172a;
+    border: 1px solid #28354f;
+    color: #e2e8f0;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .input-field:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.15);
+  }
+  .input-field.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.15);
+  }
+  .btn-buy {
+    background: rgba(16,185,129,0.1);
+    border: 1px solid #10b981;
+    color: #10b981;
+  }
+  .btn-buy.active {
+    background: #10b981;
+    color: #04120c;
+    box-shadow: 0 0 20px rgba(16,185,129,0.35);
+  }
+  .btn-sell {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid #ef4444;
+    color: #ef4444;
+  }
+  .btn-sell.active {
+    background: #ef4444;
+    color: #1a0505;
+    box-shadow: 0 0 20px rgba(239,68,68,0.35);
+  }
+
+  .metric-card {
+    background: linear-gradient(160deg, rgba(28,39,63,0.9), rgba(15,23,42,0.9));
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .badge-profit { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+  .badge-loss { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+  .badge-buy { background: rgba(56,189,248,0.12); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); }
+  .badge-sell { background: rgba(251,146,60,0.12); color: #fb923c; border: 1px solid rgba(251,146,60,0.3); }
+
+  table thead th { position: sticky; top: 0; background: #0f172a; z-index: 10; }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .4; transform: scale(.7); }
+  }
+  .status-dot { animation: pulse-dot 1.4s ease-in-out infinite; }
+
+  .fade-in { animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 640px) {
+    table { font-size: 0.78rem; }
+  }
+</style>
+</head>
+
+<body class="bg-base-900 text-slate-200 font-sans min-h-screen pb-16">
+
+<!-- ============ TOP BAR ============ -->
+<header class="sticky top-0 z-40 glass border-b border-white/5">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-accent to-profit flex items-center justify-center shadow-lg shadow-accent/20">
+        <i data-lucide="candlestick-chart" class="w-5 h-5 text-base-950"></i>
+      </div>
+      <div>
+        <h1 class="font-extrabold text-sm sm:text-base tracking-tight text-white leading-none">Trading Journal</h1>
+        <p class="text-[11px] text-slate-400 leading-none mt-1">Forex &amp; Gold Daily Log</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Sync status indicator -->
+      <div id="syncStatus" class="hidden sm:flex items-center gap-2 text-xs px-3 py-1.5 rounded-full glass">
+        <span id="syncDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+        <span id="syncText" class="text-slate-400">Belum tersambung</span>
+      </div>
+      <button id="refreshBtn" class="p-2 rounded-lg glass hover:border-accent/50 transition" title="Muat ulang data">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+  <!-- Mobile sync status -->
+  <div id="syncStatusMobile" class="sm:hidden flex items-center gap-2 text-xs px-4 pb-2 -mt-1">
+    <span id="syncDotMobile" class="w-2 h-2 rounded-full bg-slate-500"></span>
+    <span id="syncTextMobile" class="text-slate-400">Belum tersambung</span>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 mt-6 space-y-6">
+
+  <!-- ============ DASHBOARD METRICS ============ -->
+  <section>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+
+      <div class="metric-card rounded-xl p-4 fade-in">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-slate-400 font-medium">Net Profit/Loss</span>
+          <i data-lucide="wallet" class="w-4 h-4 text-slate-500"></i>
+        </div>
+        <p id="metricNetPL" class="num text-xl sm:text-2xl font-bold text-white">$0.00</p>
+        <p id="metricNetPLSub" class="text-[11px] text-slate-500 mt-1">dari modal $0.00</p>
+      </div>
+
+      <div class="metric-card rounded-xl p-4 fade-in">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-slate-400 font-medium">Win Rate</span>
+          <i data-lucide="target" class="w-4 h-4 text-slate-500"></i>
+        </div>
+        <p id="metricWinRate" class="num text-xl sm:text-2xl font-bold text-white">0.0%</p>
+        <p id="metricWinRateSub" class="text-[11px] text-slate-500 mt-1">0 win / 0 loss</p>
+      </div>
+
+      <div class="metric-card rounded-xl p-4 fade-in">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-slate-400 font-medium">Profit Factor</span>
+          <i data-lucide="scale" class="w-4 h-4 text-slate-500"></i>
+        </div>
+        <p id="metricPF" class="num text-xl sm:text-2xl font-bold text-white">0.00</p>
+        <p id="metricPFSub" class="text-[11px] text-slate-500 mt-1">0 total trade</p>
+      </div>
+
+      <div class="metric-card rounded-xl p-4 fade-in">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-slate-400 font-medium">Avg Win vs Avg Loss</span>
+          <i data-lucide="git-compare" class="w-4 h-4 text-slate-500"></i>
+        </div>
+        <p class="num text-lg sm:text-xl font-bold">
+          <span id="metricAvgWin" class="text-profit">$0.00</span>
+          <span class="text-slate-600 mx-1">/</span>
+          <span id="metricAvgLoss" class="text-loss">$0.00</span>
+        </p>
+        <p class="text-[11px] text-slate-500 mt-1">rata-rata per trade</p>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+
+    <!-- ============ FORM INPUT ============ -->
+    <section class="xl:col-span-2">
+      <div class="glass rounded-2xl p-5 sm:p-6">
+        <div class="flex items-center gap-2 mb-5">
+          <i data-lucide="pencil-line" class="w-4.5 h-4.5 text-accent"></i>
+          <h2 class="font-bold text-white text-sm tracking-wide">CATAT TRANSAKSI BARU</h2>
+        </div>
+
+        <form id="journalForm" class="space-y-4" novalidate>
+
+          <!-- Tanggal & Waktu -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Tanggal &amp; Waktu Eksekusi</label>
+            <input type="datetime-local" id="f_datetime" required
+              class="input-field w-full rounded-lg px-3 py-2.5 text-sm" />
+            <p class="err-msg hidden text-loss text-[11px] mt-1">Tanggal &amp; waktu wajib diisi.</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <!-- Pair -->
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Pair</label>
+              <select id="f_pair" class="input-field w-full rounded-lg px-3 py-2.5 text-sm"></select>
+            </div>
+            <!-- Custom pair (muncul jika "Custom" dipilih) -->
+            <div id="customPairWrap" class="hidden">
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Pair Custom</label>
+              <input type="text" id="f_pairCustom" placeholder="cth. USDIDR"
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm uppercase" />
+            </div>
+            <!-- Lot -->
+            <div id="lotWrap">
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Lot Size</label>
+              <input type="number" id="f_lot" step="0.01" min="0.01" placeholder="0.10" required
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num" />
+              <p class="err-msg hidden text-loss text-[11px] mt-1">Isi lot size yang valid (&gt; 0).</p>
+            </div>
+          </div>
+
+          <!-- Tipe Order -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Tipe Order</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" data-type="BUY" class="order-type-btn btn-buy active rounded-lg py-2.5 text-sm font-bold tracking-wide transition">
+                <i data-lucide="trending-up" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i> BUY
+              </button>
+              <button type="button" data-type="SELL" class="order-type-btn btn-sell rounded-lg py-2.5 text-sm font-bold tracking-wide transition">
+                <i data-lucide="trending-down" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i> SELL
+              </button>
+            </div>
+            <input type="hidden" id="f_type" value="BUY" />
+          </div>
+
+          <!-- Entry / Exit -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Harga Entry</label>
+              <input type="number" id="f_entry" step="any" placeholder="0.00000" required
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num" />
+              <p class="err-msg hidden text-loss text-[11px] mt-1">Harga entry wajib diisi.</p>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Harga Keluar (Close)</label>
+              <input type="number" id="f_exit" step="any" placeholder="0.00000" required
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num" />
+              <p class="err-msg hidden text-loss text-[11px] mt-1">Harga keluar wajib diisi.</p>
+            </div>
+          </div>
+
+          <!-- SL / TP -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Stop Loss (SL)</label>
+              <input type="number" id="f_sl" step="any" placeholder="Opsional"
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Take Profit (TP)</label>
+              <input type="number" id="f_tp" step="any" placeholder="Opsional"
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num" />
+            </div>
+          </div>
+
+          <!-- Profit/Loss Nominal (pips dihitung otomatis, nominal wajib diisi manual agar akurat sesuai kontrak) -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">
+                Pips <span class="text-slate-600 font-normal">(auto)</span>
+              </label>
+              <input type="text" id="f_pips" readonly placeholder="0.0"
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num opacity-70 cursor-not-allowed" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Profit / Loss ($)</label>
+              <input type="number" id="f_pnl" step="any" placeholder="cth. 25.50 atau -10.00" required
+                class="input-field w-full rounded-lg px-3 py-2.5 text-sm num" />
+              <p class="err-msg hidden text-loss text-[11px] mt-1">Nominal profit/loss wajib diisi.</p>
+            </div>
+          </div>
+
+          <!-- Strategi -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Setup Strategi / Kategori</label>
+            <select id="f_strategy" class="input-field w-full rounded-lg px-3 py-2.5 text-sm"></select>
+          </div>
+
+          <!-- Psikologi -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Psikologi / Catatan Emosi</label>
+            <select id="f_psychology" class="input-field w-full rounded-lg px-3 py-2.5 text-sm"></select>
+          </div>
+
+          <!-- Screenshot URL -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Link Screenshot Chart (opsional)</label>
+            <input type="url" id="f_screenshot" placeholder="https://..."
+              class="input-field w-full rounded-lg px-3 py-2.5 text-sm" />
+          </div>
+
+          <!-- Catatan tambahan -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Catatan Tambahan (opsional)</label>
+            <textarea id="f_notes" rows="2" placeholder="Refleksi, pelajaran, alasan entry..."
+              class="input-field w-full rounded-lg px-3 py-2.5 text-sm resize-none"></textarea>
+          </div>
+
+          <button type="submit" id="submitBtn"
+            class="w-full bg-accent hover:bg-sky-400 text-base-950 font-bold text-sm py-3 rounded-lg transition flex items-center justify-center gap-2">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span id="submitBtnText">Simpan ke Spreadsheet</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============ TABEL RIWAYAT ============ -->
+    <section class="xl:col-span-3">
+      <div class="glass rounded-2xl p-5 sm:p-6 flex flex-col h-full">
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="table-2" class="w-4.5 h-4.5 text-accent"></i>
+            <h2 class="font-bold text-white text-sm tracking-wide">RIWAYAT TRANSAKSI</h2>
+            <span id="rowCountBadge" class="text-[11px] px-2 py-0.5 rounded-full bg-white/5 text-slate-400">0 trade</span>
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+          <div class="col-span-2 sm:col-span-1 relative">
+            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+            <input type="text" id="searchInput" placeholder="Cari catatan..."
+              class="input-field w-full rounded-lg pl-8 pr-3 py-2 text-xs" />
+          </div>
+          <select id="filterPair" class="input-field w-full rounded-lg px-2.5 py-2 text-xs">
+            <option value="">Semua Pair</option>
+          </select>
+          <select id="filterType" class="input-field w-full rounded-lg px-2.5 py-2 text-xs">
+            <option value="">Semua Tipe</option>
+            <option value="BUY">BUY</option>
+            <option value="SELL">SELL</option>
+          </select>
+          <input type="date" id="filterDate" class="input-field w-full rounded-lg px-2.5 py-2 text-xs" />
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-auto rounded-xl border border-white/5 flex-1" style="max-height: 620px;">
+          <table class="w-full text-xs sm:text-sm">
+            <thead>
+              <tr class="text-slate-400 border-b border-white/5">
+                <th class="text-left px-3 py-2.5 font-semibold">Tanggal</th>
+                <th class="text-left px-3 py-2.5 font-semibold">Pair</th>
+                <th class="text-left px-3 py-2.5 font-semibold">Tipe</th>
+                <th class="text-right px-3 py-2.5 font-semibold">Lot</th>
+                <th class="text-right px-3 py-2.5 font-semibold">Entry</th>
+                <th class="text-right px-3 py-2.5 font-semibold">Exit</th>
+                <th class="text-right px-3 py-2.5 font-semibold">Pips</th>
+                <th class="text-right px-3 py-2.5 font-semibold">P/L ($)</th>
+                <th class="text-left px-3 py-2.5 font-semibold">Strategi</th>
+                <th class="text-left px-3 py-2.5 font-semibold">Psikologi</th>
+                <th class="text-center px-3 py-2.5 font-semibold">Chart</th>
+                <th class="text-center px-3 py-2.5 font-semibold">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="divide-y divide-white/5">
+              <!-- baris diisi via JS -->
+            </tbody>
+          </table>
+
+          <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center">
+            <i data-lucide="inbox" class="w-10 h-10 text-slate-600 mb-3"></i>
+            <p class="text-slate-500 text-sm">Belum ada transaksi tercatat.</p>
+            <p class="text-slate-600 text-xs mt-1">Isi form di sebelah kiri untuk mulai mencatat.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ============ TOAST NOTIFICATION ============ -->
+<div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2 w-[calc(100%-2rem)] sm:w-auto"></div>
+
+<!-- ============ EDIT MODAL ============ -->
+<div id="editModal" class="hidden fixed inset-0 z-50 items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+  <div class="glass rounded-2xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-white text-sm">EDIT TRANSAKSI</h3>
+      <button id="closeModalBtn" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1">Profit / Loss ($)</label>
+        <input type="number" id="edit_pnl" step="any" class="input-field w-full rounded-lg px-3 py-2 text-sm num" />
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1">Catatan Tambahan</label>
+        <textarea id="edit_notes" rows="3" class="input-field w-full rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+      </div>
+      <button id="saveEditBtn" class="w-full bg-accent hover:bg-sky-400 text-base-950 font-bold text-sm py-2.5 rounded-lg transition">
+        Simpan Perubahan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Config harus dimuat sebelum script.js -->
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
