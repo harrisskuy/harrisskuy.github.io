@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Timemark — Kamera Waktu &amp; Lokasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-void:#07090A;
+    --bg-panel:#121613;
+    --bg-panel-2:#181E1A;
+    --line:#262E29;
+    --phosphor:#7CFFB2;
+    --amber:#FF9F45;
+    --text:#EDEFEC;
+    --text-dim:#8C948E;
+    --danger:#FF6B5E;
+    --card-bg:#F4F2EC;
+    --card-text:#14181A;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg-void);
+    color:var(--text);
+    font-family:'Space Grotesk', system-ui, sans-serif;
+    overflow:hidden;
+    overscroll-behavior:none;
+  }
+  #app{
+    position:fixed; inset:0;
+    display:flex; flex-direction:column;
+    background:#000;
+  }
+
+  /* ---------- Viewfinder ---------- */
+  #stage{
+    position:relative;
+    flex:1;
+    overflow:hidden;
+    background:#000;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #video, #resultImg{
+    width:100%; height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  #resultImg{ object-fit:contain; background:#000; }
+
+  .frame-corners span{
+    position:absolute; width:22px; height:22px;
+    border:2px solid rgba(124,255,178,.55);
+  }
+  .frame-corners span:nth-child(1){ top:14px; left:14px; border-right:none; border-bottom:none; }
+  .frame-corners span:nth-child(2){ top:14px; right:14px; border-left:none; border-bottom:none; }
+  .frame-corners span:nth-child(3){ bottom:14px; left:14px; border-right:none; border-top:none; }
+  .frame-corners span:nth-child(4){ bottom:14px; right:14px; border-left:none; border-top:none; }
+
+  #livePreviewTag{
+    position:absolute; left:14px; bottom:14px;
+    max-width:78%;
+    background:var(--card-bg);
+    color:var(--card-text);
+    border-radius:10px;
+    padding:10px 12px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    line-height:1.5;
+    box-shadow:0 6px 20px rgba(0,0,0,.35);
+    pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  #livePreviewTag .row1{ font-weight:600; font-size:12.5px; color:#1c231f; }
+  #livePreviewTag .row-note{ color:#3a4440; margin-top:1px; word-break:break-word; }
+  #livePreviewTag .row-geo{ color:#5c665f; font-size:10.5px; margin-top:1px; }
+  #livePreviewTag.style-minimal{
+    background:transparent; box-shadow:none; padding:0;
+    color:#fff; text-shadow:0 1px 6px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,.6);
+  }
+  #livePreviewTag.style-minimal .row1{ color:#fff; }
+  #livePreviewTag.style-minimal .row-note{ color:#e9ece9; }
+  #livePreviewTag.style-minimal .row-geo{ color:#c7d0cb; }
+  #livePreviewTag.style-classic{
+    background:rgba(9,13,11,.72);
+    color:var(--phosphor);
+    border:1px solid rgba(124,255,178,.25);
+    box-shadow:none;
+  }
+  #livePreviewTag.style-classic .row1{ color:var(--phosphor); }
+  #livePreviewTag.style-classic .row-note{ color:#bdf5d6; }
+  #livePreviewTag.style-classic .row-geo{ color:#6fcf9c; }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    position:absolute; top:0; left:0; right:0;
+    padding:calc(12px + var(--safe-top)) 14px 12px;
+    display:flex; align-items:center; justify-content:space-between;
+    background:linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,0));
+    z-index:5;
+  }
+  .brand{
+    display:flex; align-items:center; gap:8px;
+    font-weight:700; letter-spacing:.2px; font-size:15px;
+  }
+  .rec-dot{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--danger);
+    box-shadow:0 0 0 0 rgba(255,107,94,.6);
+    animation:pulse 1.8s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(255,107,94,.55);}
+    70%{box-shadow:0 0 0 8px rgba(255,107,94,0);}
+    100%{box-shadow:0 0 0 0 rgba(255,107,94,0);}
+  }
+  .iconbtn{
+    width:38px; height:38px; border-radius:50%;
+    background:rgba(20,24,22,.55);
+    border:1px solid rgba(255,255,255,.14);
+    color:var(--text);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .iconbtn svg{ width:18px; height:18px; }
+  .iconbtn:active{ transform:scale(.92); }
+
+  /* ---------- Bottom dock (viewfinder mode) ---------- */
+  .dock{
+    position:absolute; left:0; right:0; bottom:0;
+    padding:16px 26px calc(22px + var(--safe-bottom));
+    display:flex; align-items:center; justify-content:space-between;
+    background:linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.6));
+    z-index:5;
+  }
+  .dock-side{ width:52px; display:flex; justify-content:center; }
+  .shutter{
+    width:74px; height:74px; border-radius:50%;
+    background:transparent;
+    border:3px solid #fff;
+    padding:4px;
+    cursor:pointer;
+  }
+  .shutter-inner{
+    width:100%; height:100%; border-radius:50%;
+    background:#fff;
+    transition:transform .12s ease, background .12s ease;
+  }
+  .shutter:active .shutter-inner{ transform:scale(.82); background:var(--amber); }
+
+  /* ---------- Settings sheet ---------- */
+  #sheetBackdrop{
+    position:absolute; inset:0; background:rgba(0,0,0,.5);
+    opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:8;
+  }
+  #sheetBackdrop.open{ opacity:1; pointer-events:auto; }
+  #settingsSheet{
+    position:absolute; left:0; right:0; bottom:0;
+    background:var(--bg-panel);
+    border-top:1px solid var(--line);
+    border-radius:18px 18px 0 0;
+    padding:6px 18px calc(20px + var(--safe-bottom));
+    transform:translateY(102%);
+    transition:transform .28s cubic-bezier(.32,.72,0,1);
+    z-index:9;
+    max-height:78vh;
+    overflow-y:auto;
+  }
+  #settingsSheet.open{ transform:translateY(0); }
+  .sheet-handle{
+    width:36px; height:4px; border-radius:2px;
+    background:var(--line); margin:10px auto 14px;
+  }
+  .sheet-title{
+    font-size:13px; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--text-dim); margin:16px 0 8px;
+  }
+  .sheet-title:first-of-type{ margin-top:2px; }
+  .field-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 0; border-bottom:1px solid var(--line);
+  }
+  .field-row:last-child{ border-bottom:none; }
+  .field-label{ font-size:14.5px; }
+  .field-sub{ font-size:12px; color:var(--text-dim); margin-top:2px; }
+
+  .switch{ position:relative; width:44px; height:26px; flex-shrink:0; }
+  .switch input{ display:none; }
+  .switch-track{
+    position:absolute; inset:0; background:#2b332e; border-radius:14px;
+    transition:background .2s ease; cursor:pointer;
+  }
+  .switch-track::after{
+    content:''; position:absolute; top:3px; left:3px;
+    width:20px; height:20px; border-radius:50%; background:#fff;
+    transition:transform .2s ease;
+  }
+  .switch input:checked + .switch-track{ background:var(--phosphor); }
+  .switch input:checked + .switch-track::after{ transform:translateX(18px); }
+
+  textarea#noteInput{
+    width:100%; resize:none; background:var(--bg-panel-2);
+    border:1px solid var(--line); border-radius:10px;
+    color:var(--text); font-family:inherit; font-size:14px;
+    padding:10px 12px; margin-top:6px;
+  }
+  textarea#noteInput:focus{ outline:none; border-color:var(--phosphor); }
+
+  .chip-row{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  .chip{
+    padding:8px 13px; border-radius:20px;
+    border:1px solid var(--line); background:var(--bg-panel-2);
+    color:var(--text-dim); font-size:13px; cursor:pointer;
+  }
+  .chip.active{ border-color:var(--phosphor); color:var(--phosphor); background:rgba(124,255,178,.08); }
+
+  .geo-status{ font-size:12px; color:var(--text-dim); margin-top:6px; }
+  .geo-status.ok{ color:var(--phosphor); }
+  .geo-status.err{ color:var(--danger); }
+
+  /* ---------- Result view ---------- */
+  #resultBar{
+    position:absolute; left:0; right:0; bottom:0;
+    padding:14px 18px calc(20px + var(--safe-bottom));
+    background:linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.7) 40%);
+    display:flex; gap:10px; z-index:6;
+  }
+  .btn{
+    flex:1; border:none; border-radius:13px; padding:15px 14px;
+    font-family:inherit; font-weight:600; font-size:15px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    cursor:pointer;
+  }
+  .btn svg{ width:18px; height:18px; flex-shrink:0; }
+  .btn-send{ background:#25D366; color:#07330f; }
+  .btn-send:active{ filter:brightness(.9); }
+  .btn-reset{ background:rgba(255,255,255,.1); color:var(--text); border:1px solid rgba(255,255,255,.18); flex:0 0 auto; width:54px; }
+  .btn-dl{ background:rgba(255,255,255,.1); color:var(--text); border:1px solid rgba(255,255,255,.18); flex:0 0 auto; width:54px; }
+
+  /* ---------- Flash + toast ---------- */
+  #flash{
+    position:absolute; inset:0; background:#fff; opacity:0;
+    pointer-events:none; z-index:20;
+  }
+  #flash.on{ animation:flashfx .35s ease-out; }
+  @keyframes flashfx{ 0%{opacity:.9;} 100%{opacity:0;} }
+
+  #toast{
+    position:absolute; left:50%; bottom:calc(96px + var(--safe-bottom));
+    transform:translateX(-50%) translateY(10px);
+    background:rgba(18,22,19,.94); border:1px solid var(--line);
+    color:var(--text); padding:11px 16px; border-radius:11px;
+    font-size:13.5px; max-width:86%; text-align:center;
+    opacity:0; pointer-events:none; transition:all .25s ease;
+    z-index:30;
+  }
+  #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ---------- Boot / permission screen ---------- */
+  #permScreen{
+    position:absolute; inset:0; z-index:15;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:30px; background:var(--bg-void);
+    gap:14px;
+  }
+  #permScreen h1{ font-size:19px; margin:0; }
+  #permScreen p{ color:var(--text-dim); font-size:14px; max-width:320px; margin:0; line-height:1.5; }
+  #permScreen .mark{ color:var(--phosphor); font-family:'IBM Plex Mono',monospace; }
+  .retrybtn{
+    margin-top:6px; background:var(--phosphor); color:#0a1c10; border:none;
+    padding:12px 22px; border-radius:11px; font-weight:600; font-family:inherit;
+    font-size:14.5px; cursor:pointer;
+  }
+
+  canvas{ display:none; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="stage">
+    <video id="video" autoplay playsinline muted></video>
+    <img id="resultImg" hidden alt="Hasil foto">
+    <div class="frame-corners" id="corners"><span></span><span></span><span></span><span></span></div>
+    <div id="livePreviewTag" class="style-card"></div>
+  </div>
+
+  <div class="topbar" id="topbar">
+    <div class="brand"><span class="rec-dot"></span>TIMEMARK</div>
+    <button class="iconbtn" id="settingsBtn" aria-label="Pengaturan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1Z"/></svg>
+    </button>
+  </div>
+
+  <div class="dock" id="dock">
+    <div class="dock-side">
+      <button class="iconbtn" id="flipBtn" aria-label="Ganti kamera">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 15a8 8 0 0 1-14.24 4.88M4 9a8 8 0 0 1 14.24-4.88M4 15v5h5M20 9V4h-5"/></svg>
+      </button>
+    </div>
+    <button class="shutter" id="shutterBtn" aria-label="Potret"><div class="shutter-inner"></div></button>
+    <div class="dock-side">
+      <button class="iconbtn" id="geoQuickBtn" aria-label="Lokasi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="resultBar" hidden>
+    <button class="btn btn-reset" id="resetBtn" aria-label="Reset">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
+    </button>
+    <button class="btn btn-send" id="sendBtn">
+      <svg viewBox="0 0 24 24" fill="#07330f"><path d="M12 2C6.48 2 2 6.36 2 11.72c0 2.05.66 3.95 1.8 5.53L2 22l4.9-1.56A10.1 10.1 0 0 0 12 21.44c5.52 0 10-4.36 10-9.72S17.52 2 12 2Zm5.6 13.88c-.24.66-1.4 1.27-1.94 1.33-.5.06-1.13.09-1.82-.11-.42-.12-.96-.3-1.66-.6-2.92-1.24-4.83-4.13-4.98-4.32-.14-.2-1.2-1.58-1.2-3.02 0-1.44.77-2.14 1.04-2.44.27-.3.6-.36.8-.36h.58c.19 0 .44-.04.68.5.24.56.82 1.94.9 2.08.07.14.12.3.02.5-.1.2-.15.31-.3.48-.15.17-.31.38-.44.5-.15.15-.3.31-.13.6.17.3.76 1.24 1.63 2 1.12.99 2.06 1.3 2.36 1.45.3.15.48.13.66-.07.18-.2.76-.87.96-1.17.2-.3.4-.24.66-.14.27.1 1.7.8 1.99.94.29.15.48.22.55.34.07.13.07.72-.16 1.38Z"/></svg>
+      Kirim ke WhatsApp
+    </button>
+    <button class="btn btn-dl" id="dlBtn" aria-label="Unduh">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>
+    </button>
+  </div>
+
+  <div id="sheetBackdrop"></div>
+  <div id="settingsSheet">
+    <div class="sheet-handle"></div>
+
+    <div class="sheet-title">Tampilan Watermark</div>
+    <div class="chip-row" id="styleChips">
+      <div class="chip active" data-style="card">Kartu</div>
+      <div class="chip" data-style="minimal">Minimal</div>
+      <div class="chip" data-style="classic">Klasik Hijau</div>
+    </div>
+
+    <div class="sheet-title">Informasi</div>
+    <div class="field-row">
+      <div><div class="field-label">Tanggal &amp; waktu</div><div class="field-sub">Dicap otomatis saat memotret</div></div>
+      <label class="switch"><input type="checkbox" id="toggleDate" checked><span class="switch-track"></span></label>
+    </div>
+    <div class="field-row">
+      <div><div class="field-label">Koordinat GPS</div><div class="field-sub" id="geoSub">Butuh izin lokasi perangkat</div></div>
+      <label class="switch"><input type="checkbox" id="toggleGeo"><span class="switch-track"></span></label>
+    </div>
+    <div class="geo-status" id="geoStatus"></div>
+
+    <div class="sheet-title">Catatan Lokasi / Keterangan</div>
+    <textarea id="noteInput" rows="2" maxlength="80" placeholder="cth. Proyek Jembatan Blok 3, Surabaya"></textarea>
+
+    <div class="sheet-title">Kirim ke Nomor (opsional)</div>
+    <textarea id="waNumberInput" rows="1" maxlength="20" placeholder="cth. 6281234567890 — kosongkan untuk pilih kontak sendiri" style="font-family:'IBM Plex Mono',monospace;"></textarea>
+  </div>
+
+  <div id="flash"></div>
+  <div id="toast"></div>
+
+  <div id="permScreen" hidden>
+    <h1>Izin kamera diperlukan</h1>
+    <p>Timemark butuh akses kamera untuk membidik foto. Izinkan akses pada peramban, lalu coba lagi. <span class="mark">// no camera, no shot</span></p>
+    <button class="retrybtn" id="retryCamBtn">Coba Lagi</button>
+  </div>
+
+  <canvas id="canvas"></canvas>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const state = {
+    facingMode: 'environment',
+    stream: null,
+    style: 'card',
+    showDate: true,
+    showGeo: false,
+    note: '',
+    waNumber: '',
+    coords: null,
+    geoWatchId: null,
+    capturedBlob: null,
+    capturedUrl: null
+  };
+
+  const video = document.getElementById('video');
+  const resultImg = document.getElementById('resultImg');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  const dock = document.getElementById('dock');
+  const topbar = document.getElementById('topbar');
+  const corners = document.getElementById('corners');
+  const liveTag = document.getElementById('livePreviewTag');
+  const resultBar = document.getElementById('resultBar');
+
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsSheet = document.getElementById('settingsSheet');
+  const sheetBackdrop = document.getElementById('sheetBackdrop');
+  const flipBtn = document.getElementById('flipBtn');
+  const shutterBtn = document.getElementById('shutterBtn');
+  const geoQuickBtn = document.getElementById('geoQuickBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const sendBtn = document.getElementById('sendBtn');
+  const dlBtn = document.getElementById('dlBtn');
+  const flash = document.getElementById('flash');
+  const toastEl = document.getElementById('toast');
+  const permScreen = document.getElementById('permScreen');
+  const retryCamBtn = document.getElementById('retryCamBtn');
+
+  const toggleDate = document.getElementById('toggleDate');
+  const toggleGeo = document.getElementById('toggleGeo');
+  const geoStatus = document.getElementById('geoStatus');
+  const geoSub = document.getElementById('geoSub');
+  const noteInput = document.getElementById('noteInput');
+  const waNumberInput = document.getElementById('waNumberInput');
+  const styleChips = document.getElementById('styleChips');
+
+  let toastTimer = null;
+  function toast(msg, ms){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> toastEl.classList.remove('show'), ms || 2400);
+  }
+
+  /* ---------------- Camera ---------------- */
+  async function startCamera(){
+    stopCamera();
+    try{
+      const constraints = {
+        audio:false,
+        video:{
+          facingMode: state.facingMode,
+          width:{ ideal:1920 },
+          height:{ ideal:1080 }
+        }
+      };
+      const s = await navigator.mediaDevices.getUserMedia(constraints);
+      state.stream = s;
+      video.srcObject = s;
+      permScreen.hidden = true;
+    }catch(err){
+      permScreen.hidden = false;
+    }
+  }
+  function stopCamera(){
+    if(state.stream){
+      state.stream.getTracks().forEach(t=>t.stop());
+      state.stream = null;
+    }
+  }
+  flipBtn.addEventListener('click', ()=>{
+    state.facingMode = state.facingMode === 'environment' ? 'user' : 'environment';
+    startCamera();
+  });
+  retryCamBtn.addEventListener('click', startCamera);
+
+  /* ---------------- Settings sheet ---------------- */
+  function openSheet(){ settingsSheet.classList.add('open'); sheetBackdrop.classList.add('open'); }
+  function closeSheet(){ settingsSheet.classList.remove('open'); sheetBackdrop.classList.remove('open'); }
+  settingsBtn.addEventListener('click', openSheet);
+  sheetBackdrop.addEventListener('click', closeSheet);
+
+  styleChips.addEventListener('click', (e)=>{
+    const chip = e.target.closest('.chip');
+    if(!chip) return;
+    [...styleChips.children].forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    state.style = chip.dataset.style;
+    liveTag.className = 'style-' + state.style;
+  });
+
+  toggleDate.addEventListener('change', ()=>{ state.showDate = toggleDate.checked; });
+  toggleGeo.addEventListener('change', ()=>{
+    state.showGeo = toggleGeo.checked;
+    if(state.showGeo) requestGeo(); else { geoStatus.textContent=''; geoStatus.className='geo-status'; }
+  });
+  noteInput.addEventListener('input', ()=>{ state.note = noteInput.value; });
+  waNumberInput.addEventListener('input', ()=>{ state.waNumber = waNumberInput.value.replace(/[^0-9+]/g,''); });
+  geoQuickBtn.addEventListener('click', ()=>{
+    state.showGeo = true;
+    toggleGeo.checked = true;
+    requestGeo();
+    openSheet();
+  });
+
+  function requestGeo(){
+    if(!navigator.geolocation){
+      geoStatus.textContent = 'Perangkat tidak mendukung GPS.';
+      geoStatus.className = 'geo-status err';
+      return;
+    }
+    geoStatus.textContent = 'Mencari sinyal lokasi…';
+    geoStatus.className = 'geo-status';
+    navigator.geolocation.getCurrentPosition(
+      pos=>{
+        state.coords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        geoStatus.textContent = 'Lokasi terkunci ✓';
+        geoStatus.className = 'geo-status ok';
+        geoSub.textContent = 'Aktif — akurasi ±' + Math.round(pos.coords.accuracy) + 'm';
+      },
+      err=>{
+        geoStatus.textContent = 'Gagal ambil lokasi: izin ditolak atau nonaktif.';
+        geoStatus.className = 'geo-status err';
+      },
+      { enableHighAccuracy:true, timeout:10000 }
+    );
+  }
+
+  /* ---------------- Live clock / preview tag ---------------- */
+  function formatStamp(date){
+    const dateStr = date.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
+    const timeStr = date.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+    let zone = '';
+    try{
+      const parts = new Intl.DateTimeFormat('id-ID', { timeZoneName:'shortOffset' }).formatToParts(date);
+      const p = parts.find(x=>x.type==='timeZoneName');
+      if(p) zone = p.value.replace('GMT','UTC');
+    }catch(e){}
+    return { dateStr, timeStr, zone };
+  }
+
+  function buildLines(){
+    const { dateStr, timeStr, zone } = formatStamp(new Date());
+    const lines = { title: state.showDate ? (dateStr + '  ·  ' + timeStr + (zone? ' '+zone:'')) : '', note:'', geo:'' };
+    if(state.note.trim()) lines.note = state.note.trim();
+    if(state.showGeo && state.coords) lines.geo = state.coords.lat.toFixed(5) + ', ' + state.coords.lon.toFixed(5);
+    else if(state.showGeo && !state.coords) lines.geo = 'mencari lokasi…';
+    return lines;
+  }
+
+  function renderLiveTag(){
+    const l = buildLines();
+    let html = '';
+    if(l.title) html += '<div class="row1">'+escapeHtml(l.title)+'</div>';
+    if(l.note) html += '<div class="row-note">'+escapeHtml(l.note)+'</div>';
+    if(l.geo) html += '<div class="row-geo">📍 '+escapeHtml(l.geo)+'</div>';
+    liveTag.innerHTML = html || '<div class="row1" style="opacity:.5">Watermark nonaktif</div>';
+    liveTag.style.opacity = (l.title || l.note || l.geo) ? '1' : '0.55';
+  }
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  setInterval(renderLiveTag, 1000);
+  renderLiveTag();
+
+  /* ---------------- Capture ---------------- */
+  function beep(){
+    try{
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const actx = new AudioCtx();
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      osc.frequency.value = 1180;
+      gain.gain.setValueAtTime(0.06, actx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 0.12);
+      osc.connect(gain); gain.connect(actx.destination);
+      osc.start(); osc.stop(actx.currentTime + 0.13);
+    }catch(e){}
+  }
+
+  function drawOverlay(w, h){
+    const l = buildLines();
+    if(!l.title && !l.note && !l.geo) return;
+    const pad = Math.max(14, w * 0.02);
+    const baseFont = Math.max(16, w * 0.024);
+    const smallFont = baseFont * 0.72;
+
+    if(state.style === 'card'){
+      ctx.font = '600 ' + baseFont + 'px "IBM Plex Mono", monospace';
+      const textLines = [];
+      if(l.title) textLines.push({ t:l.title, f:baseFont, w:600, c:'#14181A' });
+      if(l.note) textLines.push({ t:l.note, f:smallFont, w:400, c:'#3a4440' });
+      if(l.geo) textLines.push({ t:'📍 '+l.geo, f:smallFont*0.92, w:400, c:'#5c665f' });
+      const lineGap = baseFont * 0.42;
+      let boxH = pad*1.4;
+      let maxW = 0;
+      textLines.forEach(tl=>{
+        ctx.font = tl.w + ' ' + tl.f + 'px "IBM Plex Mono", monospace';
+        maxW = Math.max(maxW, ctx.measureText(tl.t).width);
+        boxH += tl.f + lineGap;
+      });
+      boxH += pad*0.3;
+      const boxW = Math.min(w - pad*2, maxW + pad*2);
+      const x = pad, y = h - pad - boxH;
+      roundRect(x, y, boxW, boxH, 12);
+      ctx.fillStyle = 'rgba(244,242,236,0.96)';
+      ctx.fill();
+      let cy = y + pad*1.4;
+      textLines.forEach(tl=>{
+        ctx.font = tl.w + ' ' + tl.f + 'px "IBM Plex Mono", monospace';
+        ctx.fillStyle = tl.c;
+        ctx.textBaseline = 'top';
+        ctx.fillText(tl.t, x + pad, cy);
+        cy += tl.f + lineGap;
+      });
+    } else if(state.style === 'classic'){
+      const lines = [l.title, l.note, l.geo].filter(Boolean);
+      const lineH = baseFont * 1.3;
+      const boxH = pad + lines.length * lineH + pad*0.4;
+      ctx.fillStyle = 'rgba(9,13,11,0.72)';
+      ctx.fillRect(0, h - boxH, w, boxH);
+      let cy = h - boxH + pad*0.7;
+      lines.forEach((t,i)=>{
+        ctx.font = (i===0?'600 ':'400 ') + (i===0?baseFont:smallFont) + 'px "IBM Plex Mono", monospace';
+        ctx.fillStyle = i===0 ? '#7CFFB2' : '#bdf5d6';
+        ctx.textBaseline = 'top';
+        ctx.fillText(t, pad, cy);
+        cy += lineH;
+      });
+    } else {
+      const lines = [l.title, l.note, l.geo].filter(Boolean);
+      const lineH = baseFont * 1.3;
+      let cy = h - pad - lines.length*lineH;
+      ctx.textBaseline = 'top';
+      ctx.shadowColor = 'rgba(0,0,0,.85)';
+      ctx.shadowBlur = 10;
+      lines.forEach((t,i)=>{
+        ctx.font = (i===0?'600 ':'400 ') + (i===0?baseFont:smallFont) + 'px "Space Grotesk", sans-serif';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(t, pad, cy);
+        cy += lineH;
+      });
+      ctx.shadowBlur = 0;
+    }
+  }
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  shutterBtn.addEventListener('click', capturePhoto);
+
+  function capturePhoto(){
+    if(!video.videoWidth) { toast('Kamera belum siap.'); return; }
+    const w = video.videoWidth, h = video.videoHeight;
+    canvas.width = w; canvas.height = h;
+
+    // mirror correctly if front camera (visual only during draw, keep EXIF-free simple flip)
+    ctx.save();
+    if(state.facingMode === 'user'){
+      ctx.translate(w,0); ctx.scale(-1,1);
+    }
+    ctx.drawImage(video, 0, 0, w, h);
+    ctx.restore();
+
+    drawOverlay(w, h);
+
+    flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
+    beep();
+    if(navigator.vibrate) navigator.vibrate(35);
+
+    canvas.toBlob(blob=>{
+      if(!blob){ toast('Gagal memproses foto.'); return; }
+      state.capturedBlob = blob;
+      state.capturedUrl = URL.createObjectURL(blob);
+      resultImg.src = state.capturedUrl;
+      showResult();
+    }, 'image/jpeg', 0.92);
+  }
+
+  /* ---------------- Result / Send / Reset ---------------- */
+  function showResult(){
+    video.hidden = true;
+    resultImg.hidden = false;
+    corners.style.display = 'none';
+    liveTag.style.display = 'none';
+    dock.hidden = true;
+    topbar.style.display = 'none';
+    resultBar.hidden = false;
+  }
+  function showViewfinder(){
+    video.hidden = false;
+    resultImg.hidden = true;
+    corners.style.display = '';
+    liveTag.style.display = '';
+    dock.hidden = false;
+    topbar.style.display = '';
+    resultBar.hidden = true;
+    if(state.capturedUrl) URL.revokeObjectURL(state.capturedUrl);
+    state.capturedUrl = null;
+    state.capturedBlob = null;
+  }
+
+  resetBtn.addEventListener('click', ()=>{
+    showViewfinder();
+    toast('Siap memotret ulang.');
+  });
+
+  dlBtn.addEventListener('click', ()=>{
+    if(!state.capturedBlob) return;
+    const a = document.createElement('a');
+    a.href = state.capturedUrl;
+    a.download = 'timemark-' + Date.now() + '.jpg';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    toast('Foto tersimpan ke perangkat.');
+  });
+
+  sendBtn.addEventListener('click', async ()=>{
+    if(!state.capturedBlob) return;
+    const file = new File([state.capturedBlob], 'timemark-' + Date.now() + '.jpg', { type:'image/jpeg' });
+    const shareText = state.note.trim() ? state.note.trim() : 'Foto Timemark';
+
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      try{
+        await navigator.share({ files:[file], text: shareText, title:'Timemark' });
+        toast('Pilih ikon WhatsApp (bukan WhatsApp Business) di menu berbagi.', 3200);
+      }catch(err){
+        if(err && err.name !== 'AbortError'){
+          toast('Pengiriman dibatalkan atau gagal.');
+        }
+      }
+      return;
+    }
+
+    // Fallback: browser tidak mendukung Web Share dengan file (umumnya desktop)
+    const a = document.createElement('a');
+    a.href = state.capturedUrl;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    const num = state.waNumber ? state.waNumber.replace(/^\+/,'') : '';
+    const waUrl = 'https://web.whatsapp.com/send?' + (num ? ('phone='+num+'&') : '') + 'text=' + encodeURIComponent(shareText);
+    window.open(waUrl, '_blank');
+    toast('Foto diunduh — lampirkan manual di WhatsApp Web yang baru terbuka.', 4200);
+  });
+
+  /* ---------------- Init ---------------- */
+  startCamera();
+})();
+</script>
+</body>
+  </html>
